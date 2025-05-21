@@ -10,6 +10,8 @@ dependencies = [
     "httpx>=0.28.1",
     "lxml>=5.4.0",
     "pydantic>=2.11.4",
+    "sqlalchemy>=2.0.41",
+    "sqlalchemy-orm>=1.2.10",
 ]
 
 [tool.uv]
