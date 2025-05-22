@@ -1,3 +1,5 @@
+from crawler.store.models import create_db, StoreDB, ProductDB
+from sqlalchemy.orm import sessionmaker
 from csv import DictWriter
 from decimal import Decimal
 from logging import getLogger
@@ -161,3 +163,57 @@ def create_archive(path: Path, output: Path):
     with ZipFile(output, "w", compression=ZIP_DEFLATED, compresslevel=9) as zf:
         for file in path.rglob("*"):
             zf.write(file, arcname=file.relative_to(path))
+
+
+def save_to_db(db_path: Path, stores: list[Store]):
+    """
+    Save store data to a SQLite database.
+
+    Args:
+        db_path: Path to the SQLite database.
+        stores: List of Store objects containing product data.
+    """
+    engine = create_db(db_path)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    
+    try:
+        for store in stores:
+            print(f"Processing store: {store.name}")
+            store_db = StoreDB(
+                chain=store.chain,
+                store_id=store.store_id,
+                name=store.name,
+                store_type=store.store_type,
+                city=store.city,
+                street_address=store.street_address,
+                zipcode=store.zipcode,
+            )
+
+            for product in store.items:
+                print(f"  Processing product: {product.product}")
+                product_db = ProductDB(
+                    barcode=product.barcode,
+                    product_id=product.product_id,
+                    name=product.product,
+                    brand=product.brand,
+                    category=product.category,
+                    unit=product.unit,
+                    quantity=product.quantity,
+                    price=product.price,
+                    unit_price=product.unit_price,
+                    best_price_30=product.best_price_30,
+                    anchor_price=product.anchor_price,
+                )
+                store_db.products.append(product_db)
+
+            session.add(store_db)
+
+        session.commit()
+        print("Data saved to database successfully.")
+
+    except Exception as e:
+        session.rollback()
+        print(f"Error saving data to database: {e}")
+    finally:
+        session.close()

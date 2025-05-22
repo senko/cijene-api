@@ -81,6 +81,12 @@ def main():
         default="warning",
         help="Set verbosity level (default: warning)",
     )
+    parser.add_argument(
+       "-s",
+       "--sql",
+       action="store_true",       
+       help="Output data to a SQLite database instead of CSV files.\n",
+    )
 
     args = parser.parse_args()
 
@@ -124,8 +130,12 @@ def main():
         date_txt = args.date.strftime("%Y-%m-%d") if args.date else "today"
         print(f"Fetching price data from {chains_txt} for {date_txt} ...", flush=True)
 
-        zip_path = crawl(args.output_path, crawl_date, chains_to_crawl)
-        print(f"Archive created: {zip_path}")
+        if args.sql:
+            crawl(args.output_path, crawl_date, chains_to_crawl, output_format="sql")
+            print(f"Data saved to SQLite database in: {args.output_path}")
+        else:
+            zip_path = crawl(args.output_path, crawl_date, chains_to_crawl, output_format="csv")
+            print(f"Archive created: {zip_path}")
         return 0
     except Exception as e:
         print(f"Error during crawling: {e}")

@@ -18,7 +18,7 @@ from crawler.store.dm import DmCrawler
 from crawler.store.ktc import KtcCrawler
 from crawler.store.metro import MetroCrawler
 
-from crawler.store.output import save_chain, copy_archive_info, create_archive
+from crawler.store.output import save_chain, copy_archive_info, create_archive, save_to_db
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +47,7 @@ def get_chains() -> List[str]:
     return list(CRAWLERS.keys())
 
 
-def crawl_chain(chain: str, date: datetime.date, path: Path):
+def crawl_chain(chain: str, date: datetime.date, path: Path, output_format: str):
     """
     Crawl a specific retail chain for product/pricing data and save it.
 
@@ -55,6 +55,7 @@ def crawl_chain(chain: str, date: datetime.date, path: Path):
         chain: The name of the retail chain to crawl.
         date: The date for which to fetch the product data.
         path: The directory path where the data will be saved.
+        output_format: The format in which to save the data.
     """
 
     crawler_class = CRAWLERS.get(chain)
@@ -74,14 +75,18 @@ def crawl_chain(chain: str, date: datetime.date, path: Path):
         logger.error(f"No stores imported for {chain} on {date}")
         return
 
-    save_chain(path, stores)
+    if output_format == "sql":
+        save_to_db(path, stores)
+    else:
+        save_chain(path, stores)
 
 
 def crawl(
     root: Path,
     date: datetime.date | None = None,
     chains: list[str] | None = None,
-) -> Path:
+    output_format: str = "csv",
+) -> Path | None:
     """
     Crawl multiple retail chains for product/pricing data and save it.
 
@@ -89,9 +94,10 @@ def crawl(
         root: The base directory path where the data will be saved.
         date: The date for which to fetch the product data. If None, uses today's date.
         chains: List of retail chain names to crawl. If None, crawls all available chains.
+        output_format: The format in which to save the data.
 
     Returns:
-        Path to the created ZIP archive file.
+        Path to the created ZIP archive file or None if output_format is 'sql'.
     """
 
     if chains is None:
@@ -100,20 +106,31 @@ def crawl(
     if date is None:
         date = datetime.date.today()
 
-    path = root / date.strftime("%Y-%m-%d")
-    zip_path = root / f"{date:%Y-%m-%d}.zip"
-    os.makedirs(path, exist_ok=True)
+    if output_format == "sql":
+        from crawler.store.models import create_db
+        path = root / f"{date:%Y-%m-%d}.sqlite"
+        create_db(path)
+    else:
+        path = root / date.strftime("%Y-%m-%d")
+        zip_path = root / f"{date:%Y-%m-%d}.zip"
+        os.makedirs(path, exist_ok=True)
 
     t0 = time()
     for chain in chains:
         logger.info(f"Starting crawl for {chain} on {date:%Y-%m-%d}")
-        crawl_chain(chain, date, path / chain)
+        if output_format == "sql":
+            crawl_chain(chain, date, path, output_format)
+        else:
+            crawl_chain(chain, date, path / chain, output_format)
     t1 = time()
 
     logger.info(f"Crawled {','.join(chains)} for {date:%Y-%m-%d} in {t1 - t0:.2f}s")
 
     copy_archive_info(path)
-    create_archive(path, zip_path)
+    if output_format == "sql":
+        return None
+    else:
+        create_archive(path, zip_path)
 
     logger.info(f"Created archive {zip_path} with data for {date:%Y-%m-%d}")
     return zip_path

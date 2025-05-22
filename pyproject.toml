@@ -11,6 +11,8 @@ dependencies = [
     "lxml>=5.4.0",
     "openpyxl>=3.1.5",
     "pydantic>=2.11.4",
+    "sqlalchemy>=2.0.41",
+    "sqlalchemy-orm>=1.2.10",
 ]
 
 [tool.uv]

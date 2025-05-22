@@ -3,6 +3,9 @@ from typing import List, Optional
 from datetime import date
 
 from pydantic import BaseModel, Field
+from sqlalchemy import create_engine, Column, String, Numeric, ForeignKey
+from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy import Integer
 
 
 class Product(BaseModel):
@@ -51,3 +54,49 @@ class Store(BaseModel):
 
     def __str__(self):
         return f"{self.name} ({self.street_address})"
+
+
+Base = declarative_base()
+
+class StoreDB(Base):
+    __tablename__ = 'stores'
+
+    id = Column(Integer, primary_key=True)
+    chain = Column(String)
+    store_id = Column(String)
+    name = Column(String)
+    store_type = Column(String)
+    city = Column(String)
+    street_address = Column(String)
+    zipcode = Column(String)
+    products = relationship("ProductDB", back_populates="store")
+
+    def __repr__(self):
+        return f"<Store(name='{self.name}', city='{self.city}')>"
+
+class ProductDB(Base):
+    __tablename__ = 'products'
+
+    id = Column(Integer, primary_key=True)
+    store_id = Column(Integer, ForeignKey('stores.id'))
+    barcode = Column(String, nullable=True)
+    product_id = Column(String)
+    name = Column(String)
+    brand = Column(String, nullable=True)
+    category = Column(String, nullable=True)
+    unit = Column(String, nullable=True)
+    quantity = Column(String, nullable=True)
+    price = Column(Numeric, nullable=True)
+    unit_price = Column(Numeric, nullable=True)
+    best_price_30 = Column(Numeric, nullable=True)
+    anchor_price = Column(Numeric, nullable=True)
+
+    store = relationship("StoreDB", back_populates="products")
+
+    def __repr__(self):
+        return f"<Product(name='{self.name}', price={self.price})>"
+
+def create_db(db_path: str):
+    engine = create_engine(f'sqlite:///{db_path}')
+    Base.metadata.create_all(engine)
+    return engine
