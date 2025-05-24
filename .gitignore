@@ -14,3 +14,6 @@ wheels/
 
 # Data
 data/
+
+# Configuration
+.env

@@ -63,7 +63,17 @@ odabir datuma (default: trenutni dan), `-c` za odabir lanaca (default: svi) te
 
 ### Web servis
 
-Web servis je u izradi. Trenutno nije dostupan.
+Prije pokretanja servisa, kreirajte datoteku `.env` sa konfiguracijskim varijablama.
+Primjer datoteke sa zadanim (default) vrijednostima može se naći u `.env.example`.
+
+Nakon što ste kreirali `.env` datoteku, pokrenite servis koristeći:
+
+```bash
+uv run -m service.main
+```
+
+Servis će biti dostupan na `http://localhost:8000` (ako niste mijenjali port), a na
+`http://localhost:8000/docs` je dostupna Swagger dokumentacija API-ja.
 
 ## Licenca
 
