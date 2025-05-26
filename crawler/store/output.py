@@ -11,6 +11,7 @@ logger = getLogger(__name__)
 
 STORE_COLUMNS = [
     "store_id",
+    "name",  # Added
     "type",
     "address",
     "city",
@@ -63,6 +64,7 @@ def transform_products(
     for store in stores:
         store_data = {
             "store_id": store.store_id,
+            "name": store.name,  # Added
             "type": store.store_type,
             "address": store.street_address,
             "city": store.city,

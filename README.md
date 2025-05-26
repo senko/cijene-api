@@ -32,6 +32,16 @@ Softver je izgrađen na Pythonu a sastoji se od dva dijela:
 * Crawler - preuzima podatke s web stranica trgovačkih lanaca (`crawler`)
 * Web servis - API koji omogućava pristup podacima o cijenama proizvoda (`service`) - **U IZRADI**
 
+## Pohrana i Obrada Podataka
+
+Sustav koristi PostgreSQL bazu podataka za pohranu prikupljenih informacija te namjenski servis za obradu CSV datoteka.
+
+### PostgreSQL Baza Podataka
+Podaci o proizvodima, cijenama, trgovinama i trgovačkim lancima sada se pohranjuju u PostgreSQL bazi podataka. Ovo omogućava strukturirano skladištenje i efikasnije dohvaćanje podataka. Glavne tablice uključuju `chains` (trgovački lanci), `stores` (pojedinačne trgovine), `products` (proizvodi) i `prices` (dnevne cijene). Interno, tablica `processed_batches` koristi se za praćenje obrađenih CSV datoteka kako bi se izbjeglo dupliciranje podataka. Kompletna shema baze podataka definirana je u datoteci `database/schema.sql`.
+
+### CSV Procesor (`csv_processor` servis)
+Novi servis, nazvan `csv_processor`, automatski obrađuje CSV datoteke koje generira crawler. Ovaj servis parsira podatke iz CSV datoteka (smještenih u `docker_data/latest/`) i unosi ih u PostgreSQL bazu. Kako bi se izbjeglo dvostruko procesiranje istih podataka, `csv_processor` računa SHA256 hash sadržaja CSV datoteka za svaku grupu (batch) i pamti obrađene grupe u `processed_batches` tablici. Ako se sadržaj CSV datoteka za određenu grupu nije promijenio, preskače se ponovni unos. Servis koristi environment varijable poput `DATABASE_URL` (za spajanje na bazu) i `CSV_DIR` (direktorij s CSV datotekama), koje su automatski konfigurirane unutar `docker-compose.yml`.
+
 ## Instalacija
 
 Za instalaciju crawlera potrebno je imati instaliran Python 3.13 ili noviji. Preporučamo
@@ -75,11 +85,11 @@ uv run -m service.main
 ```
 
 Servis će biti dostupan na `http://localhost:8000` (ako niste mijenjali port), a na
-`http://localhost:8000/docs` je dostupna Swagger dokumentacija API-ja.
+`http://localhost:8000/docs` je dostupna Swagger dokumentacija API-ja. Očekuje se da će API dohvaćati podatke iz PostgreSQL baze.
 
 ## Docker Compose
 
-Za pokretanje servisa i crawlera putem Docker Compose:
+Za pokretanje svih komponenti sustava (crawler, baza podataka, CSV procesor, API servis) putem Docker Compose:
 
 ```bash
 # Kreiraj direktorij za trajne podatke
@@ -91,6 +101,14 @@ cp .env.example .env
 # Pokreni Docker Compose
 docker compose up -d
 ```
+
+Sustav sada uključuje sljedeće servise:
+*   `crawler`: Preuzima podatke s web stranica trgovačkih lanaca i sprema ih kao CSV datoteke u `docker_data/latest/` direktorij.
+*   `db`: PostgreSQL servis baze podataka. Podaci baze su trajno pohranjeni korištenjem Docker volume-a `postgres_data`.
+*   `csv_processor`: Servis koji čita CSV datoteke iz `docker_data/latest` (koje generira `crawler`) i unosi ih u `db` servis. Ovaj servis ovisi o `db` servisu i pokreće se nakon njega. Izgrađen je pomoću `Dockerfile.csv_processor`.
+*   `service`: API servis koji će (u budućnosti) dohvaćati podatke iz `db` servisa.
+
+Standardni tijek podataka je: `crawler` preuzima podatke i sprema ih kao CSV datoteke -> `csv_processor` ih uvozi u bazu podataka -> `service` API dohvaća podatke iz baze.
 
 # Rebuildanje kontejnera ako su napravljene promjene u kodu:
 

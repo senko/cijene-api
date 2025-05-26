@@ -18,3 +18,30 @@ services:
       - ./docker_data:/app/data
     ports:
       - "8000:8000"
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=pricedb
+      - POSTGRES_USER=priceuser
+      - POSTGRES_PASSWORD=pricepassword
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  csv_processor:
+    depends_on:
+      - db
+    build:
+      context: .
+      dockerfile: Dockerfile.csv_processor
+    restart: on-failure
+    volumes:
+      - ./docker_data:/data:ro
+    environment:
+      - DATABASE_URL=postgresql://priceuser:pricepassword@db:5432/pricedb
+      - CSV_DIR=/data/latest
+    command: tail -f /dev/null
+
+volumes:
+  postgres_data:

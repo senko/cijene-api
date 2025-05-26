@@ -1,0 +1,15 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Copy the importer script and any other necessary files
+COPY ./csv_processor /app/csv_processor
+
+# Install dependencies
+# We'll add specific dependencies later as we develop importer.py
+# For now, let's include psycopg2-binary for PostgreSQL and python-dotenv to load env vars if needed for local testing
+RUN pip install --no-cache-dir psycopg2-binary python-dotenv
+
+# Command to run the importer script
+# This will be refined once importer.py is more complete
+CMD ["python", "/app/csv_processor/importer.py"]
