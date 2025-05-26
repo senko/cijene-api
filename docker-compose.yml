@@ -1,0 +1,20 @@
+services:
+  crawler:
+    build:
+      context: .
+      dockerfile: Dockerfile.crawler
+    restart: unless-stopped
+    volumes:
+      - ./docker_data:/data
+
+  service:
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./docker_data:/app/data
+    ports:
+      - "8000:8000"

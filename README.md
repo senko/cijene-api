@@ -77,6 +77,47 @@ uv run -m service.main
 Servis će biti dostupan na `http://localhost:8000` (ako niste mijenjali port), a na
 `http://localhost:8000/docs` je dostupna Swagger dokumentacija API-ja.
 
+## Docker Compose
+
+Za pokretanje servisa i crawlera putem Docker Compose:
+
+```bash
+# Kreiraj direktorij za trajne podatke
+mkdir -p docker_data
+
+# Preimenuj i prilagodi datoteku s konfiguracijskim varijablama (ako je potrebno)
+cp .env.example .env
+
+# Pokreni Docker Compose
+docker compose up -d
+```
+
+# Rebuildanje kontejnera ako su napravljene promjene u kodu:
+
+```bash
+docker compose up -d --build
+```
+
+Crawler će se izvršavati svakodnevno u 09:00 i 21:00, a preuzeti podaci će biti pohranjeni
+u direktoriju `docker_data`. API servis će biti dostupan na `http://localhost:8000`, a
+Swagger dokumentacija na `http://localhost:8000/docs`.
+
+### Preuzimanje podataka na zahtjev
+
+Ako želite odmah pokrenuti preuzimanje podataka (bez čekanja na zakazane cron zadatke),
+možete ga pokrenuti unutar već pokrenutog `crawler` kontejnera koristeći:
+
+```bash
+docker compose exec crawler python -m crawler.cli.crawl /data
+docker compose exec crawler python -m crawler.cli.crawl -h
+```
+
+Ako želite preuzeti sve povijesne podatke od početka važenja odluke, upotrijebite:
+
+```bash
+docker compose exec crawler python -m crawler.cli.fetchhistory /data
+```
+
 ## Licenca
 
 Ovaj projekt je licenciran pod [AGPL-3 licencom](LICENSE).
