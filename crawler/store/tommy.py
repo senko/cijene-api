@@ -309,7 +309,7 @@ class TommyCrawler(BaseCrawler):
                 # Try to extract just the city if no zipcode pattern found
                 city = to_camel_case(location_part)
 
-            store_id = parts[3]
+            store_id = parts[3].strip()
 
             logger.debug(
                 f"Parsed store info: type={store_type}, address={address}, zipcode={zipcode}, city={city}"
