@@ -4,8 +4,10 @@ services:
       context: .
       dockerfile: Dockerfile.crawler
     restart: unless-stopped
+    env_file:
+      - .env
     volumes:
-      - ./docker_data:/data
+      - ./docker_data/crawler:/data
 
   service:
     build:
@@ -18,3 +20,13 @@ services:
       - ./docker_data:/app/data
     ports:
       - "8000:8000"
+
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./docker_data/postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"

@@ -24,8 +24,12 @@ from crawler.store.zabac import ZabacCrawler
 from crawler.store.vrutak import VrutakCrawler
 from crawler.store.ntl import NtlCrawler
 
-
-from crawler.store.output import save_chain, copy_archive_info, create_archive
+from crawler.store.output import (
+    save_chain,
+    copy_archive_info,
+    create_archive,
+    save_to_db,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +71,10 @@ class CrawlResult:
     n_prices: int = 0
 
 
-def crawl_chain(chain: str, date: datetime.date, path: Path) -> CrawlResult:
+def crawl_chain(
+    chain: str, date: datetime.date, path: Path, output_format: str
+) -> CrawlResult:
+    # crawl(args.output_path, crawl_date, chains_to_crawl, output_format="sql")
     """
     Crawl a specific retail chain for product/pricing data and save it.
 
@@ -75,6 +82,7 @@ def crawl_chain(chain: str, date: datetime.date, path: Path) -> CrawlResult:
         chain: The name of the retail chain to crawl.
         date: The date for which to fetch the product data.
         path: The directory path where the data will be saved.
+        output_format: The format in which to save the data.
     """
 
     crawler_class = CRAWLERS.get(chain)
@@ -95,7 +103,14 @@ def crawl_chain(chain: str, date: datetime.date, path: Path) -> CrawlResult:
         logger.error(f"No stores imported for {chain} on {date}")
         return CrawlResult()
 
+    logger.info(
+        f"Path is {path}, saving {len(stores)} stores for {chain} on {date:%Y-%m-%d}"
+    )
+    if output_format == "sql":
+        save_to_db(date, stores)
+
     save_chain(path, stores)
+
     t1 = time()
 
     all_products = set()
@@ -115,7 +130,8 @@ def crawl(
     root: Path,
     date: datetime.date | None = None,
     chains: list[str] | None = None,
-) -> Path:
+    output_format: str = "csv",
+) -> Path | None:
     """
     Crawl multiple retail chains for product/pricing data and save it.
 
@@ -123,9 +139,10 @@ def crawl(
         root: The base directory path where the data will be saved.
         date: The date for which to fetch the product data. If None, uses today's date.
         chains: List of retail chain names to crawl. If None, crawls all available chains.
+        output_format: The format in which to save the data.
 
     Returns:
-        Path to the created ZIP archive file.
+        Path to the created ZIP archive file or None if output_format is 'sql'.
     """
 
     if chains is None:
@@ -143,7 +160,7 @@ def crawl(
     t0 = time()
     for chain in chains:
         logger.info(f"Starting crawl for {chain} on {date:%Y-%m-%d}")
-        r = crawl_chain(chain, date, path / chain)
+        r = crawl_chain(chain, date, path / chain, output_format)
         results[chain] = r
     t1 = time()
 

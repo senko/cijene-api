@@ -10,6 +10,7 @@ from crawler.store.base import add_file_logging
 
 logger = logging.getLogger(__name__)
 
+
 def parse_date(date_str):
     """Parse a date string in YYYY-MM-DD format."""
     if not date_str:
@@ -22,6 +23,10 @@ def parse_date(date_str):
 
 def setup_logging(log_level):
     """Configure logging for the crawler package."""
+    # Wrap stderr to replace any unencodable/surrogate characters rather than error
+    import codecs
+
+    stderr = codecs.getwriter("utf-8")(sys.stderr.buffer, errors="replace")
     level_map = {
         "debug": logging.DEBUG,
         "info": logging.INFO,
@@ -34,7 +39,7 @@ def setup_logging(log_level):
     logging.basicConfig(
         level=level,
         format="%(asctime)s:%(name)s:%(levelname)s:%(message)s",
-        stream=sys.stderr,
+        stream=stderr,
     )
 
     # Only enable logs from the crawler package
@@ -45,8 +50,6 @@ def setup_logging(log_level):
     for logger_name in logging.root.manager.loggerDict:
         if not logger_name.startswith("crawler"):
             logging.getLogger(logger_name).setLevel(logging.ERROR)
-
-
 
 
 def main():
@@ -84,6 +87,12 @@ def main():
         choices=["debug", "info", "warning", "error", "critical"],
         default="warning",
         help="Set verbosity level (default: warning)",
+    )
+    parser.add_argument(
+        "-s",
+        "--sql",
+        action="store_true",
+        help="Output data to a SQLite database instead of CSV files.\n",
     )
 
     args = parser.parse_args()
@@ -130,11 +139,21 @@ def main():
         date_txt = args.date.strftime("%Y-%m-%d") if args.date else "today"
         logger.info(f"Fetching price data from {chains_txt} for {date_txt} ...")
 
-        zip_path = crawl(args.output_path, crawl_date, chains_to_crawl)
-        logger.info(f"Archive created: {zip_path}")
+        if args.sql:
+            crawl(args.output_path, crawl_date, chains_to_crawl, output_format="sql")
+            print(f"Data saved to database, logs available in: {args.output_path}")
+            logger.info(
+                f"Data saved to database, logs available in: {args.output_path}"
+            )
+        else:
+            zip_path = crawl(
+                args.output_path, crawl_date, chains_to_crawl, output_format="csv"
+            )
+            print(f"Archive created: {zip_path}")
+            logger.info(f"Archive created: {zip_path}")
         return 0
     except Exception as e:
-        logger.error(f"Error during crawling: {e}", exc_info=True)
+        print(f"Error during crawling: {e}")
         return 1
 
 
