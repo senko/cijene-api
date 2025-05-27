@@ -1,7 +1,10 @@
 import datetime
 import logging
+from pathlib import Path
 import re
-from typing import Optional, Tuple
+import subprocess
+from tempfile import TemporaryDirectory
+from typing import Generator, Optional, Tuple
 
 from lxml import etree  # type: ignore
 
@@ -155,6 +158,24 @@ class StudenacCrawler(BaseCrawler):
                 stores.append(store)
 
         return stores
+
+    def get_zip_contents(
+        self, url: str, suffix: str
+    ) -> Generator[tuple[str, bytes], None, None]:
+        with TemporaryDirectory() as temp_dir:  # type: ignore
+            temp_path = Path(temp_dir)
+            temp_zip = temp_path / "archive.zip"
+            with open(temp_zip, "wb") as fp:
+                self.fetch_binary(url, fp)
+
+            subprocess.run(["unzip", "-x", temp_zip], cwd=temp_dir)
+
+            for file in temp_path.iterdir():
+                if file.suffix != suffix:
+                    continue
+
+                xml_content = open(file, "rb").read()
+                yield file.name, xml_content
 
 
 if __name__ == "__main__":

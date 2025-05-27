@@ -1,2 +1,0 @@
-# Cron job for crawler: run at 09:00 and 21:00 daily
-0 9,21 * * * root cd /app && python -m crawler.cli.crawl /data >> /var/log/cron.log 2>&1
