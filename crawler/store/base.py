@@ -4,8 +4,7 @@ from logging import getLogger
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 from typing import Any, BinaryIO, Generator
 from time import time
-import os
-import subprocess
+from zipfile import ZipFile
 import datetime
 from bs4 import BeautifulSoup
 from re import Pattern
@@ -119,48 +118,25 @@ class BaseCrawler:
         Using os unzip - we had problems with STUDENAC ZIP files (corrupted file naming)
         """
         with NamedTemporaryFile(mode="w+b") as temp_zip:
-            self.fetch_binary(url, temp_zip)
-            temp_zip.flush()
+            self.fetch_binary(url, temp_zip)  # type: ignore
+            temp_zip.seek(0)
 
-            with TemporaryDirectory() as extract_dir:
-                try:
-                    subprocess.run(
-                        [
-                            "unzip",
-                            "-qq",
-                            "-O",
-                            "UTF-8",
-                            "-o",
-                            temp_zip.name,
-                            "-d",
-                            extract_dir,
-                        ],
-                        stdout=subprocess.DEVNULL,
-                        stderr=subprocess.DEVNULL,
-                        check=False,
-                    )
-                except FileNotFoundError:
-                    logger.error("System 'unzip' not found, cannot extract ZIP archive")
-                    return
+            with ZipFile(temp_zip, "r") as zip_fp:
+                for file_info in zip_fp.infolist():
+                    if not file_info.filename.endswith(suffix):
+                        continue
 
-                for root, _, files in os.walk(extract_dir):
-                    for filename in files:
-                        if not filename.endswith(suffix):
-                            continue
+                    logger.debug(f"Processing file: {file_info.filename}")
 
-                        relpath = os.path.relpath(
-                            os.path.join(root, filename), extract_dir
+                    try:
+                        with zip_fp.open(file_info) as file:
+                            xml_content = file.read()
+                            yield (file_info.filename, xml_content)
+                    except Exception as e:
+                        logger.error(
+                            f"Error processing file {file_info.filename}: {e}",
+                            exc_info=True,
                         )
-                        filepath = os.path.join(root, filename)
-
-                        try:
-                            with open(filepath, "rb") as f:
-                                content = f.read()
-                            yield (relpath, content)
-                        except Exception as e:
-                            logger.error(
-                                f"Error reading file {filepath}: {e}", exc_info=True
-                            )
 
     @staticmethod
     def parse_price(
