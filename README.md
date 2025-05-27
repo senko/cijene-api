@@ -98,6 +98,15 @@ mkdir -p docker_data
 # Preimenuj i prilagodi datoteku s konfiguracijskim varijablama (ako je potrebno)
 cp .env.example .env
 
+Važno: Nakon kopiranja `.env.example` u `.env`, potrebno je u `.env` datoteci postaviti vrijednosti za sljedeće varijable koje se koriste za konfiguraciju PostgreSQL baze podataka:
+*   `POSTGRES_HOST` (npr. `db`, što je naziv servisa definiran u `docker-compose.yml`)
+*   `POSTGRES_PORT` (npr. `5432`)
+*   `POSTGRES_DB` (npr. `pricedb`)
+*   `POSTGRES_USER` (npr. `priceuser`)
+*   `POSTGRES_PASSWORD` (npr. `pricepassword`)
+
+Ove postavke su neophodne za ispravan rad `db` servisa (za inicijalizaciju baze) i `csv_processor` servisa (za spajanje na bazu i unos podataka). Ukoliko `service` (API servis) bude konfiguriran za korištenje ove PostgreSQL baze, također će koristiti ove postavke. Vrijednosti navedene kao primjer (`db`, `5432`, `pricedb`, `priceuser`, `pricepassword`) su zadane vrijednosti koje koristi `docker-compose.yml` konfiguracija.
+
 # Pokreni Docker Compose
 docker compose up -d
 ```

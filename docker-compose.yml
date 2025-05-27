@@ -22,9 +22,9 @@ services:
   db:
     image: postgres:15-alpine
     environment:
-      - POSTGRES_DB=pricedb
-      - POSTGRES_USER=priceuser
-      - POSTGRES_PASSWORD=pricepassword
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
@@ -39,9 +39,9 @@ services:
     volumes:
       - ./docker_data:/data:ro
     environment:
-      - DATABASE_URL=postgresql://priceuser:pricepassword@db:5432/pricedb
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
       - CSV_DIR=/data/latest
-    command: tail -f /dev/null
+    command: python csv_processor/importer.py
 
 volumes:
   postgres_data:
