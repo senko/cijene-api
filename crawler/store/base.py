@@ -12,9 +12,29 @@ import unicodedata
 
 import httpx
 
+import logging
+from pathlib import Path
+
 from .models import Product, Store
 
 logger = getLogger(__name__)
+
+
+def add_file_logging(log_dir: Path, logger_name_prefix: str = "crawler"):
+    """Add a DEBUG-level FileHandler for logs from the given logger namespace into
+    log_dir/logger_name_prefix.log."""
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_file = log_dir / f"{logger_name_prefix}.log"
+    # file_handler = logging.FileHandler(log_file)
+    # file_handler.setLevel(logging.getLogger(logger_name_prefix).getEffectiveLevel())
+    file_handler = logging.FileHandler(log_file)
+    file_handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter("%(asctime)s:%(name)s:%(levelname)s:%(message)s")
+    file_handler.setFormatter(formatter)
+    # logging.getLogger(logger_name_prefix).addHandler(file_handler)
+    logger_ns = logging.getLogger(logger_name_prefix)
+    logger_ns.setLevel(logging.DEBUG)
+    logger_ns.addHandler(file_handler)
 
 
 class BaseCrawler:

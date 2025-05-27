@@ -4,7 +4,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     TZ=Europe/Zagreb
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends cron tzdata gcc libxml2-dev libxslt-dev python3-dev build-essential && \
+    apt-get install -y --no-install-recommends unzip cron tzdata gcc libxml2-dev libxslt-dev python3-dev build-essential && \
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && \
     rm -rf /var/lib/apt/lists/*
 
@@ -19,8 +19,9 @@ RUN pip install --no-cache-dir \
 
 COPY crawler /app/crawler
 
-COPY docker/crawler-cron /etc/cron.d/crawler-cron
-RUN chmod 0644 /etc/cron.d/crawler-cron && \
+COPY docker/crawlercron /etc/cron.d/crawlercron
+RUN chown root:root /etc/cron.d/crawlercron
+RUN chmod 0644 /etc/cron.d/crawlercron && \
     touch /var/log/cron.log
 
 VOLUME ["/data"]

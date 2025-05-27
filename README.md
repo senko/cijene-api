@@ -63,6 +63,9 @@ Crawler prima opcije `-l` za listanje podržanih trgovačkih lanaca, `-d` za
 odabir datuma (default: trenutni dan), `-c` za odabir lanaca (default: svi) te
 `-h` za ispis pomoći.
 
+Logovi crawlera bit će zapisani u datoteku `crawler.log` unutar izlaznog direktorija.
+Datoteka sadrži detaljne zapise svih faza obrade (razina DEBUG i iznad).
+
 ### Web servis
 
 Prije pokretanja servisa, kreirajte datoteku `.env` sa konfiguracijskim varijablama.

@@ -9,6 +9,10 @@ from pathlib import Path
 
 from crawler.crawl import crawl, get_chains
 from crawler.cli.crawl import parse_date, setup_logging
+from crawler.store.base import add_file_logging
+import logging
+
+logger = logging.getLogger(__name__)
 
 DEFAULT_START_DATE = date(2025, 5, 2)
 
@@ -58,7 +62,9 @@ def main():
 
     if not args.output_path.exists():
         args.output_path.mkdir(parents=True, exist_ok=True)
-        print(f"Created directory: {args.output_path}")
+
+    add_file_logging(args.output_path)
+    logger.info(f"Created directory: {args.output_path}")
 
     chains_to_fetch = None
     if args.chain:
@@ -79,13 +85,13 @@ def main():
     while current <= end:
         date_str = current.strftime("%Y-%m-%d")
         if (args.output_path / date_str).exists() or (args.output_path / f"{date_str}.zip").exists():
-            print(f"Skipping {date_str}, already exists")
+            logger.info(f"Skipping {date_str}, already exists")
         else:
-            print(f"Fetching price data for {date_str} ...", flush=True)
+            logger.info(f"Fetching price data for {date_str} ...")
             try:
                 crawl(args.output_path, current, chains_to_fetch)
             except Exception as err:
-                print(f"Error fetching {date_str}: {err}", file=sys.stderr)
+                logger.error(f"Error fetching {date_str}: {err}", exc_info=True)
         current += timedelta(days=1)
     return 0
 

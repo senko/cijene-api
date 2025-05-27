@@ -6,7 +6,9 @@ import sys
 from pathlib import Path
 
 from crawler.crawl import crawl, get_chains
+from crawler.store.base import add_file_logging
 
+logger = logging.getLogger(__name__)
 
 def parse_date(date_str):
     """Parse a date string in YYYY-MM-DD format."""
@@ -43,6 +45,8 @@ def setup_logging(log_level):
     for logger_name in logging.root.manager.loggerDict:
         if not logger_name.startswith("crawler"):
             logging.getLogger(logger_name).setLevel(logging.ERROR)
+
+
 
 
 def main():
@@ -101,7 +105,9 @@ def main():
 
     if not args.output_path.exists():
         args.output_path.mkdir(parents=True, exist_ok=True)
-        print(f"Created directory: {args.output_path}")
+
+    add_file_logging(args.output_path)
+    logger.info(f"Created directory: {args.output_path}")
 
     chains_to_crawl = None
     if args.chain:
@@ -122,13 +128,13 @@ def main():
             ", ".join(chains_to_crawl) if chains_to_crawl else "all retail chains"
         )
         date_txt = args.date.strftime("%Y-%m-%d") if args.date else "today"
-        print(f"Fetching price data from {chains_txt} for {date_txt} ...", flush=True)
+        logger.info(f"Fetching price data from {chains_txt} for {date_txt} ...")
 
         zip_path = crawl(args.output_path, crawl_date, chains_to_crawl)
-        print(f"Archive created: {zip_path}")
+        logger.info(f"Archive created: {zip_path}")
         return 0
     except Exception as e:
-        print(f"Error during crawling: {e}")
+        logger.error(f"Error during crawling: {e}", exc_info=True)
         return 1
 
 
