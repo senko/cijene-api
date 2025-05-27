@@ -1,0 +1,4 @@
+store_id,type,address,city,zipcode
+STORE001,supermarket,"123 Main St","Čakovec City",12345
+STORE002,hypermarket,"456 Oak Ave",Testburg,67890
+STORE003,market,"789 Pine Ln","Varaždinville",54321

@@ -1,0 +1,4 @@
+store_id,product_id,price,unit_price,best_price_30,anchor_price,special_price
+STORE001,PROD001,10.99,10.99,,,
+STORE001,PROD002,5.50,11.00,,,
+STORE002,PROD001,10.89,10.89,,,

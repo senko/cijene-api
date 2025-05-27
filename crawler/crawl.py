@@ -24,6 +24,10 @@ from crawler.store.zabac import ZabacCrawler
 from crawler.store.vrutak import VrutakCrawler
 from crawler.store.ntl import NtlCrawler
 
+from dotenv import load_dotenv # For loading .env file for db credentials
+from crawler.cli.db_importer import connect_db as importer_connect_db, \
+                                    create_tables as importer_create_tables, \
+                                    import_data as importer_import_data
 
 from crawler.store.output import save_chain, copy_archive_info, create_archive
 
@@ -152,6 +156,40 @@ def crawl(
         logger.info(
             f"  * {chain}: {r.n_stores} stores, {r.n_products} products, {r.n_prices} prices in {r.elapsed_time:.2f}s"
         )
+
+    # --- Database Import Step ---
+    data_to_import_path = path # This is root / date.strftime("%Y-%m-%d")
+    
+    logger.info(f"Starting database import for data in {data_to_import_path}...")
+    load_dotenv() # Load .env file for database credentials
+    
+    db_conn = None
+    try:
+        db_conn = importer_connect_db()
+        if db_conn:
+            logger.info("Successfully connected to database for import.")
+            importer_create_tables(db_conn) # Ensure tables exist
+            logger.info("Database tables ensured/created for import.")
+            importer_import_data(str(data_to_import_path), db_conn) # Pass path as string
+            logger.info(f"Database import completed successfully for {data_to_import_path}.")
+        else:
+            logger.error("Failed to connect to database for import. Skipping import.")
+    except Exception as e:
+        logger.error(f"Error during data import into database: {e}", exc_info=True)
+        if db_conn:
+            try:
+                db_conn.rollback() # Ensure transaction is rolled back on error
+                logger.info("Database transaction rolled back due to import error.")
+            except Exception as rb_e:
+                logger.error(f"Error during rollback: {rb_e}", exc_info=True)
+    finally:
+        if db_conn:
+            try:
+                db_conn.close()
+                logger.info("Database connection closed after import attempt.")
+            except Exception as close_e:
+                logger.error(f"Error closing database connection: {close_e}", exc_info=True)
+    # --- End of Database Import Step ---
 
     copy_archive_info(path)
     create_archive(path, zip_path)

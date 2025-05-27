@@ -10,14 +10,21 @@ RUN apt-get update && \
 
 WORKDIR /app
 
+# Copy the actual application code
+COPY crawler /app/crawler
+# If your project had other Python modules/packages in the root that are part of your application,
+# they would also need to be copied here. For example:
+# COPY my_other_module /app/my_other_module
+
+# Install Python dependencies using an explicit list
 RUN pip install --no-cache-dir \
     beautifulsoup4>=4.13.4 \
     httpx>=0.28.1 \
     lxml>=5.4.0 \
     openpyxl>=3.1.5 \
-    pydantic>=1.10
-
-COPY crawler /app/crawler
+    pydantic>=2.11.4 \
+    psycopg2-binary>=2.9.9 \
+    python-dotenv>=1.1.0
 
 COPY docker/crawlercron /etc/cron.d/crawlercron
 RUN chown root:root /etc/cron.d/crawlercron

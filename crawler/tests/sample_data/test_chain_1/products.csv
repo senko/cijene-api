@@ -1,0 +1,3 @@
+product_id,barcode,name,brand,category,unit,quantity
+PROD001,111222333,Test Product 1,BrandA,CategoryX,pcs,1 item
+PROD002,444555666,Test Product 2,BrandB,CategoryY,kg,0.5
