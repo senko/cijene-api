@@ -4,7 +4,7 @@ import logging
 import re
 from io import BytesIO
 from tempfile import TemporaryFile
-from typing import List
+from typing import Any, List
 
 import openpyxl
 from crawler.store.models import Product, Store
@@ -101,6 +101,52 @@ class DmCrawler(BaseCrawler):
 
         raise ValueError(f"No Excel file found for date {target_date_str}")
 
+    def detect_columns(self, worksheet: Any) -> list[str]:
+        """
+        Detect the column ordering in the DM Excel worksheet.
+
+        This relies on the fact that one of the columns in the header will
+        always be "naziv + šifra", which is a merged cell that actually
+        has two cells in the data, naziv and product ID.
+
+        Args:
+            worksheet: The active worksheet object
+
+        Returns:
+            List of column headers
+        """
+        for row in worksheet.iter_rows():
+            row_str = [
+                self.strip_diacritics(str(cell.value or "").lower()) for cell in row
+            ]
+            if "naziv + sifra" in row_str:
+                idx = row_str.index("naziv + sifra")
+                if row_str[idx + 1] != "":
+                    raise ValueError(
+                        "Expected 'naziv + šifra' to be a merged cell with two parts"
+                    )
+                row_str[idx] = "naziv"
+                row_str[idx + 1] = "sifra"
+                return row_str
+
+        raise ValueError(
+            "Could not detect Excel columns, DM file format may have changed"
+        )
+
+    @staticmethod
+    def map_columns(row: Any, columns: list) -> dict[str, Any]:
+        """
+        Map the row data to a dictionary using the detected columns.
+
+        Args:
+            row: The row object from the worksheet
+            columns: List of column headers
+
+        Returns:
+            Dictionary mapping column names to cell values
+        """
+        return {col: str(row[i].value or "").strip() for i, col in enumerate(columns)}
+
     def parse_excel(self, excel_data: bytes) -> List[Product]:
         """
         Parse Excel file data into Product objects.
@@ -118,37 +164,51 @@ class DmCrawler(BaseCrawler):
             workbook = openpyxl.load_workbook(BytesIO(excel_data), data_only=True)
             worksheet = workbook.active  # Get the active worksheet
 
-            # Start from row 4
-            for row_idx, row in enumerate(worksheet.iter_rows(min_row=4), start=4):
-                # Skip rows that don't have exactly 13 cells
-                if len(row) != 13:
+            if not worksheet:
+                raise ValueError("No active worksheet found in the Excel file")
+
+            columns = self.detect_columns(worksheet)
+            logger.debug(f"Detected columns: {columns}")
+
+            for row_idx, row in enumerate(worksheet.iter_rows(), start=1):
+                # Skip header and empty rows
+                if len(row) != len(columns):
                     continue
 
-                # Skip empty rows
-                if not row[0].value:
+                row_map = self.map_columns(row, columns)
+                if not row_map["sifra"]:
                     continue
 
                 try:
                     product_data = {
-                        "product": str(row[0].value or "").strip(),
-                        "product_id": str(row[1].value or "").strip(),
-                        "brand": str(row[2].value or "").strip(),
-                        "quantity": str(row[4].value or "").strip(),
-                        "unit": str(row[5].value or "").strip(),
-                        "unit_price": self.parse_price(str(row[6].value or ""), False),
-                        "barcode": str(row[7].value or "").strip(),
-                        "category": str(row[8].value or "").strip(),
-                        "price": self.parse_price(str(row[9].value or ""), False),
-                        "special_price": self.parse_price(
-                            str(row[10].value or ""), False
+                        "product": row_map["naziv"],
+                        "product_id": row_map["sifra"],
+                        "brand": row_map["marka"],
+                        "barcode": row_map["barkod"],
+                        "category": row_map["kategorija proizvoda"],
+                        "quantity": row_map["neto kolicina"],
+                        "unit": row_map["jedinica mjere"],
+                        "unit_price": self.parse_price(
+                            row_map["cijena za jedinicu mjere"], False
                         ),
-                        "best_price_30": (
-                            None
-                            if row[11].value == "'--"
-                            else self.parse_price(str(row[11].value or ""), False)
+                        "price": self.parse_price(row_map["mpc"], False),
+                        "special_price": self.parse_price(
+                            row_map[
+                                "mpc za vrijeme posebnog oblika prodaje (rasprodaja proizvoda koji izlaze iz asortimana)"
+                            ],
+                            False,
+                        ),
+                        "best_price_30": self.parse_price(
+                            row_map[
+                                "najniza cijena u posljednjih 30 dana prije rasprodaje"
+                            ],
+                            False,
                         ),
                         "anchor_price": self.parse_price(
-                            str(row[12].value or ""), False
+                            row_map[
+                                "sidrena cijena na 2.5.2025. ili na datum ulistanja"
+                            ],
+                            False,
                         ),
                     }
 

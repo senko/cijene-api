@@ -182,6 +182,9 @@ class BaseCrawler:
         if price_str is None:
             price_str = ""
 
+        if price_str and not any(c.isdigit() for c in price_str):
+            price_str = ""
+
         # If price contains both "," and ".", assume what occurs first is the 1000s
         # separator and replace it with an empty string
         if "," in price_str and "." in price_str:
