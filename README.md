@@ -65,7 +65,7 @@ odabir datuma (default: trenutni dan), `-c` za odabir lanaca (default: svi) te
 
 ### Pokretanje u Windows okolini
 
-**Napomena:** Za Windows korisnike - postavite vrijednost `PYTHONUTF8` environment varijable na `1` ili pokrenite python s `-X utf8` flag-om kako bi izbjegli probleme s character encodingom. Više detalja u [#9](https://github.com/senko/cijene-api/issues/9).
+**Napomena:** Za Windows korisnike - postavite vrijednost `PYTHONUTF8` environment varijable na `1` ili pokrenite python s `-X utf8` flag-om kako bi izbjegli probleme s character encodingom. Više detalja [na poveznici](https://github.com/senko/cijene-api/issues/9#issuecomment-2911110424).
 
 ### Web servis
 
