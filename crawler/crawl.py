@@ -1,56 +1,66 @@
-from dataclasses import dataclass
-import os
 import datetime
-from typing import List
 import logging
+import os
+from dataclasses import dataclass
 from pathlib import Path
 from time import time
+from typing import List
 
+from dotenv import load_dotenv
 
+from crawler.store.dm import DmCrawler
+from crawler.store.eurospin import EurospinCrawler
+from crawler.store.kaufland import KauflandCrawler
 from crawler.store.konzum import KonzumCrawler
+from crawler.store.ktc import KtcCrawler
 from crawler.store.lidl import LidlCrawler
+from crawler.store.metro import MetroCrawler
+from crawler.store.ntl import NtlCrawler
 from crawler.store.plodine import PlodineCrawler
 from crawler.store.ribola import RibolaCrawler
 from crawler.store.spar import SparCrawler
 from crawler.store.studenac import StudenacCrawler
 from crawler.store.tommy import TommyCrawler
-from crawler.store.kaufland import KauflandCrawler
-from crawler.store.eurospin import EurospinCrawler
-from crawler.store.dm import DmCrawler
-from crawler.store.ktc import KtcCrawler
-from crawler.store.metro import MetroCrawler
 from crawler.store.trgocentar import TrgocentarCrawler
-from crawler.store.zabac import ZabacCrawler
 from crawler.store.vrutak import VrutakCrawler
-from crawler.store.ntl import NtlCrawler
-
+from crawler.store.zabac import ZabacCrawler
 from crawler.store.output import (
-    save_chain,
     copy_archive_info,
     create_archive,
+    save_chain,
     save_to_db,
 )
+from crawler.store.mocky import MockCrawler
 
 logger = logging.getLogger(__name__)
+load_dotenv()
 
-CRAWLERS = {
-    StudenacCrawler.CHAIN: StudenacCrawler,
-    SparCrawler.CHAIN: SparCrawler,
-    KonzumCrawler.CHAIN: KonzumCrawler,
-    PlodineCrawler.CHAIN: PlodineCrawler,
-    LidlCrawler.CHAIN: LidlCrawler,
-    TommyCrawler.CHAIN: TommyCrawler,
-    KauflandCrawler.CHAIN: KauflandCrawler,
-    EurospinCrawler.CHAIN: EurospinCrawler,
-    DmCrawler.CHAIN: DmCrawler,
-    KtcCrawler.CHAIN: KtcCrawler,
-    MetroCrawler.CHAIN: MetroCrawler,
-    TrgocentarCrawler.CHAIN: TrgocentarCrawler,
-    ZabacCrawler.CHAIN: ZabacCrawler,
-    VrutakCrawler.CHAIN: VrutakCrawler,
-    NtlCrawler.CHAIN: NtlCrawler,
-    RibolaCrawler.CHAIN: RibolaCrawler,
-}
+IS_MOCK_MODE = os.getenv("MOCK_ENABLED", "").lower() == "true"
+
+if IS_MOCK_MODE:
+    logger.warning("Running in MOCK mode. Only MockCrawler will be available.")
+    CRAWLERS = {
+        MockCrawler.CHAIN: MockCrawler,
+    }
+else:
+    CRAWLERS = {
+        StudenacCrawler.CHAIN: StudenacCrawler,
+        SparCrawler.CHAIN: SparCrawler,
+        KonzumCrawler.CHAIN: KonzumCrawler,
+        PlodineCrawler.CHAIN: PlodineCrawler,
+        LidlCrawler.CHAIN: LidlCrawler,
+        TommyCrawler.CHAIN: TommyCrawler,
+        KauflandCrawler.CHAIN: KauflandCrawler,
+        EurospinCrawler.CHAIN: EurospinCrawler,
+        DmCrawler.CHAIN: DmCrawler,
+        KtcCrawler.CHAIN: KtcCrawler,
+        MetroCrawler.CHAIN: MetroCrawler,
+        TrgocentarCrawler.CHAIN: TrgocentarCrawler,
+        ZabacCrawler.CHAIN: ZabacCrawler,
+        VrutakCrawler.CHAIN: VrutakCrawler,
+        NtlCrawler.CHAIN: NtlCrawler,
+        RibolaCrawler.CHAIN: RibolaCrawler,
+    }
 
 
 def get_chains() -> List[str]:
