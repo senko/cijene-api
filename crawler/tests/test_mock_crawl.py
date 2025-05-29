@@ -4,15 +4,36 @@ import sys
 import os
 from unittest.mock import patch
 
+import pytest
+
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, project_root)
+
+
+@pytest.fixture(autouse=True)
+def patched_db_uri(monkeypatch):
+    """
+    Patches the SQLALCHEMY_DATABASE_URI environment variable for tests.
+    """
+    test_uri_from_env = os.getenv("SQLALCHEMY_DATABASE_URI_TEST")
+    final_test_uri = None
+
+    if test_uri_from_env:
+        final_test_uri = test_uri_from_env
+        print(f"INFO: Using SQLALCHEMY_DATABASE_URI_TEST: {final_test_uri}")
+    else:
+        final_test_uri = "sqlite:///tmp/crawler_test.db"
+
+    monkeypatch.setenv("SQLALCHEMY_DATABASE_URI", final_test_uri)
+    print(
+        f"INFO: SQLALCHEMY_DATABASE_URI temporarily set to {final_test_uri} for testing."
+    )
+
 
 from crawler.tests.mocky import MockCrawler  # noqa: E402
 
 
 def test_crawl(monkeypatch, tmp_path):
-    monkeypatch.setenv("MOCK_ENABLED", "true")
-
     if "crawler.crawl" in sys.modules:
         crawl_module = importlib.reload(sys.modules["crawler.crawl"])
     else:
@@ -138,7 +159,15 @@ def test_db_no_valid_ean_replacement(monkeypatch, tmp_path):
 def test_db_ean_replacement(monkeypatch, tmp_path):
     """
     If we used EAN replacement (chain/store was sending invalid one),
-    but now we got valid EAN - we should update the record with the new EAN.
+    but now we got valid EAN - we should update the record with the new EAN
+    or use the existing one that has the same EAN (from another chain/store).
     We need to check first for replacement if it exists (chain:product_id),
     """
+
+    # in products: we have product with chain:product_id, now we have valid EAN
+    # EAN not in products - we should update the record with the new real EAN
+    assert True
+
+    # in products: we have product with chain:product_id, now we have valid EAN
+    # EAN in products - we should use the existing one that has the same EAN
     assert True

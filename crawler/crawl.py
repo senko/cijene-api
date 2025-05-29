@@ -6,7 +6,6 @@ from pathlib import Path
 from time import time
 from typing import List
 
-from dotenv import load_dotenv
 
 from crawler.store.dm import DmCrawler
 from crawler.store.eurospin import EurospinCrawler

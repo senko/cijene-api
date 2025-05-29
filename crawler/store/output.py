@@ -178,7 +178,6 @@ def save_to_db(date: datetime.date, stores: list[Store]):
         stores: List of Store objects containing product data.
     """
     import os
-    from dotenv import load_dotenv
     from sqlalchemy import create_engine
     from sqlalchemy.orm import sessionmaker
 
@@ -195,7 +194,6 @@ def save_to_db(date: datetime.date, stores: list[Store]):
         Store as DbStore,
     )
 
-    load_dotenv()
     db_url = os.getenv("SQLALCHEMY_DATABASE_URI")
     if not db_url:
         logger.error("SQLALCHEMY_DATABASE_URI is not set")
