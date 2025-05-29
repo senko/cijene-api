@@ -2,15 +2,14 @@ from sqlalchemy import (
     DECIMAL,
     TIMESTAMP,
     Column,
+    Date,
     ForeignKey,
     Index,
     Integer,
     String,
     Text,
-    Date,
 )
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.sql import func
 
 Base = declarative_base()

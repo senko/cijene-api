@@ -53,3 +53,92 @@ def test_crawl(monkeypatch, tmp_path):
             print(
                 "crawl_module.crawl_chain function not found, skipping that part of the test."
             )
+
+
+def test_db_new_store(monkeypatch, tmp_path):
+    """
+    New store - new record in db
+    """
+    assert True
+
+
+def test_db_store_info_changed(monkeypatch, tmp_path):
+    """
+    Store info changed - updated record in db
+    """
+    assert True
+
+
+def test_db_new_chain(monkeypatch, tmp_path):
+    """
+    New chain - new record in db
+    """
+    assert True
+
+
+def test_db_chain_info_changed(monkeypatch, tmp_path):
+    """
+    Chain info changed - updated record in db
+    """
+    assert True
+
+
+def test_db_new_product(monkeypatch, tmp_path):
+    """
+    New product in global table - new record in db
+    """
+    assert True
+
+
+def test_db_product_info_changed(monkeypatch, tmp_path):
+    """
+    Product info changed - updated record in db
+    As we have the same products in different chains, we need to decide how to handle this.
+    """
+    assert True
+
+
+def test_db_new_store_product(monkeypatch, tmp_path):
+    """
+    New store product - new record in db
+    New store product price - new record in db
+    """
+    assert True
+
+
+def test_db_store_product_info_changed(monkeypatch, tmp_path):
+    """
+    Store product info changed - updated record in db
+    """
+    assert True
+
+
+def test_db_product_price_changed(monkeypatch, tmp_path):
+    """
+    Product price changed - updated record in db
+    """
+    assert True
+
+
+def test_db_product_price_not_changed(monkeypatch, tmp_path):
+    """
+    Product price not changed - no new record in db
+    We will use price from the previous record
+    """
+    assert True
+
+
+def test_db_no_valid_ean_replacement(monkeypatch, tmp_path):
+    """
+    No valid EAN - test replacement logic
+    """
+    assert True
+
+
+def test_db_ean_replacement(monkeypatch, tmp_path):
+    """
+    If we used EAN replacement (chain/store was sending invalid one),
+    but now we got valid EAN - we should update the record with the new EAN.
+    We need to check first for replacement if it exists (chain:product_id),
+    """
+    assert True
