@@ -1,6 +1,6 @@
 import datetime
 from csv import DictWriter
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
 from logging import getLogger
 from os import makedirs
 from pathlib import Path
@@ -170,258 +170,264 @@ logger = getLogger(__name__)
 
 
 def save_to_db(date: datetime.date, stores: list[Store]):
-    """
-    Save store and product pricing data to a database.
-    Handles existing data by updating prices if different, and adding new entities.
-    Args:
-        date: The date for which the prices are valid.
-        stores: List of Store objects containing product data.
-    """
     import os
-    from sqlalchemy import create_engine
+    from sqlalchemy import create_engine, func, and_
     from sqlalchemy.orm import sessionmaker
+    from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
 
     from crawler.db.model import (
         Base,
         Chain,
+        Product,
         ProductPrice,
+        Store,
         StoreProduct,
     )
-    from crawler.db.model import (
-        Product as DbProduct,
-    )
-    from crawler.db.model import (
-        Store as DbStore,
-    )
+
+    def _get_barcode_or_replacement(
+        barcode: str, chain: str, ext_product_id: str
+    ) -> str:
+        if not barcode.isdigit() or len(barcode) < 8:
+            return f"{chain}:{ext_product_id}"
+        return barcode
+
+    def _normalize_decimal(val):
+        if val is None:
+            return None
+        if not isinstance(val, Decimal):
+            try:
+                val = Decimal(val)
+            except (ValueError, TypeError, InvalidOperation):
+                return None
+        return val.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
     db_url = os.getenv("SQLALCHEMY_DATABASE_URI")
     if not db_url:
         logger.error("SQLALCHEMY_DATABASE_URI is not set")
         raise RuntimeError("SQLALCHEMY_DATABASE_URI is not set")
+
     engine = create_engine(db_url)
-    Base.metadata.create_all(engine)  # Ensure tables are created
+    Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     session = Session()
-    chains_to_add = []
-    products_to_add = []
-    db_stores_to_add = []
-    store_products_to_add = []
-    product_prices_to_add = []
-    try:
-        # --- Pre-fetch global caches for existing Chains and Products ---
-        # Cache for Chain: {chain_slug: Chain_obj}
-        chains_cache = {c.slug: c for c in session.query(Chain).all()}
-        # Cache for DbProduct: {barcode: DbProduct_obj}
-        db_products_cache = {p.barcode: p for p in session.query(DbProduct).all()}
-        # --- Pass 1: Identify and collect new Chains and Products ---
-        logger.info("DB Processing started")
-        logger.info("DB Pass 1: Identifying new Chains and Products...")
-        for store_item_data in stores:
-            chain_slug = store_item_data.chain
-            # Comment: Check for existing Chain.
-            if chain_slug not in chains_cache:
-                new_chain = Chain(name=chain_slug, slug=chain_slug)
-                chains_cache[chain_slug] = new_chain
-                chains_to_add.append(new_chain)
-            for product_item_data in store_item_data.items:
-                effective_barcode = product_item_data.barcode
-                if not effective_barcode or len(effective_barcode) < 8:
-                    effective_barcode = f"{chain_slug}:{product_item_data.product_id}"
-
-                # Comment: Check for existing DbProduct.
-                if effective_barcode not in db_products_cache:
-                    new_db_product = DbProduct(
-                        barcode=effective_barcode,
-                        ext_name=product_item_data.product,
-                        ext_brand=product_item_data.brand,
-                        ext_category=product_item_data.category,
-                        ext_unit=product_item_data.unit,
-                        ext_quantity=product_item_data.quantity,
-                    )
-                    db_products_cache[effective_barcode] = new_db_product
-                    products_to_add.append(new_db_product)
-        if chains_to_add:
-            session.add_all(chains_to_add)
-        if products_to_add:
-            session.add_all(products_to_add)
-        if chains_to_add or products_to_add:
-            session.flush()  # Assign IDs to new chains and products
-            logger.info(
-                f"Flushed {len(chains_to_add)} new chains and {len(products_to_add)} new products to assign IDs."
-            )
-        # --- Pre-fetch Stores cache now that Chain IDs are stable ---
-        db_stores_cache = {
-            (s.chain_id, s.ext_store_id): s for s in session.query(DbStore).all()
+    session.connection(
+        execution_options={
+            "executemany_mode": "values_plus_batch",
+            "executemany_values_page_size": 10000,
         }
-        processed_db_store_ids = set()
-        # --- Pass 2: Identify and collect new Stores ---
-        logger.info("DB Pass 2: Identifying new Stores...")
-        for store_item_data in stores:
-            chain_obj = chains_cache[store_item_data.chain]
-            store_key = (chain_obj.id, store_item_data.store_id)
-            # Comment: Check for existing DbStore.
-            if store_key not in db_stores_cache:
-                new_db_store = DbStore(
+    )
+
+    logger.info("DB Processing started")
+
+    try:
+        existing_chains = {c.slug: c for c in session.query(Chain).all()}
+        existing_products = {p.barcode: p for p in session.query(Product).all()}
+        existing_stores = {
+            (s.chain_id, s.ext_store_id): s for s in session.query(Store).all()
+        }
+
+        chains_to_add, products_to_add, stores_to_add = [], [], []
+        store_products_to_add, product_prices_to_add, product_prices_to_update = (
+            [],
+            [],
+            [],
+        )
+
+        for store in stores:
+            chain_obj = existing_chains.get(store.chain)
+            if not chain_obj:
+                chain_obj = Chain(name=store.chain, slug=store.chain)
+                chains_to_add.append(chain_obj)
+                existing_chains[store.chain] = chain_obj
+                logger.info(f"Adding new chain: {store.chain}")
+
+        session.add_all(chains_to_add)
+        session.flush()
+
+        # Products and Stores
+        for store in stores:
+            chain_obj = existing_chains[store.chain]
+            store_key = (chain_obj.id, store.store_id)
+            db_store = existing_stores.get(store_key)
+            if not db_store:
+                db_store = Store(
                     chain_id=chain_obj.id,
-                    ext_store_id=store_item_data.store_id,
-                    ext_name=store_item_data.name,
-                    ext_store_type=store_item_data.store_type,
-                    ext_street_address=store_item_data.street_address,
-                    ext_city=store_item_data.city,
-                    ext_zipcode=store_item_data.zipcode or None,
+                    ext_store_id=store.store_id,
+                    ext_name=store.name,
+                    ext_store_type=store.store_type,
+                    ext_street_address=store.street_address,
+                    ext_city=store.city,
+                    ext_zipcode=store.zipcode or "",
                 )
-                db_stores_cache[store_key] = new_db_store
-                db_stores_to_add.append(new_db_store)
-        if db_stores_to_add:
-            session.add_all(db_stores_to_add)
-            session.flush()  # Assign IDs to new stores
-            logger.info(f"Flushed {len(db_stores_to_add)} new stores to assign IDs.")
-        for store_item_data in stores:
-            chain_obj = chains_cache[store_item_data.chain]
-            db_store_obj = db_stores_cache[(chain_obj.id, store_item_data.store_id)]
-            processed_db_store_ids.add(db_store_obj.id)
-        # --- Pre-fetch StoreProducts for all relevant stores ---
-        store_products_cache = {}  # {(db_store_id, ext_product_id): StoreProduct_obj}
-        if processed_db_store_ids:
-            existing_store_products = (
-                session.query(StoreProduct)
-                .filter(StoreProduct.store_id.in_(list(processed_db_store_ids)))
-                .all()
-            )
-            for sp in existing_store_products:
-                store_products_cache[(sp.store_id, sp.ext_product_id)] = sp
-        temp_all_sp_objects_cache = store_products_cache.copy()
-        # --- Pass 3: Identify and collect new StoreProducts ---
-        logger.info("DB Pass 3: Identifying new StoreProducts...")
-        for store_item_data in stores:
-            chain_obj = chains_cache[store_item_data.chain]
-            db_store_obj = db_stores_cache[(chain_obj.id, store_item_data.store_id)]
-            for product_item_data in store_item_data.items:
-                sp_key = (db_store_obj.id, product_item_data.product_id)
-                # Comment: Check for existing StoreProduct.
-                if sp_key not in temp_all_sp_objects_cache:
-                    effective_barcode = product_item_data.barcode
-                    if not effective_barcode or len(effective_barcode) < 8:
-                        effective_barcode = (
-                            f"{chain_obj.slug}:{product_item_data.product_id}"
-                        )
-                    db_product_obj = db_products_cache[effective_barcode]
-                    new_store_product = StoreProduct(
-                        store_id=db_store_obj.id,
-                        barcode=db_product_obj.barcode,
-                        ext_product_id=product_item_data.product_id,
+                stores_to_add.append(db_store)
+                existing_stores[store_key] = db_store
+                logger.info(f"Adding new store: {store.store_id} ({store.name})")
+
+        session.add_all(stores_to_add)
+        session.flush()
+
+        existing_store_products = {
+            (sp.store_id, sp.ext_product_id): sp
+            for sp in session.query(StoreProduct).all()
+        }
+
+        # Products and StoreProducts
+        for store in stores:
+            chain_obj = existing_chains[store.chain]
+            db_store = existing_stores[(chain_obj.id, store.store_id)]
+
+            for prod in store.items:
+                prod_barcode = _get_barcode_or_replacement(
+                    prod.barcode or "", store.chain, prod.product_id
+                )
+                product_obj = existing_products.get(prod_barcode)
+                if not product_obj:
+                    product_obj = Product(
+                        barcode=prod_barcode,
+                        ext_name=prod.product,
+                        ext_brand=prod.brand,
+                        ext_category=prod.category,
+                        ext_unit=prod.unit,
+                        ext_quantity=prod.quantity,
                     )
-                    temp_all_sp_objects_cache[sp_key] = new_store_product
-                    store_products_to_add.append(new_store_product)
-        if store_products_to_add:
-            session.add_all(store_products_to_add)
-            session.flush()  # Assign IDs to new store products
-            logger.info(
-                f"Flushed {len(store_products_to_add)} new store products to assign IDs."
+                    products_to_add.append(product_obj)
+                    existing_products[prod_barcode] = product_obj
+
+                store_product_key = (db_store.id, prod.product_id)
+                db_store_product = existing_store_products.get(store_product_key)
+                if not db_store_product:
+                    db_store_product = StoreProduct(
+                        store_id=db_store.id,
+                        barcode=prod_barcode,
+                        ext_product_id=prod.product_id,
+                    )
+                    store_products_to_add.append(db_store_product)
+                    existing_store_products[store_product_key] = db_store_product
+        logger.info(
+            f"Adding {len(products_to_add)} new Products and {len(store_products_to_add)} new StoreProducts"
+        )
+        session.add_all(products_to_add + store_products_to_add)
+        session.flush()
+
+        # Product Prices handling
+        for store in stores:
+            chain_obj = existing_chains[store.chain]
+            db_store = existing_stores[(chain_obj.id, store.store_id)]
+
+            sp_keys = [(db_store.id, prod.product_id) for prod in store.items]
+            store_product_objs = {k: existing_store_products[k] for k in sp_keys}
+
+            sp_ids = [sp.id for sp in store_product_objs.values()]
+            subq = (
+                session.query(
+                    ProductPrice.store_product_id,
+                    func.max(ProductPrice.valid_date).label("max_date"),
+                )
+                .filter(
+                    ProductPrice.store_product_id.in_(sp_ids),
+                    ProductPrice.valid_date <= date,
+                )
+                .group_by(ProductPrice.store_product_id)
+                .subquery()
             )
-        # --- Pass 4: Process ProductPrices (Create new or Update existing) ---
-        logger.info("DB Pass 4: Processing ProductPrices...")
-        some_price_changed = False
-        for store_item_data in stores:
-            chain_obj = chains_cache[store_item_data.chain]
-            db_store_obj = db_stores_cache[(chain_obj.id, store_item_data.store_id)]
-            # Load existing prices for this specific store and date (single store cache for prices)
-            current_store_date_prices_cache = {  # {store_product_id: ProductPrice_obj}
+
+            last_prices = {
                 pp.store_product_id: pp
                 for pp in session.query(ProductPrice)
-                .join(StoreProduct)  # Join to filter by store_id
-                .filter(
-                    StoreProduct.store_id == db_store_obj.id,
-                    ProductPrice.valid_date == date,
+                .join(
+                    subq,
+                    and_(
+                        ProductPrice.store_product_id == subq.c.store_product_id,
+                        ProductPrice.valid_date == subq.c.max_date,
+                    ),
                 )
                 .all()
             }
-            for product_item_data in store_item_data.items:
-                sp_key = (db_store_obj.id, product_item_data.product_id)
-                sp_obj = temp_all_sp_objects_cache[sp_key]  # Guaranteed to have ID
-                # Comment: Check for existing ProductPrice for this store_product and date.
-                existing_price_record = current_store_date_prices_cache.get(sp_obj.id)
 
-                if existing_price_record:
-                    # Comment: Update existing ProductPrice if values differ.
-                    changed = False
-                    if existing_price_record.price != product_item_data.price:
-                        logger.debug(
-                            f"Price change detected for StoreProductID {sp_obj.id} on {date}. "
-                            f"Old: {existing_price_record.price}, New: {product_item_data.price}"
-                        )
-                        existing_price_record.price = product_item_data.price
-                        changed = True
-                    if existing_price_record.unit_price != product_item_data.unit_price:
-                        logger.debug(
-                            f"Unit price change detected for StoreProductID {sp_obj.id} on {date}. "
-                            f"Old: {existing_price_record.unit_price}, New: {product_item_data.unit_price}"
-                        )
-                        existing_price_record.unit_price = product_item_data.unit_price
-                        changed = True
-                    if (
-                        existing_price_record.best_price_30
-                        != product_item_data.best_price_30
-                    ):
-                        logger.debug(
-                            f"Best price 30 change detected for StoreProductID {sp_obj.id} on {date}. "
-                            f"Old: {existing_price_record.best_price_30}, New: {product_item_data.best_price_30}"
-                        )
-                        existing_price_record.best_price_30 = (
-                            product_item_data.best_price_30
-                        )
-                        changed = True
-                    if (
-                        existing_price_record.anchor_price
-                        != product_item_data.anchor_price
-                    ):
-                        logger.debug(
-                            f"Anchor price change detected for StoreProductID {sp_obj.id} on {date}. "
-                            f"Old: {existing_price_record.anchor_price}, New: {product_item_data.anchor_price}"
-                        )
-                        existing_price_record.anchor_price = (
-                            product_item_data.anchor_price
-                        )
-                        changed = True
-                    if (
-                        existing_price_record.special_price
-                        != product_item_data.special_price
-                    ):
-                        logger.debug(
-                            f"Special price change detected for StoreProductID {sp_obj.id} on {date}. "
-                            f"Old: {existing_price_record.special_price}, New: {product_item_data.special_price}"
-                        )
-                        existing_price_record.special_price = (
-                            product_item_data.special_price
-                        )
-                        changed = True
-                    if changed:
-                        some_price_changed = True
-                else:
-                    new_price = ProductPrice(
-                        store_product_id=sp_obj.id,
-                        valid_date=date,
-                        price=product_item_data.price,
-                        unit_price=product_item_data.unit_price,
-                        best_price_30=product_item_data.best_price_30,
-                        anchor_price=product_item_data.anchor_price,
-                        special_price=product_item_data.special_price,
+            count_changed = 0
+            count_added = 0
+            processed_products = set()  # 2+ for the same product in the same store!
+            count_duplicates = 0
+            for prod in store.items:
+                prod_key = (store.store_id, prod.product_id)
+                if prod_key in processed_products:
+                    count_duplicates += 1
+                    logger.debug(
+                        f" **** ERROR: Skipping duplicate product {prod.product_id} for store {store.store_id}"
                     )
-                    product_prices_to_add.append(new_price)
-        if some_price_changed:
-            logger.info("*** Some price changed ***")
-        if product_prices_to_add:
-            session.add_all(product_prices_to_add)
-            logger.info(
-                f"Prepared {len(product_prices_to_add)} new product prices for commit."
-            )
+                    continue
+                processed_products.add(prod_key)
+                sp = store_product_objs[(db_store.id, prod.product_id)]
+                new_price = _normalize_decimal(prod.price)
+                new_unit_price = _normalize_decimal(prod.unit_price)
+                new_best_price_30 = _normalize_decimal(prod.best_price_30)
+                new_anchor_price = _normalize_decimal(prod.anchor_price)
+                new_special_price = _normalize_decimal(prod.special_price)
+
+                last_pp = last_prices.get(sp.id)
+                if last_pp and last_pp.valid_date == date:
+                    changes = []
+                    for field, new_val in [
+                        ("price", new_price),
+                        ("unit_price", new_unit_price),
+                        ("best_price_30", new_best_price_30),
+                        ("anchor_price", new_anchor_price),
+                        ("special_price", new_special_price),
+                    ]:
+                        old_val = _normalize_decimal(getattr(last_pp, field))
+                        if old_val != new_val:
+                            setattr(last_pp, field, new_val)
+                            changes.append(f"{field} {old_val}->{new_val}")
+
+                    if changes:
+                        logger.debug(
+                            f"Detected changes store={store.chain}, store_id={store.store_id}, "
+                            f"product_id={prod.product_id}, date={date}: {'; '.join(changes)}"
+                        )
+                        count_changed += 1
+                        product_prices_to_update.append(last_pp)
+                else:
+                    if not last_pp or any(
+                        [
+                            _normalize_decimal(last_pp.price) != new_price,
+                            _normalize_decimal(last_pp.unit_price) != new_unit_price,
+                            _normalize_decimal(last_pp.best_price_30)
+                            != new_best_price_30,
+                            _normalize_decimal(last_pp.anchor_price)
+                            != new_anchor_price,
+                            _normalize_decimal(last_pp.special_price)
+                            != new_special_price,
+                        ]
+                    ):
+                        new_pp = ProductPrice(
+                            store_product_id=sp.id,
+                            valid_date=date,
+                            price=new_price,
+                            unit_price=new_unit_price,
+                            best_price_30=new_best_price_30,
+                            anchor_price=new_anchor_price,
+                            special_price=new_special_price,
+                        )
+                        count_added += 1
+                        product_prices_to_add.append(new_pp)
+            if count_changed > 0 or count_added > 0:
+                logger.info(
+                    f"Processed {len(store.items)} products for store {store.store_id} "
+                    f"({store.chain}): {count_changed} prices updated, {count_added} new prices added"
+                )
+            if count_duplicates > 0:
+                logger.info(
+                    f"**** ERROR: Found {count_duplicates} duplicate products for store "
+                    f"{store.store_id} ({store.chain}), skipping them"
+                )
+        session.add_all(product_prices_to_add + product_prices_to_update)
         session.commit()
-        logger.info("Successfully saved data to DB and committed session.")
+        logger.info("DB Processing completed successfully")
+
     except Exception as e:
-        logger.error(f"Error during DB operation: {e}", exc_info=True)
+        logger.error(f"Error during DB processing: {e}", exc_info=True)
         session.rollback()
-        logger.info("Session rolled back due to error.")
         raise
+
     finally:
         session.close()
-        logger.info("Session closed.")

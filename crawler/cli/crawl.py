@@ -93,11 +93,35 @@ def main():
         action="store_true",
         help="Process data and save to DB\n",
     )
+    parser.add_argument(
+        "--dropdb",
+        action="store_true",
+        help="Drop existing database tables and exit (or drop before crawling if combined)",
+    )
 
     args = parser.parse_args()
 
     # Set up logging
     setup_logging(args.verbose)
+
+    # Optionally drop all tables before doing anything
+    if args.dropdb:
+        import os
+        from sqlalchemy import create_engine
+
+        from crawler.db.model import Base
+
+        db_url = os.getenv("SQLALCHEMY_DATABASE_URI")
+        if not db_url:
+            logger.error("SQLALCHEMY_DATABASE_URI is not set, cannot drop tables")
+            return 1
+        engine = create_engine(db_url)
+        Base.metadata.drop_all(engine)
+        logger.info("Dropped all tables in database")
+        # if only dropping, exit
+        if not args.output_path and not args.list and not args.sql:
+            return 0
+
     add_file_logging(args.output_path)
 
     if args.list:
@@ -106,7 +130,7 @@ def main():
             print(f"  - {chain_name}")
         return 0
 
-    if args.output_path is None:
+    if args.output_path is None and not args.list:
         parser.error("output_path is required; use -h/--help for more info")
 
     if args.output_path.is_file():

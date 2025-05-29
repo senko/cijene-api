@@ -48,7 +48,11 @@ class Store(Base):
     chain = relationship("Chain", back_populates="stores")
     products = relationship("StoreProduct", back_populates="store")
 
-    __table_args__ = (Index("idx_stores_chain_id", "chain_id"),)
+    __table_args__ = (
+        Index("idx_stores_chain_id", "chain_id"),
+        Index("idx_stores_chain_ext_id", "chain_id", "ext_store_id"),
+        Index("idx_stores_ext_store_id", "ext_store_id"),
+    )
 
     def __repr__(self):
         return f"<Store(name='{self.ext_name}', city='{self.ext_city}')>"
@@ -120,7 +124,13 @@ class ProductPrice(Base):
         Index("idx_product_prices_store_product_id", "store_product_id"),
         Index("idx_product_prices_date", "valid_date"),
         Index(
-            "idx_product_prices_store_product_id_date", "store_product_id", "valid_date"
+            "idx_product_prices_store_product_id_date",
+            "store_product_id",
+            "valid_date",
+            unique=True,
+        ),
+        Index(
+            "idx_product_prices_date_store_product_id", "valid_date", "store_product_id"
         ),
     )
 

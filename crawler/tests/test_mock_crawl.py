@@ -124,7 +124,7 @@ def test_crawl(crawl, tmp_path, db_session):
             chain=MockCrawler.CHAIN,
             date=test_date,
             path=chain_output_dir,
-            output_format="sql",
+            process_db=True,
         )
         print(f"Crawl result for {MockCrawler.CHAIN}: {result}")
 
@@ -176,7 +176,7 @@ def test_db_new_store(crawl, tmp_path, db_session):
         chain=MockCrawler.CHAIN,
         date=test_date,
         path=chain_output_dir,
-        output_format="sql",
+        process_db=True,
     )
     chains = db_session.query(Chain).all()
     print(
@@ -194,7 +194,7 @@ def test_db_new_store(crawl, tmp_path, db_session):
         chain=MockCrawler.CHAIN,
         date=test_date,
         path=chain_output_dir,
-        output_format="sql",
+        process_db=True,
     )
     db_session.refresh(chains[0])
     print(
@@ -286,7 +286,7 @@ def test_db_no_valid_ean_replacement(monkeypatch, crawl, tmp_path, db_session):
         chain=MockCrawler.CHAIN,
         date=test_date,
         path=chain_output_dir,
-        output_format="sql",
+        process_db=True,
     )
 
     expected_placeholder_ean = f"{MockCrawler.CHAIN}:STABLE_NO_EAN"
