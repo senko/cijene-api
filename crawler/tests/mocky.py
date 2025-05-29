@@ -5,7 +5,7 @@ from decimal import Decimal
 from typing import List, Optional
 
 from crawler.store.models import Product, Store
-from .base import BaseCrawler
+from crawler.store.base import BaseCrawler 
 
 logger = logging.getLogger(__name__)
 
