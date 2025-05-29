@@ -23,7 +23,6 @@ def parse_date(date_str):
 
 def setup_logging(log_level):
     """Configure logging for the crawler package."""
-    # Wrap stderr to replace any unencodable/surrogate characters rather than error
     import codecs
 
     stderr = codecs.getwriter("utf-8")(sys.stderr.buffer, errors="replace")
@@ -92,13 +91,14 @@ def main():
         "-s",
         "--sql",
         action="store_true",
-        help="Output data to a SQLite database instead of CSV files.\n",
+        help="Process data and save to DB\n",
     )
 
     args = parser.parse_args()
 
     # Set up logging
     setup_logging(args.verbose)
+    add_file_logging(args.output_path)
 
     if args.list:
         print("Supported retail chains:")
@@ -114,9 +114,7 @@ def main():
 
     if not args.output_path.exists():
         args.output_path.mkdir(parents=True, exist_ok=True)
-
-    add_file_logging(args.output_path)
-    logger.info(f"Created directory: {args.output_path}")
+        logger.info(f"Created directory: {args.output_path}")
 
     chains_to_crawl = None
     if args.chain:
@@ -139,18 +137,10 @@ def main():
         date_txt = args.date.strftime("%Y-%m-%d") if args.date else "today"
         logger.info(f"Fetching price data from {chains_txt} for {date_txt} ...")
 
-        if args.sql:
-            crawl(args.output_path, crawl_date, chains_to_crawl, output_format="sql")
-            print(f"Data saved to database, logs available in: {args.output_path}")
-            logger.info(
-                f"Data saved to database, logs available in: {args.output_path}"
-            )
-        else:
-            zip_path = crawl(
-                args.output_path, crawl_date, chains_to_crawl, output_format="csv"
-            )
-            print(f"Archive created: {zip_path}")
-            logger.info(f"Archive created: {zip_path}")
+        zip_path = crawl(
+            args.output_path, crawl_date, chains_to_crawl, process_db=args.sql
+        )
+        logger.info(f"Archive created: {zip_path}")
         return 0
     except Exception as e:
         print(f"Error during crawling: {e}")

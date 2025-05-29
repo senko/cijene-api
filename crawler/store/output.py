@@ -4,7 +4,7 @@ from decimal import Decimal
 from logging import getLogger
 from os import makedirs
 from pathlib import Path
-from zipfile import ZIP_DEFLATED, ZipFile
+from zipfile import ZipFile, ZIP_DEFLATED
 
 from .models import Store
 
@@ -214,7 +214,8 @@ def save_to_db(date: datetime.date, stores: list[Store]):
         # Cache for DbProduct: {barcode: DbProduct_obj}
         db_products_cache = {p.barcode: p for p in session.query(DbProduct).all()}
         # --- Pass 1: Identify and collect new Chains and Products ---
-        logger.info("Pass 1: Identifying new Chains and Products...")
+        logger.info("DB Processing started")
+        logger.info("DB Pass 1: Identifying new Chains and Products...")
         for store_item_data in stores:
             chain_slug = store_item_data.chain
             # Comment: Check for existing Chain.
@@ -254,7 +255,7 @@ def save_to_db(date: datetime.date, stores: list[Store]):
         }
         processed_db_store_ids = set()
         # --- Pass 2: Identify and collect new Stores ---
-        logger.info("Pass 2: Identifying new Stores...")
+        logger.info("DB Pass 2: Identifying new Stores...")
         for store_item_data in stores:
             chain_obj = chains_cache[store_item_data.chain]
             store_key = (chain_obj.id, store_item_data.store_id)
@@ -291,7 +292,7 @@ def save_to_db(date: datetime.date, stores: list[Store]):
                 store_products_cache[(sp.store_id, sp.ext_product_id)] = sp
         temp_all_sp_objects_cache = store_products_cache.copy()
         # --- Pass 3: Identify and collect new StoreProducts ---
-        logger.info("Pass 3: Identifying new StoreProducts...")
+        logger.info("DB Pass 3: Identifying new StoreProducts...")
         for store_item_data in stores:
             chain_obj = chains_cache[store_item_data.chain]
             db_store_obj = db_stores_cache[(chain_obj.id, store_item_data.store_id)]
@@ -319,7 +320,8 @@ def save_to_db(date: datetime.date, stores: list[Store]):
                 f"Flushed {len(store_products_to_add)} new store products to assign IDs."
             )
         # --- Pass 4: Process ProductPrices (Create new or Update existing) ---
-        logger.info("Pass 4: Processing ProductPrices...")
+        logger.info("DB Pass 4: Processing ProductPrices...")
+        some_price_changed = False
         for store_item_data in stores:
             chain_obj = chains_cache[store_item_data.chain]
             db_store_obj = db_stores_cache[(chain_obj.id, store_item_data.store_id)]
@@ -339,18 +341,19 @@ def save_to_db(date: datetime.date, stores: list[Store]):
                 sp_obj = temp_all_sp_objects_cache[sp_key]  # Guaranteed to have ID
                 # Comment: Check for existing ProductPrice for this store_product and date.
                 existing_price_record = current_store_date_prices_cache.get(sp_obj.id)
+
                 if existing_price_record:
                     # Comment: Update existing ProductPrice if values differ.
                     changed = False
                     if existing_price_record.price != product_item_data.price:
-                        logger.info(
+                        logger.debug(
                             f"Price change detected for StoreProductID {sp_obj.id} on {date}. "
                             f"Old: {existing_price_record.price}, New: {product_item_data.price}"
                         )
                         existing_price_record.price = product_item_data.price
                         changed = True
                     if existing_price_record.unit_price != product_item_data.unit_price:
-                        logger.info(
+                        logger.debug(
                             f"Unit price change detected for StoreProductID {sp_obj.id} on {date}. "
                             f"Old: {existing_price_record.unit_price}, New: {product_item_data.unit_price}"
                         )
@@ -360,7 +363,7 @@ def save_to_db(date: datetime.date, stores: list[Store]):
                         existing_price_record.best_price_30
                         != product_item_data.best_price_30
                     ):
-                        logger.info(
+                        logger.debug(
                             f"Best price 30 change detected for StoreProductID {sp_obj.id} on {date}. "
                             f"Old: {existing_price_record.best_price_30}, New: {product_item_data.best_price_30}"
                         )
@@ -372,7 +375,7 @@ def save_to_db(date: datetime.date, stores: list[Store]):
                         existing_price_record.anchor_price
                         != product_item_data.anchor_price
                     ):
-                        logger.info(
+                        logger.debug(
                             f"Anchor price change detected for StoreProductID {sp_obj.id} on {date}. "
                             f"Old: {existing_price_record.anchor_price}, New: {product_item_data.anchor_price}"
                         )
@@ -384,7 +387,7 @@ def save_to_db(date: datetime.date, stores: list[Store]):
                         existing_price_record.special_price
                         != product_item_data.special_price
                     ):
-                        logger.info(
+                        logger.debug(
                             f"Special price change detected for StoreProductID {sp_obj.id} on {date}. "
                             f"Old: {existing_price_record.special_price}, New: {product_item_data.special_price}"
                         )
@@ -393,9 +396,7 @@ def save_to_db(date: datetime.date, stores: list[Store]):
                         )
                         changed = True
                     if changed:
-                        logger.debug(
-                            f"Updating price for StoreProductID {sp_obj.id} on {date}."
-                        )
+                        some_price_changed = True
                 else:
                     new_price = ProductPrice(
                         store_product_id=sp_obj.id,
@@ -407,6 +408,8 @@ def save_to_db(date: datetime.date, stores: list[Store]):
                         special_price=product_item_data.special_price,
                     )
                     product_prices_to_add.append(new_price)
+        if some_price_changed:
+            logger.info("*** Some price changed ***")
         if product_prices_to_add:
             session.add_all(product_prices_to_add)
             logger.info(
