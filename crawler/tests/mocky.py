@@ -5,7 +5,7 @@ from decimal import Decimal
 from typing import List, Optional
 
 from crawler.store.models import Product, Store
-from crawler.store.base import BaseCrawler 
+from crawler.store.base import BaseCrawler
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +13,13 @@ logger = logging.getLogger(__name__)
 # Price changes (ups, downs, stability, fluctuations) are calculated based on
 # the number of days elapsed between SIMULATION_START_DATE and the requested date.
 
-# STABLE_NO_EAN_NO_EAN is a product without a valid EAN (barcode) for testing purposes.
+# STABLE_NO_EAN_NO_EAN is a initially a product without a valid EAN (barcode) for testing purposes.
+
+# TEST DATES:
+
+# 2025-06-01: New store (Mocky 3) added with all 4 products (including STABLE_NO_EAN with no EAN)
+# 2025-06-01: STABLE_NO_EAN now gets a valid EAN (barcode) for testing purposes in Mocky 2 store
+# 2025-07-01: STABLE_NO_EAN gets a valid EAN (barcode) for testing purposes in all stores
 
 
 class MockCrawler(BaseCrawler):
@@ -23,7 +29,11 @@ class MockCrawler(BaseCrawler):
     """
 
     CHAIN = "mocky"
-    SIMULATION_START_DATE: datetime.date = datetime.date(2025, 1, 1)
+    DATE_SIM_START: datetime.date = datetime.date(2025, 1, 1)
+    DATE_MOCKY3_STORE_ADDED: datetime.date = datetime.date(2025, 6, 1)
+    VALID_EAN = "111000111001"
+    DATE_EAN_FIX_IN_MOCKY2: datetime.date = datetime.date(2025, 6, 1)
+    DATE_PRODUCT_EAN_FIX_IN_ALL_STORES: datetime.date = datetime.date(2025, 7, 1)
 
     def _get_base_products(self) -> List[Product]:
         """
@@ -44,10 +54,10 @@ class MockCrawler(BaseCrawler):
                 barcode="111000111001",
                 category="Dairy & Chilled",
                 initial_price=Decimal("1.99"),
-                date_added=self.SIMULATION_START_DATE,
+                date_added=self.DATE_SIM_START,
                 packaging="Carton",
                 anchor_price=Decimal("2.05"),
-                anchor_price_date=self.SIMULATION_START_DATE.strftime("%Y-%m-%d"),
+                anchor_price_date=self.DATE_SIM_START.strftime("%Y-%m-%d"),
                 best_price_30=Decimal("1.99"),  # Initial best price
             ),
             Product(
@@ -61,10 +71,10 @@ class MockCrawler(BaseCrawler):
                 barcode="222000222002",
                 category="Bakery",
                 initial_price=Decimal("3.49"),
-                date_added=self.SIMULATION_START_DATE,
+                date_added=self.DATE_SIM_START,
                 packaging="Paper Bag",
                 anchor_price=Decimal("3.59"),
-                anchor_price_date=self.SIMULATION_START_DATE.strftime("%Y-%m-%d"),
+                anchor_price_date=self.DATE_SIM_START.strftime("%Y-%m-%d"),
                 best_price_30=Decimal("3.49"),  # Initial best price
             ),
             Product(
@@ -75,10 +85,10 @@ class MockCrawler(BaseCrawler):
                 unit="pack",
                 price=Decimal("2.79"),  # Price on 2025-01-01
                 unit_price=Decimal("0.47"),  # Unit price (per egg) on 2025-01-01
-                barcode="333033", # EAN NOT VALID (len > 8), we will later use '{chain_slug}:{product_id}' instead
+                barcode="NO_CODE",  # EAN NOT VALID (len > 8), we will later use '{chain_slug}:{product_id}' instead
                 category="Dairy & Chilled",
                 initial_price=Decimal("2.79"),
-                date_added=self.SIMULATION_START_DATE,
+                date_added=self.DATE_SIM_START,
                 packaging="Carton",
                 # No anchor price for this item initially
                 best_price_30=Decimal("2.79"),  # Initial best price
@@ -94,10 +104,10 @@ class MockCrawler(BaseCrawler):
                 barcode="444000444004",
                 category="Drinks",
                 initial_price=Decimal("0.89"),
-                date_added=self.SIMULATION_START_DATE,
+                date_added=self.DATE_SIM_START,
                 packaging="Plastic Bottle",
                 anchor_price=Decimal("0.95"),  # Using initial price as base for anchor
-                anchor_price_date=self.SIMULATION_START_DATE.strftime("%Y-%m-%d"),
+                anchor_price_date=self.DATE_SIM_START.strftime("%Y-%m-%d"),
                 best_price_30=Decimal("0.89"),  # Initial best price
             ),
         ]
@@ -194,39 +204,33 @@ class MockCrawler(BaseCrawler):
         based on the provided date relative to SIMULATION_START_DATE.
         """
         logger.info(f"Generating mock data for chain '{self.CHAIN}' for date {date}")
-        logger.info(
-            f"Price simulation reference start date: {self.SIMULATION_START_DATE}."
-        )
+        logger.info(f"Price simulation reference start date: {self.DATE_SIM_START}.")
 
-        if date < self.SIMULATION_START_DATE:
+        if date < self.DATE_SIM_START:
             logger.warning(
-                f"Requested date {date} is before simulation start date {self.SIMULATION_START_DATE}. "
-                f"Prices will be shown as of {self.SIMULATION_START_DATE}."
+                f"Requested date {date} is before simulation start date {self.DATE_SIM_START}. "
+                f"Prices will be shown as of {self.DATE_SIM_START}."
             )
             days_since_start = 0
         else:
-            days_since_start = (date - self.SIMULATION_START_DATE).days
+            days_since_start = (date - self.DATE_SIM_START).days
 
         logger.info(f"Simulating prices for {days_since_start} days after start date.")
 
         base_products = self._get_base_products()
 
-        simulated_products = {
+        simulated_products_map = {
             p.product_id: self._simulate_product_state(p, days_since_start)
             for p in base_products
         }
 
+        # --- Store 1 (Mocky 1) ---
+        # Mocky 1 does not have STABLE_NO_EAN
         store1_items = [
-            simulated_products["INCREASING"],
-            simulated_products["FLUCTUATING"],
-            simulated_products["DECREASING"],
+            simulated_products_map["INCREASING"],
+            simulated_products_map["FLUCTUATING"],
+            simulated_products_map["DECREASING"],
         ]
-        store2_items = [
-            simulated_products["INCREASING"],
-            simulated_products["STABLE_NO_EAN"],
-            simulated_products["DECREASING"],
-        ]
-
         store1 = Store(
             chain=self.CHAIN,
             store_id="MOCK_S1",
@@ -238,6 +242,22 @@ class MockCrawler(BaseCrawler):
             items=store1_items,
         )
 
+        # --- Store 2 (Mocky 2) ---
+        # Mocky 2 has STABLE_NO_EAN; its EAN might change based on the date.
+        stable_product_mocky2 = simulated_products_map["STABLE_NO_EAN"].model_copy(
+            deep=True
+        )
+        if date >= self.DATE_PRODUCT_EAN_FIX_IN_ALL_STORES:
+            stable_product_mocky2.barcode = self.VALID_EAN
+        elif date >= self.DATE_EAN_FIX_IN_MOCKY2:
+            stable_product_mocky2.barcode = self.VALID_EAN
+        # Else - original barcode from _get_base_products.
+
+        store2_items = [
+            simulated_products_map["INCREASING"],
+            stable_product_mocky2,  # Use the (potentially modified) STABLE_NO_EAN
+            simulated_products_map["DECREASING"],
+        ]
         store2 = Store(
             chain=self.CHAIN,
             store_id="MOCK_S2",
@@ -250,6 +270,38 @@ class MockCrawler(BaseCrawler):
         )
 
         stores_list = [store1, store2]
+
+        # --- Store 3 (Mocky 3) ---
+        # Added on MOCKY3_STORE_ADDITION_DATE.
+        # Contains all 4 products. STABLE_NO_EAN initially has its original (invalid) EAN,
+        # then gets a valid EAN on STABLE_PRODUCT_EAN_FIX_ALL_STORES_DATE.
+        if date >= self.DATE_MOCKY3_STORE_ADDED:
+            stable_product_mocky3 = simulated_products_map["STABLE_NO_EAN"].model_copy(
+                deep=True
+            )
+            # STABLE_NO_EAN in Mocky 3 gets a valid EAN only on/after STABLE_PRODUCT_EAN_FIX_ALL_STORES_DATE
+            if date >= self.DATE_PRODUCT_EAN_FIX_IN_ALL_STORES:
+                stable_product_mocky3.barcode = self.VALID_EAN
+            # Else, it keeps its original invalid barcode
+
+            store3_items = [
+                simulated_products_map["INCREASING"].model_copy(deep=True),
+                simulated_products_map["FLUCTUATING"].model_copy(deep=True),
+                stable_product_mocky3,  # Use the (potentially modified) STABLE_NO_EAN for Mocky 3
+                simulated_products_map["DECREASING"].model_copy(deep=True),
+            ]
+            store3 = Store(
+                chain=self.CHAIN,
+                store_id="MOCK_S3",
+                name="Mocky 3",
+                store_type="hypermarket",
+                city="Mockcity",
+                street_address="Test Boulevard 33",
+                zipcode="10000",
+                items=store3_items,
+            )
+            stores_list.append(store3)
+
         logger.info(
             f"Generated {len(stores_list)} mock stores with a total of {sum(len(s.items) for s in stores_list)} simulated products."
         )
@@ -265,17 +317,19 @@ if __name__ == "__main__":
     mock_crawler = MockCrawler()
 
     dates_to_test = [
-        MockCrawler.SIMULATION_START_DATE,
-        MockCrawler.SIMULATION_START_DATE
+        MockCrawler.DATE_SIM_START,
+        MockCrawler.DATE_SIM_START
         + datetime.timedelta(days=1),  # Day 1 (Mon for bread if start is Mon)
-        MockCrawler.SIMULATION_START_DATE
+        MockCrawler.DATE_SIM_START
         + datetime.timedelta(days=5),  # Day 5 (Fri for bread)
-        MockCrawler.SIMULATION_START_DATE
+        MockCrawler.DATE_SIM_START
         + datetime.timedelta(days=16),  # Milk price increased
-        MockCrawler.SIMULATION_START_DATE
+        MockCrawler.DATE_SIM_START
         + datetime.timedelta(days=35),  # Water price decreased, bread cycle
-        MockCrawler.SIMULATION_START_DATE + datetime.timedelta(days=60),
+        MockCrawler.DATE_SIM_START + datetime.timedelta(days=60),
         datetime.date(2024, 12, 15),  # Date before simulation start
+        MockCrawler.DATE_MOCKY3_STORE_ADDED,  # Date when Mocky 3 is added
+        MockCrawler.DATE_PRODUCT_EAN_FIX_IN_ALL_STORES,  # Date when STABLE_NO_EAN gets valid EAN in all stores
     ]
 
     for test_date in dates_to_test:
@@ -296,6 +350,7 @@ if __name__ == "__main__":
                     for prod_idx, product in enumerate(store.items):
                         logger.info(
                             f"    Product {prod_idx+1}: {product.product} ({product.product_id})"
+                            f" - Barcode: {product.barcode}"
                             f" - Price: {product.price}"
                             f" (Unit: {product.unit_price})"
                             f" - Special: {product.special_price}"
