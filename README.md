@@ -259,6 +259,24 @@ WHERE c.name = 'lidl';
 "
 ```
 
+## Crawl from csv
+
+If you have CSV files from a previous crawl and want to import them into the database, 
+you can use the `--from-csv-dir` option. This is useful for testing or when you want 
+to re-import data without crawling again. It also saves new CSV files in the specified directory.
+
+Unzipped archives available in `data/` directory can be used to import data into the 
+database. Log and CSV files will be saved in the specified output directory `tmp/` in this example.
+
+```bash
+python -m crawler.cli.crawl -c zabac -d 2025-05-29 tmp --from-csv-dir data -v debug -s
+```
+
+For all chains available in the `data/` directory, on date `2025-05-15`, you can run:
+
+```bash
+python -m crawler.cli.crawl -d 2025-05-15 tmp --from-csv-dir data -v debug -s
+```
 
 ## Licenca
 

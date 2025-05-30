@@ -5,7 +5,7 @@ import logging
 import sys
 from pathlib import Path
 
-from crawler.crawl import crawl, get_chains
+from crawler.crawl import crawl, get_chains, crawl_from_csv
 from crawler.store.base import add_file_logging
 
 logger = logging.getLogger(__name__)
@@ -98,11 +98,28 @@ def main():
         action="store_true",
         help="Drop existing database tables and exit (or drop before crawling if combined)",
     )
+    parser.add_argument(
+        "--from-csv-dir",
+        type=Path,
+        help=(
+            "Directory containing date/chain subfolders with CSV files."
+            " Loads data from CSV instead of crawling web."
+        ),
+    )
 
     args = parser.parse_args()
 
     # Set up logging
     setup_logging(args.verbose)
+
+    # Validate flag combinations
+    if args.from_csv_dir:
+        if args.list:
+            parser.error("--from-csv-dir cannot be used with --list")
+        if args.dropdb:
+            parser.error("--from-csv-dir cannot be used with --dropdb")
+        if args.output_path is None:
+            parser.error("output_path is required when using --from-csv-dir")
 
     # Optionally drop all tables before doing anything
     if args.dropdb:
@@ -161,9 +178,18 @@ def main():
         date_txt = args.date.strftime("%Y-%m-%d") if args.date else "today"
         logger.info(f"Fetching price data from {chains_txt} for {date_txt} ...")
 
-        zip_path = crawl(
-            args.output_path, crawl_date, chains_to_crawl, process_db=args.sql
-        )
+        if args.from_csv_dir:
+            zip_path = crawl_from_csv(
+                args.output_path,
+                crawl_date,
+                chains_to_crawl,
+                args.from_csv_dir,
+                process_db=args.sql,
+            )
+        else:
+            zip_path = crawl(
+                args.output_path, crawl_date, chains_to_crawl, process_db=args.sql
+            )
         logger.info(f"Archive created: {zip_path}")
         return 0
     except Exception as e:

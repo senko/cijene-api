@@ -1,6 +1,7 @@
 import datetime
 import logging
 import os
+import shutil
 from dataclasses import dataclass
 from pathlib import Path
 from time import time
@@ -29,6 +30,7 @@ from crawler.store.output import (
     save_chain,
     save_to_db,
 )
+from crawler.store.from_csv import load_from_csv
 
 logger = logging.getLogger(__name__)
 
@@ -172,4 +174,88 @@ def crawl(
     create_archive(path, zip_path)
 
     logger.info(f"Created archive {zip_path} with data for {date:%Y-%m-%d}")
+    return zip_path
+
+
+def crawl_from_csv(
+    root: Path,
+    date: datetime.date | None = None,
+    chains: list[str] | None = None,
+    csv_dir: Path | None = None,
+    process_db: bool = False,
+) -> Path:
+    """
+    Load data from CSV files for specified chains and date.
+
+    Args:
+        root: Base output directory for saving data.
+        date: Date for which to load data (YYYY-MM-DD). Defaults to today if None.
+        chains: List of chain slugs to process. Defaults to all chains if None.
+        csv_dir: Root directory containing date/chain subdirectories with CSV files.
+    process_db: Whether to save data to DB.
+
+    Returns:
+        Path to the created ZIP archive file.
+    """
+    if chains is None:
+        chains = get_chains()
+
+    if date is None:
+        date = datetime.date.today()
+
+    date_str = date.strftime("%Y-%m-%d")
+    path = root / date_str
+    zip_path = root / f"{date_str}.zip"
+    os.makedirs(path, exist_ok=True)
+
+    results: dict[str, CrawlResult] = {}
+    start_all = time()
+    for chain in chains:
+        logger.info(f"Loading CSV data for {chain} on {date_str}")
+        t0 = time()
+        try:
+            stores = load_from_csv(chain, date, csv_dir)
+        except FileNotFoundError:
+            logger.info(f"CSV data for {chain} on {date_str} not found; skipping")
+            results[chain] = CrawlResult()
+            continue
+        except Exception as err:
+            logger.error(
+                f"Error loading CSV for {chain} on {date_str}: {err}", exc_info=True
+            )
+            results[chain] = CrawlResult()
+            continue
+
+        if process_db:
+            save_to_db(date, stores)
+
+        save_chain(path / chain, stores)
+        elapsed = time() - t0
+        n_stores = len(stores)
+        n_products = len({item.product_id for s in stores for item in s.items})
+        n_prices = sum(len(s.items) for s in stores)
+        results[chain] = CrawlResult(
+            elapsed_time=elapsed,
+            n_stores=n_stores,
+            n_products=n_products,
+            n_prices=n_prices,
+        )
+
+    total_elapsed = time() - start_all
+    logger.info(
+        f"Loaded CSV for {','.join(chains)} for {date_str} in {total_elapsed:.2f}s"
+    )
+    for chain, res in results.items():
+        logger.info(
+            f"  * {chain}: {res.n_stores} stores, {res.n_products} products, {res.n_prices} prices in {res.elapsed_time:.2f}s"
+        )
+
+    # copy archive-info.txt from source if available, else use default
+    src_info = Path(csv_dir) / date_str / "archive-info.txt"
+    if src_info and src_info.exists():
+        shutil.copy(src_info, path / "archive-info.txt")
+    else:
+        copy_archive_info(path)
+    create_archive(path, zip_path)
+    logger.info(f"Created archive {zip_path} with CSV data for {date_str}")
     return zip_path
