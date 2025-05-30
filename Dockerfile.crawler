@@ -1,0 +1,33 @@
+FROM python:3.13-slim
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    TZ=Europe/Zagreb
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends unzip cron tzdata gcc libxml2-dev libxslt-dev python3-dev build-essential && \
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+RUN pip install --no-cache-dir \
+    beautifulsoup4>=4.13.4 \
+    httpx>=0.28.1 \
+    lxml>=5.4.0 \
+    openpyxl>=3.1.5 \
+    pydantic>=2.11.4 \
+    psycopg2-binary>=2.9.9 \
+    python-dotenv>=1.1.0 \
+    SQLAlchemy==2.0.41 \
+    dotenv>=0.9.9
+
+COPY crawler /app/crawler
+
+COPY docker/crawlercron /etc/cron.d/crawlercron
+RUN chown root:root /etc/cron.d/crawlercron
+RUN chmod 0644 /etc/cron.d/crawlercron && \
+    touch /var/log/cron.log
+
+VOLUME ["/data"]
+
+CMD ["cron", "-f"]

@@ -1,0 +1,22 @@
+FROM python:3.13-slim
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    TZ=Europe/Zagreb
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends tzdata && \
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+RUN pip install --no-cache-dir \
+    fastapi[standard]>=0.115.12 \
+    python-dotenv>=1.1.0 \
+    uvicorn>=0.34.2
+
+COPY service /app/service
+
+EXPOSE 8000
+
+CMD ["python", "-m", "service.main"]

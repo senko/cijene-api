@@ -1,0 +1,33 @@
+services:
+  crawler:
+    build:
+      context: .
+      dockerfile: Dockerfile.crawler
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./docker_data/crawler:/data
+      - ./.env:/app/.env
+
+  service:
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./docker_data:/app/data
+    ports:
+      - "8000:8000"
+
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./docker_data/postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"

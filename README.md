@@ -81,6 +81,29 @@ uv run -m service.main
 Servis će biti dostupan na `http://localhost:8000` (ako niste mijenjali port), a na
 `http://localhost:8000/docs` je dostupna Swagger dokumentacija API-ja.
 
+## Docker
+
+Docker container crawler ima cronjob za pokretanje u 09h i 21h, definiran u `docker/crawlercron`
+
+Za pokretanje crawlera u Dockeru, potrebno je imati instaliran Docker i Docker Compose.
+Zatim, u root direktoriju projekta, pokrenite sljedeće komande:
+
+```bash
+docker compose up --build
+```
+
+Help:
+
+```bash
+docker compose exec -it crawler python -m crawler.cli.crawl -h
+```
+
+Primjer za pokretanje crawlera za KTC:
+
+```bash
+docker compose exec -it crawler python -m crawler.cli.crawl -c ktc /data
+```
+
 ## Licenca
 
 Ovaj projekt je licenciran pod [AGPL-3 licencom](LICENSE).
