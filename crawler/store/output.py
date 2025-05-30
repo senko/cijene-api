@@ -266,10 +266,24 @@ def save_to_db(date: datetime.date, stores: list[Store]):
         session.add_all(stores_to_add)
         session.flush()
 
-        existing_store_products = {
-            (sp.store_id, sp.ext_product_id): sp
-            for sp in session.query(StoreProduct).all()
-        }
+        # Pre-fetch store IDs to filter StoreProduct query
+        store_ids_to_fetch = []
+        for store_info in stores:
+            chain_obj = existing_chains.get(store_info.chain)
+            if chain_obj:
+                store_key = (chain_obj.id, store_info.store_id)
+                db_store = existing_stores.get(store_key)
+                if db_store:
+                    store_ids_to_fetch.append(db_store.id)
+
+        existing_store_products = {}
+        if store_ids_to_fetch:
+            existing_store_products = {
+                (sp.store_id, sp.ext_product_id): sp
+                for sp in session.query(StoreProduct)
+                .filter(StoreProduct.store_id.in_(store_ids_to_fetch))
+                .all()
+            }
 
         # Products and StoreProducts
         for store in stores:
