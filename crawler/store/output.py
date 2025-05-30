@@ -173,7 +173,7 @@ def save_to_db(date: datetime.date, stores: list[Store]):
     import os
     from sqlalchemy import create_engine, func, and_
     from sqlalchemy.orm import sessionmaker
-    from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
+    from decimal import Decimal
 
     from crawler.db.model import (
         Base,
@@ -294,6 +294,11 @@ def save_to_db(date: datetime.date, stores: list[Store]):
                 prod_barcode = _get_barcode_or_replacement(
                     prod.barcode or "", store.chain, prod.product_id
                 )
+
+                # TODO: if some chain provide more data for the product, use it
+                # like product name, brand, category, unit, quantity - update Product
+                # TODO: Maybe we used syntetic barcode {chain}:{product_id} until now
+                # and now chain sends valid barcode, so we need to update/merge/delete                
                 product_obj = existing_products.get(prod_barcode)
                 if not product_obj:
                     product_obj = Product(

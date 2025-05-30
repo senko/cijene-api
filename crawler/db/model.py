@@ -15,7 +15,26 @@ from sqlalchemy.sql import func
 Base = declarative_base()
 
 
-class Chain(Base):
+class TimestampMixin:
+    """
+    Mixin to add timestamp columns for record creation and modification.
+    Postgres will have Trigger to update `updated_at` on every change.
+    sqlite will be handled by SQLAlchemy.
+    """
+    created_at = Column(
+        TIMESTAMP(timezone=True),
+        server_default=func.current_timestamp(),
+        nullable=False,
+    )
+    updated_at = Column(
+        TIMESTAMP(timezone=True),
+        server_default=func.current_timestamp(),
+        onupdate=func.current_timestamp(),
+        nullable=False,
+    )
+
+
+class Chain(TimestampMixin, Base):
     __tablename__ = "chains"
 
     id = Column(Integer, primary_key=True)
@@ -33,7 +52,7 @@ class Chain(Base):
         return f"<Chain(name='{self.name}', slug='{self.slug}')>"
 
 
-class Store(Base):
+class Store(TimestampMixin, Base):
     __tablename__ = "stores"
 
     id = Column(Integer, primary_key=True)
@@ -58,7 +77,7 @@ class Store(Base):
         return f"<Store(name='{self.ext_name}', city='{self.ext_city}')>"
 
 
-class Product(Base):
+class Product(TimestampMixin, Base):
     __tablename__ = "products"
 
     barcode = Column(
@@ -76,7 +95,7 @@ class Product(Base):
         return f"<Product(barcode='{self.barcode}', name='{self.ext_name}')>"
 
 
-class StoreProduct(Base):
+class StoreProduct(TimestampMixin, Base):
     __tablename__ = "store_products"
 
     id = Column(Integer, primary_key=True)  # auto-incrementing ID
@@ -101,7 +120,7 @@ class StoreProduct(Base):
         return f"<StoreProduct(store_id={self.store_id}, ext_product_id='{self.ext_product_id}')>"
 
 
-class ProductPrice(Base):
+class ProductPrice(TimestampMixin, Base):
     __tablename__ = "product_prices"
 
     id = Column(Integer, primary_key=True)
