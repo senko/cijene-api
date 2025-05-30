@@ -21,6 +21,7 @@ class TimestampMixin:
     Postgres will have Trigger to update `updated_at` on every change.
     sqlite will be handled by SQLAlchemy.
     """
+
     created_at = Column(
         TIMESTAMP(timezone=True),
         server_default=func.current_timestamp(),
@@ -131,11 +132,6 @@ class ProductPrice(TimestampMixin, Base):
     best_price_30 = Column(DECIMAL(10, 2))
     anchor_price = Column(DECIMAL(10, 2))
     special_price = Column(DECIMAL(10, 2))
-    crawled_at = Column(
-        TIMESTAMP(timezone=True),
-        server_default=func.current_timestamp(),
-        nullable=False,
-    )
 
     store_product = relationship("StoreProduct", back_populates="prices")
 

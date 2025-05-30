@@ -309,8 +309,3 @@ Ovaj projekt je licenciran pod [AGPL-3 licencom](LICENSE).
 Podaci prikupljeni putem ovog projekta su javni i dostupni svima, temeljem
 Odluke o objavi cjenika i isticanju dodatne cijene kao mjeri izravne
 kontrole cijena u trgovini na malo, NN 75/2025 od 2.5.2025.
-
-
-SELECT store_products.id AS store_products_id, store_products.store_id AS store_products_store_id, store_products.barcode AS store_products_barcode, store_products.ext_product_id AS store_products_ext_product_id 
-FROM store_products
-
