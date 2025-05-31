@@ -121,8 +121,11 @@ docker compose exec -it crawler python -m crawler.cli.crawl -h
 Primjer za pokretanje crawlera za KTC (bez i sa snimanjem u bazu podataka):
 
 ```bash
-docker compose exec -it crawler python -m crawler.cli.crawl -c ktc /data
-docker compose exec -it crawler python -m crawler.cli.crawl -c ktc /data -s
+docker compose exec -it crawler python -m crawler.cli.crawl -c ktc /data -v debug
+```
+
+```bash
+docker compose exec -it crawler python -m crawler.cli.crawl -c ktc /data -s -v debug
 ```
 
 Kako docker koristi mountane direktorije, CSV datoteke i logovi će biti 

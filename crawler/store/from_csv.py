@@ -27,7 +27,7 @@ def load_from_csv(chain: str, date: date, csv_dir: Path) -> List[Store]:
     stores: dict[str, Store] = {}
     stores_csv = root / "stores.csv"
     with stores_csv.open(newline="") as f:
-        reader = csv.DictReader(f)
+        reader = csv.DictReader(f)  # type: ignore
         for row in reader:
             store_id = row.get("store_id")
             if not store_id:
@@ -46,7 +46,7 @@ def load_from_csv(chain: str, date: date, csv_dir: Path) -> List[Store]:
     products: dict[str, dict] = {}
     products_csv = root / "products.csv"
     with products_csv.open(newline="") as f:
-        reader = csv.DictReader(f)
+        reader = csv.DictReader(f)  # type: ignore
         for row in reader:
             prod_id = row.get("product_id")
             if not prod_id:
@@ -65,7 +65,7 @@ def load_from_csv(chain: str, date: date, csv_dir: Path) -> List[Store]:
     # Load prices and attach Product items to stores
     prices_csv = root / "prices.csv"
     with prices_csv.open(newline="") as f:
-        reader = csv.DictReader(f)
+        reader = csv.DictReader(f)  # type: ignore
         for row in reader:
             store_id = row.get("store_id")
             prod_id = row.get("product_id")
@@ -77,7 +77,7 @@ def load_from_csv(chain: str, date: date, csv_dir: Path) -> List[Store]:
                 continue
 
             price = _parse_decimal(row.get("price", "")) or Decimal("0")
-            unit_price = _parse_decimal(row.get("unit_price", ""))
+            unit_price = _parse_decimal(row.get("unit_price", "")) or Decimal("0")
             best_price_30 = _parse_decimal(row.get("best_price_30", ""))
             anchor_price = _parse_decimal(row.get("anchor_price", ""))
             special_price = _parse_decimal(row.get("special_price", ""))

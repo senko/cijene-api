@@ -2,11 +2,23 @@ import datetime
 import importlib
 import os
 import sys
+from typing import (
+    Any,
+    Dict,
+    Generator,
+    Protocol,
+    cast,
+    runtime_checkable,
+)
+from typing import (
+    Type as TypingType,
+)
 from unittest.mock import patch
 
 import pytest
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import Engine, create_engine
+from sqlalchemy.orm import Session
+from sqlalchemy.orm import sessionmaker as SQLASessionMaker
 
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, project_root)
@@ -15,10 +27,19 @@ from crawler.db.model import (  # noqa: E402
     Base,
     Chain,
     Product,
-    ProductPrice,  # noqa: F401
-    Store, # noqa: F401
     StoreProduct,
 )
+from crawler.tests.mocky import MockCrawler  # noqa: E402
+
+
+@runtime_checkable
+class CrawlModuleProto(Protocol):
+    CRAWLERS: Dict[str, TypingType[MockCrawler]]
+
+    def get_chains(self) -> list[str]: ...
+    def crawl_chain(
+        self, chain: str, date: datetime.date, path: Any, process_db: bool
+    ) -> Any: ...
 
 
 @pytest.fixture(autouse=True)
@@ -42,59 +63,71 @@ def patched_db_uri(monkeypatch):
 
 
 @pytest.fixture
-def db_engine(patched_db_uri):
+def db_engine(patched_db_uri) -> Engine:
     current_db_uri = os.getenv("SQLALCHEMY_DATABASE_URI")
+    assert current_db_uri is not None, (
+        "SQLALCHEMY_DATABASE_URI not set by patched_db_uri"
+    )
     engine = create_engine(current_db_uri)
-    Base.metadata.create_all(engine)  # create tabels if we don't have it yet
+    Base.metadata.create_all(engine)  # create tables if we don't have it yet
     return engine
 
 
-@pytest.fixture
-def SqlAlchemyTestSession(db_engine):
-    return sessionmaker(bind=db_engine)
-
-
 @pytest.fixture(autouse=True)
-def db_session(SqlAlchemyTestSession):
-    session = SqlAlchemyTestSession()
+def db_session(
+    SqlAlchemyTestSession: SQLASessionMaker[Session],
+) -> Generator[Session, None, None]:
+    session: Session = SqlAlchemyTestSession()
     try:
         yield session
     finally:
         session.close()
 
 
-from crawler.tests.mocky import MockCrawler  # noqa: E402
+@pytest.fixture
+def SqlAlchemyTestSession(db_engine: Engine) -> SQLASessionMaker[Session]:
+    return SQLASessionMaker(bind=db_engine, class_=Session)
+
+
+# from crawler.tests.mocky import MockCrawler  # noqa: E402
 
 
 @pytest.fixture(autouse=True)
-def crawl():
+def crawl() -> Generator[CrawlModuleProto, None, None]:
     """
     Provides the 'crawler.crawl' module with its CRAWLERS dictionary
     patched to only include MockCrawler.
     Reloads the module for each test to ensure a clean state before patching.
     """
+    crawl_module_obj: Any
     if "crawler.crawl" in sys.modules:
-        crawl_module_instance = importlib.reload(sys.modules["crawler.crawl"])
+        crawl_module_obj = importlib.reload(sys.modules["crawler.crawl"])
     else:
-        from crawler import crawl as crawl_module_instance
+        from crawler import crawl as raw_crawl_module
+
+        crawl_module_obj = raw_crawl_module
+
+    typed_crawl_module = cast(CrawlModuleProto, crawl_module_obj)
 
     with patch.dict(
-        crawl_module_instance.CRAWLERS, {MockCrawler.CHAIN: MockCrawler}, clear=True
+        typed_crawl_module.CRAWLERS,
+        {MockCrawler.CHAIN: MockCrawler},
+        clear=True,
     ):
-        assert (
-            len(crawl_module_instance.CRAWLERS) == 1
-        ), "CRAWLERS dict should only have MockCrawler"
-        assert (
-            MockCrawler.CHAIN in crawl_module_instance.CRAWLERS
-        ), "MockCrawler.CHAIN key missing in CRAWLERS"
-        assert (
-            crawl_module_instance.CRAWLERS[MockCrawler.CHAIN] == MockCrawler
-        ), "CRAWLERS not patched with MockCrawler instance"
-        print(f"\nINFO (fixture): CRAWLERS patched: {crawl_module_instance.CRAWLERS}")
-        yield crawl_module_instance
+        assert len(typed_crawl_module.CRAWLERS) == 1, (
+            "CRAWLERS dict should only have MockCrawler"
+        )
+        assert MockCrawler.CHAIN in typed_crawl_module.CRAWLERS, (
+            "MockCrawler.CHAIN key missing in CRAWLERS"
+        )
+        assert typed_crawl_module.CRAWLERS[MockCrawler.CHAIN] == MockCrawler, (
+            "CRAWLERS not patched with MockCrawler instance"
+        )
+        print(f"\nINFO (fixture): CRAWLERS patched: {typed_crawl_module.CRAWLERS}")
+        yield typed_crawl_module
 
 
-def delete_all_data(db_session):
+def delete_all_data(db_session: Session):
     engine = db_session.get_bind()
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
@@ -109,7 +142,7 @@ def prepare_crawl_test_environment(
     return test_date, chain_specific_output_dir
 
 
-def test_crawl(crawl, tmp_path, db_session):
+def test_crawl(crawl: CrawlModuleProto, tmp_path, db_session: Session):
     delete_all_data(db_session)
     chains = crawl.get_chains()
     assert chains == [MockCrawler.CHAIN], f"Expected chains to be {[MockCrawler.CHAIN]}"
@@ -130,9 +163,9 @@ def test_crawl(crawl, tmp_path, db_session):
 
         created_files = list(chain_output_dir.glob("*csv"))
         print(f"Found output files: {[f.name for f in created_files]}")
-        assert (
-            len(created_files) == 3
-        ), f"Expected 3 output files in {chain_output_dir}, found {len(created_files)}"
+        assert len(created_files) == 3, (
+            f"Expected 3 output files in {chain_output_dir}, found {len(created_files)}"
+        )
     else:
         print("crawl.crawl_chain function not found, skipping that part of the test.")
 
@@ -148,19 +181,19 @@ def test_crawl(crawl, tmp_path, db_session):
     print(
         f"Product EANs in DB after crawl: {[product.barcode for product in products]}"
     )
-    assert (
-        len(products) == 4
-    ), "Wrong number of products found in the database after crawl."
+    assert len(products) == 4, (
+        "Wrong number of products found in the database after crawl."
+    )
     # db STORE PRODUCTS
-    assert (
-        len(chains[0].stores[0].products) == 3
-    ), "Wrong number of products found in the database after crawl."
-    assert (
-        len(chains[0].stores[1].products) == 3
-    ), "Wrong number of products found in the database after crawl."
+    assert len(chains[0].stores[0].products) == 3, (
+        "Wrong number of products found in the database after crawl."
+    )
+    assert len(chains[0].stores[1].products) == 3, (
+        "Wrong number of products found in the database after crawl."
+    )
 
 
-def test_db_new_store(crawl, tmp_path, db_session):
+def test_db_new_store(crawl: CrawlModuleProto, tmp_path, db_session: Session):
     """
     New store - new record in db
     - we get store that is not in the db
@@ -182,9 +215,9 @@ def test_db_new_store(crawl, tmp_path, db_session):
     print(
         f"Stores in DB after initial crawl: {[store.ext_name for store in chains[0].stores]}"
     )
-    assert (
-        len(chains[0].stores) == 2
-    ), "Initial stores not found in the database after crawl."
+    assert len(chains[0].stores) == 2, (
+        "Initial stores not found in the database after crawl."
+    )
 
     test_date, chain_output_dir = prepare_crawl_test_environment(
         tmp_path, MockCrawler.DATE_MOCKY3_STORE_ADDED
@@ -200,9 +233,9 @@ def test_db_new_store(crawl, tmp_path, db_session):
     print(
         f"Stores in DB after new store crawl: {[store.ext_name for store in chains[0].stores]}"
     )
-    assert (
-        len(chains[0].stores) == 3
-    ), "New store not added to the database after crawl."
+    assert len(chains[0].stores) == 3, (
+        "New store not added to the database after crawl."
+    )
 
 
 def test_db_store_info_changed(monkeypatch, tmp_path):
@@ -297,16 +330,16 @@ def test_db_no_valid_ean_replacement(monkeypatch, crawl, tmp_path, db_session):
         .one_or_none()
     )
 
-    assert (
-        product_in_db is not None
-    ), f"Product with placeholder EAN '{expected_placeholder_ean}' not found in DB."
+    assert product_in_db is not None, (
+        f"Product with placeholder EAN '{expected_placeholder_ean}' not found in DB."
+    )
 
     store_products_with_placeholder_ean = (
         db_session.query(StoreProduct).filter_by(barcode=expected_placeholder_ean).all()
     )
-    assert (
-        len(store_products_with_placeholder_ean) > 0
-    ), f"No StoreProduct entries found with placeholder EAN '{expected_placeholder_ean}'."
+    assert len(store_products_with_placeholder_ean) > 0, (
+        f"No StoreProduct entries found with placeholder EAN '{expected_placeholder_ean}'."
+    )
     print(f"StoreProducts with placeholder EAN: {store_products_with_placeholder_ean}")
 
 

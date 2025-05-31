@@ -4,8 +4,8 @@ import logging
 from decimal import Decimal
 from typing import List, Optional
 
-from crawler.store.models import Product, Store
 from crawler.store.base import BaseCrawler
+from crawler.store.models import Product, Store
 
 logger = logging.getLogger(__name__)
 
@@ -344,12 +344,12 @@ if __name__ == "__main__":
             )
             for store_idx, store in enumerate(mock_stores):
                 logger.info(
-                    f"  Store {store_idx+1}: {store.name} (ID: {store.store_id})"
+                    f"  Store {store_idx + 1}: {store.name} (ID: {store.store_id})"
                 )
                 if store.items:
                     for prod_idx, product in enumerate(store.items):
                         logger.info(
-                            f"    Product {prod_idx+1}: {product.product} ({product.product_id})"
+                            f"    Product {prod_idx + 1}: {product.product} ({product.product_id})"
                             f" - Barcode: {product.barcode}"
                             f" - Price: {product.price}"
                             f" (Unit: {product.unit_price})"

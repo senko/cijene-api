@@ -197,6 +197,9 @@ def crawl_from_csv(
     Returns:
         Path to the created ZIP archive file.
     """
+    if csv_dir is None:
+        logger.error("CSV directory not provided")
+        raise ValueError("csv_dir must be provided to load data from CSV files")
     if chains is None:
         chains = get_chains()
 

@@ -1,10 +1,10 @@
 import datetime
 from csv import DictWriter
-from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
+from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from logging import getLogger
 from os import makedirs
 from pathlib import Path
-from zipfile import ZipFile, ZIP_DEFLATED
+from zipfile import ZIP_DEFLATED, ZipFile
 
 from .models import Store
 
@@ -171,9 +171,11 @@ logger = getLogger(__name__)
 
 def save_to_db(date: datetime.date, stores: list[Store]):
     import os
-    from sqlalchemy import create_engine, func, and_
-    from sqlalchemy.orm import sessionmaker
     from decimal import Decimal
+
+    from sqlalchemy import and_, create_engine, func
+    from sqlalchemy.orm import sessionmaker
+    from sqlalchemy.orm import Session as SqlaSession
 
     from crawler.db.model import (
         Base,
@@ -208,8 +210,10 @@ def save_to_db(date: datetime.date, stores: list[Store]):
 
     engine = create_engine(db_url)
     Base.metadata.create_all(engine)
-    Session = sessionmaker(bind=engine)
-    session = Session()
+    SessionFactory: sessionmaker[SqlaSession] = sessionmaker(
+        bind=engine, class_=SqlaSession
+    )
+    session: SqlaSession = SessionFactory()
     session.connection(
         execution_options={
             "executemany_mode": "values_plus_batch",
@@ -298,7 +302,7 @@ def save_to_db(date: datetime.date, stores: list[Store]):
                 # TODO: if some chain provide more data for the product, use it
                 # like product name, brand, category, unit, quantity - update Product
                 # TODO: Maybe we used syntetic barcode {chain}:{product_id} until now
-                # and now chain sends valid barcode, so we need to update/merge/delete                
+                # and now chain sends valid barcode, so we need to update/merge/delete
                 product_obj = existing_products.get(prod_barcode)
                 if not product_obj:
                     product_obj = Product(

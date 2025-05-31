@@ -25,7 +25,7 @@ def setup_logging(log_level):
     """Configure logging for the crawler package."""
     import codecs
 
-    stderr = codecs.getwriter("utf-8")(sys.stderr.buffer, errors="replace")
+    stderr = codecs.getwriter("utf-8")(sys.stderr.buffer, errors="replace")  # type: ignore
     level_map = {
         "debug": logging.DEBUG,
         "info": logging.INFO,
