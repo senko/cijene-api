@@ -15,8 +15,8 @@ from crawler.db.model import (  # noqa: E402
     Base,
     Chain,
     Product,
-    ProductPrice,
-    Store,
+    ProductPrice,  # noqa: F401
+    Store, # noqa: F401
     StoreProduct,
 )
 
