@@ -139,7 +139,8 @@ def main():
         if not args.output_path and not args.list and not args.sql:
             return 0
 
-    add_file_logging(args.output_path)
+    if args.output_path is not None:
+        add_file_logging(args.output_path)
 
     if args.list:
         print("Supported retail chains:")
