@@ -1,0 +1,21 @@
+FROM python:3.13-slim
+
+ENV DEBIAN_FRONTEND=noninteractive \
+  TZ=Europe/Zagreb
+
+RUN apt-get update && \
+  apt-get install -y --no-install-recommends tzdata && \
+  ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && \
+  rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY pyproject.toml README.md ./
+COPY service ./service
+
+RUN python -m pip install --upgrade pip setuptools wheel && \
+  python -m pip install --no-cache-dir ".[service]"
+
+EXPOSE 8000
+
+CMD ["python", "-m", "service.main"]

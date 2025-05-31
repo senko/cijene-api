@@ -1,0 +1,34 @@
+FROM python:3.13-slim
+
+ENV DEBIAN_FRONTEND=noninteractive \
+  TZ=Europe/Zagreb
+
+RUN apt-get update && \
+  apt-get install -y --no-install-recommends \
+  unzip \
+  cron \
+  tzdata \
+  gcc \
+  libxml2-dev \
+  libxslt-dev \
+  python3-dev \
+  build-essential && \
+  ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
+  echo $TZ > /etc/timezone && \
+  rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY pyproject.toml README.md ./
+COPY crawler ./crawler
+COPY docker/crawlercron /etc/cron.d/crawlercron
+
+RUN python -m pip install --upgrade pip setuptools wheel && \
+  python -m pip install --no-cache-dir ".[crawler]" && \
+  chmod 0644 /etc/cron.d/crawlercron && \
+  chown root:root /etc/cron.d/crawlercron && \
+  touch /var/log/cron.log
+
+VOLUME ["/data"]
+
+CMD ["cron", "-f"]
