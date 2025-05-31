@@ -54,7 +54,7 @@ def patched_db_uri(monkeypatch):
         final_test_uri = test_uri_from_env
         print(f"INFO: Using SQLALCHEMY_DATABASE_URI_TEST: {final_test_uri}")
     else:
-        final_test_uri = "sqlite:///tmp/crawler_test.db"
+        final_test_uri = "sqlite:///./tmp/pytest/crawler_test.db"
 
     monkeypatch.setenv("SQLALCHEMY_DATABASE_URI", final_test_uri)
     print(

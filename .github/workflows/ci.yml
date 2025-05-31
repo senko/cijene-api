@@ -45,8 +45,11 @@ jobs:
       - name: Check type hints with ty
         run: uv run ty check
 
+      - name: Prepare a project‐local tmp folder
+        run: mkdir -p ./tmp/pytest
+
       - name: Run tests with pytest
-        run: uv run pytest --basetemp=./tmp_pytest
+        run: uv run pytest --basetemp=./tmp/pytest
 
       # Docker-based CLI test (Linux only)
       - name: Start Docker containers
