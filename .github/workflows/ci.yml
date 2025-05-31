@@ -44,3 +44,15 @@ jobs:
 
       - name: Check type hints with ty
         run: uv run ty check
+
+      - name: Run tests with pytest
+        run: uv run pytest
+
+      # Docker-based CLI test (Linux only)
+      - name: Start Docker containers
+        if: matrix.os == 'ubuntu-24.04'
+        run: docker compose up -d --build
+
+      - name: Test CLI entrypoint (one-off container)
+        if: matrix.os == 'ubuntu-24.04'
+        run: docker compose run --rm crawler python -m crawler.cli.crawl -h
