@@ -1,22 +1,21 @@
 FROM python:3.13-slim
 
 ENV DEBIAN_FRONTEND=noninteractive \
-    TZ=Europe/Zagreb
+  TZ=Europe/Zagreb
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends tzdata && \
-    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && \
-    rm -rf /var/lib/apt/lists/*
+  apt-get install -y --no-install-recommends tzdata && \
+  ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && \
+  rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-## pyproject.toml extras 'service'
-COPY pyproject.toml uv.lock ./
-RUN pip install --no-cache-dir uv && \
-    uv pip install --system --no-cache-dir .[service]
+COPY pyproject.toml .
+RUN pip install --upgrade pip setuptools wheel && \
+  pip install --no-cache-dir ".[service]"
 
 COPY service /app/service
 
 EXPOSE 8000
 
-CMD ["uv", "run", "-m", "service.main"]
+CMD ["python", "-m", "service.main"]
