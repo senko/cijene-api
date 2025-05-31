@@ -40,7 +40,8 @@ korištenje `uv` za setup projekta:
 ```bash
 git clone https://github.com/senko/cijene-api.git
 cd cijene-api
-uv sync --dev
+uv sync --dev --extra crawler --extra service
+. .venv/bin/activate
 ```
 
 ## Korištenje
