@@ -5,20 +5,35 @@ description = "Service for product pricing data by Croatian grocery chains."
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "python-dotenv>=1.1.0",
+    "pydantic>=2.11.4",
+]
+
+[project.optional-dependencies]
+crawler = [
     "beautifulsoup4>=4.13.4",
-    "fastapi[standard]>=0.115.12",
     "httpx>=0.28.1",
     "lxml>=5.4.0",
     "openpyxl>=3.1.5",
-    "pydantic>=2.11.4",
-    "python-dotenv>=1.1.0",
+    "psycopg2-binary>=2.9.9",
+    "SQLAlchemy==2.0.41",
+]
+service = [
+    "fastapi[standard]>=0.115.12",
     "uvicorn>=0.34.2",
 ]
 
 [tool.uv]
 dev-dependencies = [
+    "docker>=6.0.0",
     "pre-commit>=4.2.0",
     "pyright>=1.1.400",
+    "pytest>=7.0.0",
+    "pytest-cov>=3.0.0",
     "ruff>=0.11.10",
     "ty>=0.0.1a3",
 ]
+
+[build-system]
+requires = ["setuptools>=65.0", "wheel"]
+build-backend = "setuptools.build_meta"
