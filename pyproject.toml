@@ -34,6 +34,13 @@ dev-dependencies = [
     "ty>=0.0.1a3",
 ]
 
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["crawler*", "service*"]
+
+[tool.setuptools.package-dir]
+"" = "."
+
 [build-system]
 requires = ["setuptools>=65.0", "wheel"]
 build-backend = "setuptools.build_meta"

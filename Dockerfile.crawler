@@ -19,15 +19,13 @@ RUN apt-get update && \
 
 WORKDIR /app
 
-COPY pyproject.toml ./
-
-RUN pip install --upgrade pip setuptools wheel && \
-  pip install --no-cache-dir ".[crawler]"
-
-COPY crawler /app/crawler
-
+COPY pyproject.toml README.md ./
+COPY crawler ./crawler
 COPY docker/crawlercron /etc/cron.d/crawlercron
-RUN chmod 0644 /etc/cron.d/crawlercron && \
+
+RUN python -m pip install --upgrade pip setuptools wheel && \
+  python -m pip install --no-cache-dir ".[crawler]" && \
+  chmod 0644 /etc/cron.d/crawlercron && \
   chown root:root /etc/cron.d/crawlercron && \
   touch /var/log/cron.log
 
