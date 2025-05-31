@@ -10,13 +10,13 @@ RUN apt-get update && \
 
 WORKDIR /app
 
-RUN pip install --no-cache-dir \
-    fastapi[standard]>=0.115.12 \
-    python-dotenv>=1.1.0 \
-    uvicorn>=0.34.2
+## pyproject.toml extras 'service'
+COPY pyproject.toml uv.lock ./
+RUN pip install --no-cache-dir uv && \
+    uv pip install --system --no-cache-dir .[service]
 
 COPY service /app/service
 
 EXPOSE 8000
 
-CMD ["python", "-m", "service.main"]
+CMD ["uv", "run", "-m", "service.main"]

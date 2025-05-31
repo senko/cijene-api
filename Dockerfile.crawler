@@ -10,16 +10,10 @@ RUN apt-get update && \
 
 WORKDIR /app
 
-RUN pip install --no-cache-dir \
-    beautifulsoup4>=4.13.4 \
-    httpx>=0.28.1 \
-    lxml>=5.4.0 \
-    openpyxl>=3.1.5 \
-    pydantic>=2.11.4 \
-    psycopg2-binary>=2.9.9 \
-    python-dotenv>=1.1.0 \
-    SQLAlchemy==2.0.41 \
-    dotenv>=0.9.9
+## pyproject.toml extras 'crawler'
+COPY pyproject.toml uv.lock ./
+RUN pip install --no-cache-dir uv && \
+    uv pip install --system --no-cache-dir .[crawler]
 
 COPY crawler /app/crawler
 
