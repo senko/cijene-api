@@ -45,17 +45,24 @@ jobs:
       - name: Check type hints with ty
         run: uv run ty check
 
+
+      # Tests and Docker (Linux and Mac only)
       - name: Prepare a project‐local tmp folder
+        if: matrix.os == 'ubuntu-24.04' or matrix.os == 'macos-latest'
         run: mkdir ./tmp ./tmp2
 
       - name: Run tests with pytest
+        if: matrix.os == 'ubuntu-24.04' or matrix.os == 'macos-latest'
         run: uv run pytest --basetemp=./tmp2
 
-      # Docker-based CLI test (Linux only)
+      - name: Copy .env.example to .env
+        if: matrix.os == 'ubuntu-24.04' or matrix.os == 'macos-latest'
+        run: cp .env.example .env
+
       - name: Start Docker containers
-        if: matrix.os == 'ubuntu-24.04'
+        if: matrix.os == 'ubuntu-24.04' or matrix.os == 'macos-latest'
         run: docker compose up -d --build
 
       - name: Test CLI entrypoint (one-off container)
-        if: matrix.os == 'ubuntu-24.04'
+        if: matrix.os == 'ubuntu-24.04' or matrix.os == 'macos-latest'
         run: docker compose run --rm crawler python -m crawler.cli.crawl -h
