@@ -2,15 +2,16 @@
 """
 Fetch historical price data by iterating through past dates.
 """
+
+import logging
 import sys
 from argparse import ArgumentParser
 from datetime import date, timedelta
 from pathlib import Path
 
-from crawler.crawl import crawl, get_chains
 from crawler.cli.crawl import parse_date, setup_logging
+from crawler.crawl import crawl, get_chains
 from crawler.store.base import add_file_logging
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -29,23 +30,27 @@ def main():
         help="Directory where data will be stored (required)",
     )
     parser.add_argument(
-        "-s", "--start-date",
+        "-s",
+        "--start-date",
         type=parse_date,
         default=None,
         help="Start date (YYYY-MM-DD), defaults to law effective date",
     )
     parser.add_argument(
-        "-e", "--end-date",
+        "-e",
+        "--end-date",
         type=parse_date,
         default=None,
         help="End date (YYYY-MM-DD), defaults to today",
     )
     parser.add_argument(
-        "-c", "--chain",
+        "-c",
+        "--chain",
         help="Comma-separated list of retail chains to fetch (defaults to all)",
     )
     parser.add_argument(
-        "-v", "--verbose",
+        "-v",
+        "--verbose",
         choices=["debug", "info", "warning", "error", "critical"],
         default="warning",
         help="Set logging verbosity level",
@@ -84,7 +89,9 @@ def main():
     current = start
     while current <= end:
         date_str = current.strftime("%Y-%m-%d")
-        if (args.output_path / date_str).exists() or (args.output_path / f"{date_str}.zip").exists():
+        if (args.output_path / date_str).exists() or (
+            args.output_path / f"{date_str}.zip"
+        ).exists():
             logger.info(f"Skipping {date_str}, already exists")
         else:
             logger.info(f"Fetching price data for {date_str} ...")
