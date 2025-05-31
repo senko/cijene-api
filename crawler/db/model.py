@@ -127,11 +127,11 @@ class ProductPrice(TimestampMixin, Base):
     id = Column(Integer, primary_key=True)
     store_product_id = Column(Integer, ForeignKey("store_products.id"))
     valid_date = Column(Date, nullable=False)
-    price = Column(DECIMAL(10, 2), nullable=False) # type: ignore
-    unit_price = Column(DECIMAL(10, 2)) # type: ignore
-    best_price_30 = Column(DECIMAL(10, 2)) # type: ignore
-    anchor_price = Column(DECIMAL(10, 2)) # type: ignore
-    special_price = Column(DECIMAL(10, 2)) # type: ignore
+    price = Column(DECIMAL(10, 2), nullable=False)  # type: ignore
+    unit_price = Column(DECIMAL(10, 2))  # type: ignore
+    best_price_30 = Column(DECIMAL(10, 2))  # type: ignore
+    anchor_price = Column(DECIMAL(10, 2))  # type: ignore
+    special_price = Column(DECIMAL(10, 2))  # type: ignore
 
     store_product = relationship("StoreProduct", back_populates="prices")
 
