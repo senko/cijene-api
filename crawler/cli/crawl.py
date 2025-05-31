@@ -5,7 +5,10 @@ import logging
 import sys
 from pathlib import Path
 
-from crawler.crawl import crawl, get_chains
+from crawler.crawl import crawl, get_chains, crawl_from_csv
+from crawler.store.base import add_file_logging
+
+logger = logging.getLogger(__name__)
 
 
 def parse_date(date_str):
@@ -20,6 +23,9 @@ def parse_date(date_str):
 
 def setup_logging(log_level):
     """Configure logging for the crawler package."""
+    import codecs
+
+    stderr = codecs.getwriter("utf-8")(sys.stderr.buffer, errors="replace")  # type: ignore
     level_map = {
         "debug": logging.DEBUG,
         "info": logging.INFO,
@@ -32,7 +38,7 @@ def setup_logging(log_level):
     logging.basicConfig(
         level=level,
         format="%(asctime)s:%(name)s:%(levelname)s:%(message)s",
-        stream=sys.stderr,
+        stream=stderr,
     )
 
     # Only enable logs from the crawler package
@@ -81,11 +87,60 @@ def main():
         default="warning",
         help="Set verbosity level (default: warning)",
     )
+    parser.add_argument(
+        "-s",
+        "--sql",
+        action="store_true",
+        help="Process data and save to DB\n",
+    )
+    parser.add_argument(
+        "--dropdb",
+        action="store_true",
+        help="Drop existing database tables and exit (or drop before crawling if combined)",
+    )
+    parser.add_argument(
+        "--from-csv-dir",
+        type=Path,
+        help=(
+            "Directory containing date/chain subfolders with CSV files."
+            " Loads data from CSV instead of crawling web."
+        ),
+    )
 
     args = parser.parse_args()
 
     # Set up logging
     setup_logging(args.verbose)
+
+    # Validate flag combinations
+    if args.from_csv_dir:
+        if args.list:
+            parser.error("--from-csv-dir cannot be used with --list")
+        if args.dropdb:
+            parser.error("--from-csv-dir cannot be used with --dropdb")
+        if args.output_path is None:
+            parser.error("output_path is required when using --from-csv-dir")
+
+    # Optionally drop all tables before doing anything
+    if args.dropdb:
+        import os
+        from sqlalchemy import create_engine
+
+        from crawler.db.model import Base
+
+        db_url = os.getenv("SQLALCHEMY_DATABASE_URI")
+        if not db_url:
+            logger.error("SQLALCHEMY_DATABASE_URI is not set, cannot drop tables")
+            return 1
+        engine = create_engine(db_url)
+        Base.metadata.drop_all(engine)
+        logger.info("Dropped all tables in database")
+        # if only dropping, exit
+        if not args.output_path and not args.list and not args.sql:
+            return 0
+
+    if args.output_path is not None:
+        add_file_logging(args.output_path)
 
     if args.list:
         print("Supported retail chains:")
@@ -93,7 +148,7 @@ def main():
             print(f"  - {chain_name}")
         return 0
 
-    if args.output_path is None:
+    if args.output_path is None and not args.list:
         parser.error("output_path is required; use -h/--help for more info")
 
     if args.output_path.is_file():
@@ -101,7 +156,7 @@ def main():
 
     if not args.output_path.exists():
         args.output_path.mkdir(parents=True, exist_ok=True)
-        print(f"Created directory: {args.output_path}")
+        logger.info(f"Created directory: {args.output_path}")
 
     chains_to_crawl = None
     if args.chain:
@@ -122,10 +177,21 @@ def main():
             ", ".join(chains_to_crawl) if chains_to_crawl else "all retail chains"
         )
         date_txt = args.date.strftime("%Y-%m-%d") if args.date else "today"
-        print(f"Fetching price data from {chains_txt} for {date_txt} ...", flush=True)
+        logger.info(f"Fetching price data from {chains_txt} for {date_txt} ...")
 
-        zip_path = crawl(args.output_path, crawl_date, chains_to_crawl)
-        print(f"Archive created: {zip_path}")
+        if args.from_csv_dir:
+            zip_path = crawl_from_csv(
+                args.output_path,
+                crawl_date,
+                chains_to_crawl,
+                args.from_csv_dir,
+                process_db=args.sql,
+            )
+        else:
+            zip_path = crawl(
+                args.output_path, crawl_date, chains_to_crawl, process_db=args.sql
+            )
+        logger.info(f"Archive created: {zip_path}")
         return 0
     except Exception as e:
         print(f"Error during crawling: {e}")

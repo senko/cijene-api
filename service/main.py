@@ -3,9 +3,23 @@ from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.exceptions import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
+import logging
+import os
 
 from service.routers import v0
 from service.config import settings
+
+os.makedirs(settings.archive_dir, exist_ok=True)
+_service_log_file = os.path.join(settings.archive_dir, "service.log")
+_service_handler = logging.FileHandler(_service_log_file)
+_service_level = logging.DEBUG if settings.debug else logging.INFO
+_service_handler.setLevel(_service_level)
+_service_handler.setFormatter(
+    logging.Formatter("%(asctime)s:%(name)s:%(levelname)s:%(message)s")
+)
+root_logger = logging.getLogger()
+root_logger.setLevel(_service_level)
+root_logger.addHandler(_service_handler)
 
 app = FastAPI(
     title="Cijene API",
