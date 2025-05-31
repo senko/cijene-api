@@ -46,7 +46,7 @@ jobs:
         run: uv run ty check
 
       - name: Run tests with pytest
-        run: uv run pytest
+        run: uv run pytest --basetemp=./tmp_pytest
 
       # Docker-based CLI test (Linux only)
       - name: Start Docker containers
