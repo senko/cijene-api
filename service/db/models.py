@@ -25,6 +25,15 @@ class ChainWithId(Chain):
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
+class ChainSummary:
+    chain_code: str
+    price_date: date
+    price_count: int
+    store_count: int
+    created_at: datetime
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
 class Store:
     chain_id: int
     code: str

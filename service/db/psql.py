@@ -12,6 +12,7 @@ from datetime import date
 from .base import Database
 from .models import (
     Chain,
+    ChainSummary,
     ChainWithId,
     Product,
     ProductWithId,
@@ -121,6 +122,21 @@ class PostgresDatabase(Database):
         async with self._get_conn() as conn:
             rows = await conn.fetch("SELECT id, code FROM chains")
             return [ChainWithId(**row) for row in rows]  # type: ignore
+
+    async def list_latest_chain_summaries(self) -> list[ChainSummary]:
+        async with self._get_conn() as conn:
+            rows = await conn.fetch("""
+                SELECT DISTINCT ON (c.code)
+                    c.code AS chain_code,
+                    cs.price_date,
+                    cs.price_count,
+                    cs.store_count,
+                    cs.created_at
+                FROM chain_summaries cs
+                JOIN chains c ON c.id = cs.id
+                ORDER BY c.code, cs.price_date DESC;
+            """)
+            return [ChainSummary(**row) for row in rows]  # type: ignore
 
     async def add_store(self, store: Store) -> int:
         return await self._fetchval(
