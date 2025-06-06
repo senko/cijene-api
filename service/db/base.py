@@ -226,6 +226,19 @@ class Database(ABC):
         pass
 
     @abstractmethod
+    async def compute_chain_summaries(self, date: date) -> None:
+        """
+        Compute chain summaries for a specific date.
+
+        This method populates the store data summary for each chain on the given
+        date.
+
+        Args:
+            date: The date for which to compute summaries.
+        """
+        pass
+
+    @abstractmethod
     async def get_product_prices(
         self,
         product_ids: list[int],

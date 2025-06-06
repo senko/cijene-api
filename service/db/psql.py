@@ -464,6 +464,37 @@ class PostgresDatabase(Database):
                 date,
             )
 
+    async def compute_chain_summaries(self, date: date) -> None:
+        async with self._get_conn() as conn:
+            await conn.execute(
+                """
+                INSERT INTO chain_summaries(
+                    chain_id,
+                    price_date,
+                    price_count,
+                    store_count,
+                    created_at
+                )
+                SELECT
+                    c.id,
+                    $1 AS price_date,
+                    COUNT(*) AS price_count,
+                    COUNT(DISTINCT p.store_id) AS store_count,
+                    NOW() AS created_at
+                FROM prices p
+                JOIN chain_products cp ON cp.id = p.chain_product_id
+                JOIN chains c ON c.id = cp.chain_id
+                WHERE p.price_date = $2
+                GROUP BY 1
+                ON CONFLICT (chain_id, price_date)
+                DO UPDATE SET
+                    price_count = EXCLUDED.price_count,
+                    store_count = EXCLUDED.store_count;
+                """,
+                date,
+                date,
+            )
+
     async def get_user_by_api_key(self, api_key: str) -> User | None:
         async with self._get_conn() as conn:
             row = await conn.fetchrow(
