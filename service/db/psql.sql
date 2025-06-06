@@ -16,6 +16,17 @@ CREATE TABLE IF NOT EXISTS chains (
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Chain summaries table to store the summary of loaded data per chain
+CREATE TABLE IF NOT EXISTS chain_summaries(
+    id SERIAL PRIMARY KEY,
+    chain_id INTEGER NOT NULL REFERENCES chains (id),
+    price_date DATE NOT NULL,
+    price_count INTEGER NOT NULL,
+    store_count INTEGER NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (chain_id, price_date)
+);
+
 -- Stores table to store retailer locations
 CREATE TABLE IF NOT EXISTS stores (
     id SERIAL PRIMARY KEY,

@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 import datetime
 
 from service.config import settings
-from service.db.models import ProductWithId
+from service.db.models import ChainSummary, ProductWithId
 from service.routers.auth import RequireAuth
 
 router = APIRouter(tags=["Products, Chains and Stores"], dependencies=[RequireAuth])
@@ -259,3 +259,20 @@ async def search_products(
     )
 
     return ProductSearchResponse(products=product_responses)
+
+
+class ChainSummariesResponse(BaseModel):
+    chain_summaries: list[ChainSummary] = Field(
+        ..., description="List chain summaries."
+    )
+
+
+@router.get(
+    "/chain-summaries/",
+    summary="Return summaries of currently loaded data per chain."
+)
+async def chain_summaries() -> ChainSummariesResponse:
+    """Return summaries of currently loaded data per chain."""
+
+    chain_summaries = await db.list_latest_chain_summaries()
+    return ChainSummariesResponse(chain_summaries=chain_summaries)
