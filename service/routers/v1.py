@@ -322,39 +322,103 @@ class StorePricesResponse(BaseModel):
     )
 
 
-@router.get("/products/{ean}/store-prices/", summary="Get product prices by store")
-async def get_store_prices(
-    ean: str,
+@router.get("/prices/", summary="Get product prices by store with filtering")
+async def get_prices(
+    eans: str = Query(
+        ...,
+        description="Comma-separated list of EAN barcodes (required)",
+    ),
     chains: str = Query(
         None,
         description="Comma-separated list of chain codes to include",
     ),
+    city: str = Query(
+        None,
+        description="City name for case-insensitive substring match",
+    ),
+    address: str = Query(
+        None,
+        description="Address for case-insensitive substring match",
+    ),
+    lat: float = Query(
+        None,
+        description="Latitude coordinate for geolocation search",
+    ),
+    lon: float = Query(
+        None,
+        description="Longitude coordinate for geolocation search",
+    ),
+    d: float = Query(
+        10.0,
+        description="Distance in kilometers for geolocation search (default: 10.0)",
+    ),
 ) -> StorePricesResponse:
     """
-    For a single store return prices for each store where the product is
-    available. Returns prices for the last available date. Optionally filtered
-    by chain.
+    Get product prices by store with store filtering capabilities.
+
+    Returns prices for products in stores matching the filter criteria.
+    For geolocation search, both lat and lon must be provided together.
+    The EANs parameter is required and must contain at least one EAN code.
     """
-    products = await db.get_products_by_ean([ean])
+    # Validate EANs parameter
+    if not eans or not eans.strip():
+        raise HTTPException(
+            status_code=400,
+            detail="EANs parameter is required and must be non-empty",
+        )
+
+    # Parse EAN codes
+    ean_list = [e.strip() for e in eans.split(",") if e.strip()]
+    if not ean_list:
+        raise HTTPException(
+            status_code=400,
+            detail="At least one valid EAN code must be provided",
+        )
+
+    # Validate lat/lon parameters
+    if (lat is None) != (lon is None):
+        raise HTTPException(
+            status_code=400,
+            detail="Both latitude and longitude must be provided for geolocation search",
+        )
+
+    # Get products by EANs
+    products = await db.get_products_by_ean(ean_list)
     if not products:
         raise HTTPException(
             status_code=404,
-            detail=f"Product with EAN {ean} not found",
+            detail=f"No products found for the provided EANs: {eans}",
         )
 
-    [product] = products
-    chain_ids = await _get_chain_ids(chains)
-    store_prices = await db.get_product_store_prices(product.id, chain_ids)
+    # Parse chain codes for store filtering
+    chain_codes = None
+    if chains:
+        chain_codes = [c.strip().lower() for c in chains.split(",") if c.strip()]
+
+    # Filter stores if any filter criteria are provided
+    if chain_codes or city or address or lat or lon:
+        try:
+            filtered_stores = await db.filter_stores(
+                chain_codes=chain_codes,
+                city=city,
+                address=address,
+                lat=lat,
+                lon=lon,
+                d=d,
+            )
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+
+        store_ids = [store.id for store in filtered_stores]
+    else:
+        # If no filters are applied, get all stores
+        store_ids = None
+
+    store_prices = await db.get_product_store_prices(
+        product_ids=[product.id for product in products],
+        store_ids=store_ids,
+    )
     return StorePricesResponse(store_prices=store_prices)
-
-
-async def _get_chain_ids(chains_query: str):
-    if not chains_query:
-        return None
-
-    chains = await db.list_chains()
-    chain_codes = [code.lower().strip() for code in chains_query.split(",")]
-    return [c.id for c in chains if c.code in chain_codes]
 
 
 @router.get("/products/", summary="Search for products by name")
