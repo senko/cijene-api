@@ -339,15 +339,15 @@ class Database(ABC):
     @abstractmethod
     async def get_product_store_prices(
         self,
-        product_id: int,
-        chain_ids: list[int] | None,
+        product_ids: list[int],
+        store_ids: list[int] | None = None,
     ) -> list[StorePrice]:
         """
-        For a given product return latest available prices per store.
+        For given products return latest available prices per store.
 
         Args:
-            product_id: The ID of the product to fetch
-            chain_ids: Optional list of chain IDs to filter by.
+            product_ids: The IDs of the products to fetch
+            store_ids: Optional list of store IDs to filter by.
 
         Returns:
             A list of StorePrice objects
