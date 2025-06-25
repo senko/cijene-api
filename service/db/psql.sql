@@ -1,3 +1,7 @@
+-- Enable required PostgreSQL extensions for geospatial queries
+CREATE EXTENSION IF NOT EXISTS cube;
+CREATE EXTENSION IF NOT EXISTS earthdistance;
+
 -- Users table to store API users
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
