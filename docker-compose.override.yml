@@ -1,0 +1,33 @@
+# Override file for development
+# This file is automatically loaded by docker-compose for local development
+
+services:
+  api:
+    build:
+      context: .
+      target: development-api
+    image: cijene-api:${VERSION:-latest}-dev
+    environment:
+      DEBUG: "true"
+      DEV_MODE: "true"
+    volumes:
+      - ./service:/app/service
+      - ./data:/app/data
+      - ./enrichment:/app/enrichment
+      - ./pyproject.toml:/app/pyproject.toml
+      - ./uv.lock:/app/uv.lock
+
+  crawler:
+    build:
+      context: .
+      target: development-crawler
+    image: cijene-crawler:${VERSION:-latest}-dev
+    environment:
+      DEBUG: "true"
+      DEV_MODE: "true"
+    volumes:
+      - ./crawler:/app/crawler
+      - ./data:/app/data
+      - ./output:/app/output
+      - ./pyproject.toml:/app/pyproject.toml
+      - ./uv.lock:/app/uv.lock

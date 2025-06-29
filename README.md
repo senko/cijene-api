@@ -42,6 +42,27 @@ cd cijene-api
 uv sync --dev
 ```
 
+### Docker (preporučeno)
+
+Projekt uključuje potpunu Docker konfiguraciju za lakše pokretanje i deployment. Docker setup omogućava:
+
+* Containeriziran API servis s PostgreSQL bazom podataka
+* Automatsko pokretanje crawler servisa
+* Razvojno okruženje s hot reload funkcionalnosti
+* Automatizirano cron pokretanje crawler-a
+
+Za detaljne Docker instrukcije, konfiguraciju i sve opcije pokretanja, pogledajte [DOCKER.md](DOCKER.md).
+
+**Brza instalacija s Docker-om:**
+
+```bash
+git clone https://github.com/senko/cijene-api.git
+cd cijene-api
+cp .env.docker.example .env
+# Uredite .env prema potrebi
+docker-compose up -d
+```
+
 ## Korištenje
 
 ### Crawler
@@ -70,8 +91,22 @@ odabir datuma (default: trenutni dan), `-c` za odabir lanaca (default: svi) te
 
 Web servis koristi PostgreSQL bazu podataka za pohranu podataka o cijenama.
 
+#### Konfiguracija okruženja
+
+Projekt koristi različite primjere environment datoteka za različite načine pokretanja:
+
+- **`.env.example`** - za lokalni razvoj (bez Docker-a)
+- **`.env.docker.example`** - za Docker deployment
+
+Za lokalni razvoj, kreirajte datoteku `.env` na osnovu `.env.example`:
+
+```bash
+cp .env.example .env
+# Uredite .env prema potrebi za lokalni razvoj
+```
+
 Prije pokretanja servisa, kreirajte datoteku `.env` sa konfiguracijskim varijablama.
-Primjer datoteke sa zadanim (default) vrijednostima može se naći u `.env.example`.
+Primjer datoteke sa zadanim (default) vrijednostima za lokalni razvoj može se naći u `.env.example`.
 
 Nakon što ste kreirali `.env` datoteku, pokrenite servis koristeći:
 

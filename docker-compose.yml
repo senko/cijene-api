@@ -1,0 +1,58 @@
+services:
+  db:
+    image: postgres:17-alpine
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./service/db/psql.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-cijene_user} -d ${POSTGRES_DB:-cijene}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      target: production-api
+    image: cijene-api:${VERSION:-latest}
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./enrichment:/app/enrichment
+    ports:
+      - "${PORT:-8000}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  crawler:
+    build:
+      context: .
+      target: production-crawler
+    image: cijene-crawler:${VERSION:-latest}
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./output:/app/output
+    profiles:
+      - crawler
+    restart: "no"
+
+volumes:
+  postgres_data:
+    driver: local
