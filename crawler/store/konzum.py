@@ -25,7 +25,7 @@ class KonzumCrawler(BaseCrawler):
         "price": ("MALOPRODAJNA CIJENA", False),
         "unit_price": ("CIJENA ZA JEDINICU MJERE", True),
         "special_price": ("MPC ZA VRIJEME POSEBNOG OBLIKA PRODAJE", False),
-        "best_price_30": ("NAJNIŽA CIJENA U POSLJEDNJIH 30 DANA", False),
+        "best_price_30": ("NAJNIŽA CIJENA U POSLJEDNIH 30 DANA", False),
         "anchor_price": ("SIDRENA CIJENA NA 2.5.2025", False),
     }
 

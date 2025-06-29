@@ -43,7 +43,6 @@ class LidlCrawler(BaseCrawler):
         "unit": ("JEDINICA_MJERE", False),
         "barcode": ("BARKOD", False),
         "category": ("KATEGORIJA_PROIZVODA", False),
-        "packaging": ("PAKIRANJE", False),
     }
 
     ADDRESS_PATTERN = re.compile(

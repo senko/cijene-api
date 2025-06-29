@@ -249,7 +249,7 @@ class BaseCrawler:
             else:
                 data["price"] = data["special_price"]
 
-        if data["anchor_price"] is not None and not data.get("anchor_price_date"):
+        if data.get("anchor_price") is not None and not data.get("anchor_price_date"):
             data["anchor_price_date"] = datetime.date(2025, 5, 2).isoformat()
 
         if data["unit_price"] is None:
@@ -324,12 +324,27 @@ class BaseCrawler:
         """
         logger.debug("Parsing CSV content")
 
+        reader = self.read_csv(content, delimiter=delimiter)
+        if not reader.fieldnames:
+            raise ValueError("CSV file is missing the header row")
+
+        # Make sure all defined columns exist in the CSV
+        csv_columns = list(reader.fieldnames)
+        price_columns = [column for column, _ in self.PRICE_MAP.values()]
+        field_columns = [column for column, _ in self.FIELD_MAP.values()]
+        for column in price_columns + field_columns:
+            if column not in csv_columns:
+                available = ", ".join(f'"{c}"' for c in csv_columns)
+                raise ValueError(
+                    f'Column "{column}" not found in CSV file. CSV columns: {available}'
+                )
+
         products = []
-        for row in self.read_csv(content, delimiter=delimiter):
+        for row in reader:
             try:
                 product = self.parse_csv_row(row)
-            except Exception as e:
-                logger.warning(f"Failed to parse row: {row}: {e}")
+            except Exception:
+                logger.exception(f"Failed to parse row: {row}")
                 continue
             products.append(product)
 

@@ -41,7 +41,6 @@ class RotoCrawler(BaseCrawler):
         "unit": ("Jedinica mjere", False),
         "barcode": ("Barkod", False),
         "category": ("Kategorija proizvoda", False),
-        "packaging": ("PAKIRANJE", False),
     }
 
     def get_csv_url(self, soup: BeautifulSoup, date: datetime.date) -> str:

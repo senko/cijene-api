@@ -26,7 +26,6 @@ class KtcCrawler(BaseCrawler):
         "unit_price": ("Cijena za jedinicu mjere", True),
         "special_price": ("MPC za vrijeme posebnog oblika prodaje", False),
         "best_price_30": ("Najniža cijena u posljednjih 30 dana", False),
-        "anchor_price": ("Sidrena cijena na 2.5.2025", False),
     }
 
     # Mapping for other fields

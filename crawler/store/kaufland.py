@@ -37,8 +37,7 @@ class KauflandCrawler(BaseCrawler):
         "quantity": ("neto količina(KG)", False),
         "unit": ("jedinica mjere", False),
         "barcode": ("barkod", False),
-        "category": ("Kategorija", False),
-        "anchor_date": ("Datum sidrenja", False),
+        "category": ("WG", False),
     }
 
     CITIES = [
