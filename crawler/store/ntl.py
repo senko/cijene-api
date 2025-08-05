@@ -16,7 +16,7 @@ class NtlCrawler(BaseCrawler):
     """Crawler for NTL store prices."""
 
     CHAIN = "ntl"
-    BASE_URL = "https://www.ntl.hr/cjenici-za-ntl-supermarkete"
+    BASE_URL = "https://ntl.hr/cjenik/"
 
     # Regex to parse store information from the filename
     # Format: Supermarket_Ljudevita Gaja 1_DUGA RESA_10103_263_25052025_07_22_36.csv
@@ -57,7 +57,7 @@ class NtlCrawler(BaseCrawler):
         soup = BeautifulSoup(content, "html.parser")
         urls = []
 
-        for link_tag in soup.select('table a[href$=".csv"]'):
+        for link_tag in soup.select('a[href$=".csv"]'):
             href = str(link_tag.get("href"))
             urls.append(href)
 
