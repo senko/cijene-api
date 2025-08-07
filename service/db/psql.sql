@@ -104,6 +104,10 @@ CREATE TABLE IF NOT EXISTS prices (
 -- Mark regular_price as required if the table already exists
 ALTER TABLE prices ALTER COLUMN regular_price SET NOT NULL;
 
+ALTER TABLE prices DROP CONSTRAINT IF EXISTS prices_pkey;
+ALTER TABLE prices DROP CONSTRAINT IF EXISTS prices_chain_product_id_store_id_price_date_key;
+ALTER TABLE prices ADD CONSTRAINT prices_pkey PRIMARY KEY (store_id, chain_product_id, price_date);
+
 -- Prices table to store min/max/avg prices per chain
 CREATE TABLE IF NOT EXISTS chain_prices (
     id SERIAL PRIMARY KEY,
