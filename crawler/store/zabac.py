@@ -129,33 +129,23 @@ class ZabacCrawler(BaseCrawler):
 
     def get_index(self, date: datetime.date) -> list[str]:
         """
-        Fetch and parse the Žabac index page to get CSV URLs.
-
-        Note: Žabac only shows current CSV files, so the date parameter is ignored.
+        Fetch and parse the Žabac index page to get CSV URLs for given date.
 
         Args:
-            date: The date parameter (ignored for Žabac)
+            date: The date parameter
 
         Returns:
-            List of all CSV URLs available on the index page.
+            List of CSV URLs available on the index page for the given date.
         """
-        logger.warning(
-            f"Žabac crawler ignores date parameter ({date:%Y-%m-%d}) - "
-            "only current CSV files are available"
-        )
-
         content = self.fetch_text(self.BASE_URL)
 
         if not content:
             logger.warning(f"No content found at Žabac index URL: {self.BASE_URL}")
             return []
 
-        all_urls = self.parse_index(content)
-
-        if not all_urls:
-            logger.warning("No Žabac CSV URLs found on index page")
-
-        return all_urls
+        # strftime doesn't support unpadded day and month
+        url_date = f"{date.day}.{date.month}.{date.year}"
+        return [url for url in self.parse_index(content) if url_date in url]
 
     def get_all_products(self, date: datetime.date) -> list[Store]:
         """
