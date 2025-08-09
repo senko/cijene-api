@@ -19,9 +19,13 @@ class ZabacCrawler(BaseCrawler):
     BASE_URL = "https://zabacfoodoutlet.hr/cjenik/"
 
     # Regex to parse store information from the filename
-    # Format: Cjenik-Zabac-Food-Outlet-PJ-<store_id>-<address>.csv
-    # Example: Cjenik-Zabac-Food-Outlet-PJ-11-Savska-Cesta-206.csv
-    STORE_FILENAME_PATTERN = re.compile(r".*PJ-(?P<store_id>\d+)-(?P<address>.+)\.csv$")
+    # Format: <type><address>-<city>-<zipcode>-<date>-<time>-<something>.csv
+    # Example: SupermarketDubrava-256L-Zagreb-10000-9.7.2025-7.00h-C8.csv
+    # Since there's no divider between type and address, we'll need to hardcode
+    # types that are used, currently only "Supermarket"
+    STORE_FILENAME_PATTERN = re.compile(
+        r"^(?P<type>Supermarket)(?P<address>.+)-(?P<city>[^-]+)-(?P<zipcode>\d+)-[^-]+-[^-]+-[^-]+\.csv$"
+    )
 
     # Mapping for price fields from CSV columns
     PRICE_MAP = {
@@ -41,6 +45,20 @@ class ZabacCrawler(BaseCrawler):
         "quantity": ("", False),  # Not available in Zabac CSV
         "unit": ("", False),  # Not available in Zabac CSV
         "category": ("", False),  # Not available in Zabac CSV
+    }
+
+    # Store IDs are no longer included in the CSV filename, so use this lookup
+    # table to determine the store ID and keep backward compatibility with
+    # previously loaded data.
+    STORE_IDS = {
+        "tratinska 80a": "PJ-2",
+        "nemciceva 1": "PJ-4",
+        "bozidara magovca": "PJ-5",
+        "dolac 2": "PJ-6",
+        "dubrava 256l": "PJ-7",
+        "ilica 231": "PJ-9",
+        "zagrebacka cesta 205": "PJ-10",
+        "savska cesta 206": "PJ-11",
     }
 
     def parse_index(self, content: str) -> list[str]:
@@ -85,19 +103,24 @@ class ZabacCrawler(BaseCrawler):
 
         data = match.groupdict()
 
-        store_id = data["store_id"]
         # Address: "Savska-Cesta-206" -> "Savska Cesta 206"
         address_raw = data["address"]
         street_address = address_raw.replace("-", " ")
 
+        store_id = self.STORE_IDS.get(street_address.lower())
+        if not store_id:
+            raise ValueError(
+                f"Unable to determine store ID for address: {street_address}"
+            )
+
         store = Store(
             chain=self.CHAIN,
-            store_type="",  # Store type is not available in the filename
-            store_id=f"PJ-{store_id}",
-            name=f"Žabac PJ-{store_id}",  # e.g. "Žabac PJ-11"
+            store_type=data["type"],
+            store_id=store_id,
+            name=f"Žabac {store_id}",
             street_address=street_address,
-            zipcode="",  # Zipcode is not available in the filename
-            city="",  # City is not available in the filename
+            zipcode=data["zipcode"],
+            city=data["city"],
             items=[],
         )
 
