@@ -30,21 +30,20 @@ class ZabacCrawler(BaseCrawler):
     # Mapping for price fields from CSV columns
     PRICE_MAP = {
         # field: (column_name, is_required)
-        "price": ("MPC", False),
-        "unit_price": ("MPC", False),  # Use same as price
-        "special_price": ("", False),  # Not available in Zabac CSV
-        "anchor_price": ("", False),  # Not available in Zabac CSV
+        "price": ("Mpc", False),
+        "unit_price": ("Mpc", False),  # Use same as price
+        "best_price_30": ("Najniža cijena u posljednjih 30 dana", False),
+        "anchor_price": ("Sidrena cijena na 2.5.2025", False),
     }
 
     # Mapping for other product fields from CSV columns
     FIELD_MAP = {
-        "product_id": ("Artikl Šifra", True),
+        "product_id": ("Artikl", True),
         "barcode": ("Barcode", False),
         "product": ("Naziv artikla / usluge", True),
-        "brand": ("", False),  # Not available in Zabac CSV
-        "quantity": ("", False),  # Not available in Zabac CSV
-        "unit": ("", False),  # Not available in Zabac CSV
-        "category": ("", False),  # Not available in Zabac CSV
+        "brand": ("Marka", False),
+        "quantity": ("Gramaža", False),
+        "category": ("Kategorija", False),
     }
 
     # Store IDs are no longer included in the CSV filename, so use this lookup
@@ -132,7 +131,6 @@ class ZabacCrawler(BaseCrawler):
     def get_store_prices(self, csv_url: str) -> list[Product]:
         """
         Fetch and parse store prices from a Žabac CSV URL.
-        The CSV is semicolon-separated and windows-1250 encoded.
 
         Args:
             csv_url: URL to the CSV file containing prices
@@ -141,8 +139,8 @@ class ZabacCrawler(BaseCrawler):
             List of Product objects
         """
         try:
-            content = self.fetch_text(csv_url, encodings=["windows-1250"])
-            return self.parse_csv(content, delimiter=";")
+            content = self.fetch_text(csv_url)
+            return self.parse_csv(content)
         except Exception as e:
             logger.error(
                 f"Failed to get Žabac store prices from {csv_url}: {e}",
@@ -227,7 +225,9 @@ class ZabacCrawler(BaseCrawler):
         if "product" in data and data["product"]:
             data["product"] = data["product"].strip()
 
-        # Call parent method for common fixups
+        # Unit is not available in the CSV
+        data["unit"] = ""
+
         return super().fix_product_data(data)
 
 
