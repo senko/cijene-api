@@ -19,28 +19,45 @@ class ZabacCrawler(BaseCrawler):
     BASE_URL = "https://zabacfoodoutlet.hr/cjenik/"
 
     # Regex to parse store information from the filename
-    # Format: Cjenik-Zabac-Food-Outlet-PJ-<store_id>-<address>.csv
-    # Example: Cjenik-Zabac-Food-Outlet-PJ-11-Savska-Cesta-206.csv
-    STORE_FILENAME_PATTERN = re.compile(r".*PJ-(?P<store_id>\d+)-(?P<address>.+)\.csv$")
+    # Format: <type><address>-<city>-<zipcode>-<date>-<time>-<something>.csv
+    # Example: SupermarketDubrava-256L-Zagreb-10000-9.7.2025-7.00h-C8.csv
+    # Since there's no divider between type and address, we'll need to hardcode
+    # types that are used, currently only "Supermarket"
+    STORE_FILENAME_PATTERN = re.compile(
+        r"^(?P<type>Supermarket)(?P<address>.+)-(?P<city>[^-]+)-(?P<zipcode>\d+)-[^-]+-[^-]+-[^-]+\.csv$"
+    )
 
     # Mapping for price fields from CSV columns
     PRICE_MAP = {
         # field: (column_name, is_required)
-        "price": ("MPC", False),
-        "unit_price": ("MPC", False),  # Use same as price
-        "special_price": ("", False),  # Not available in Zabac CSV
-        "anchor_price": ("", False),  # Not available in Zabac CSV
+        "price": ("Mpc", False),
+        "unit_price": ("Mpc", False),  # Use same as price
+        "best_price_30": ("Najniža cijena u posljednjih 30 dana", False),
+        "anchor_price": ("Sidrena cijena na 2.5.2025", False),
     }
 
     # Mapping for other product fields from CSV columns
     FIELD_MAP = {
-        "product_id": ("Artikl Šifra", True),
+        "product_id": ("Artikl", True),
         "barcode": ("Barcode", False),
         "product": ("Naziv artikla / usluge", True),
-        "brand": ("", False),  # Not available in Zabac CSV
-        "quantity": ("", False),  # Not available in Zabac CSV
-        "unit": ("", False),  # Not available in Zabac CSV
-        "category": ("", False),  # Not available in Zabac CSV
+        "brand": ("Marka", False),
+        "quantity": ("Gramaža", False),
+        "category": ("Naziv grupe artikla", False),
+    }
+
+    # Store IDs are no longer included in the CSV filename, so use this lookup
+    # table to determine the store ID and keep backward compatibility with
+    # previously loaded data.
+    STORE_IDS = {
+        "tratinska 80a": "PJ-2",
+        "nemciceva 1": "PJ-4",
+        "bozidara magovca": "PJ-5",
+        "dolac 2": "PJ-6",
+        "dubrava 256l": "PJ-7",
+        "ilica 231": "PJ-9",
+        "zagrebacka cesta 205": "PJ-10",
+        "savska cesta 206": "PJ-11",
     }
 
     def parse_index(self, content: str) -> list[str]:
@@ -85,19 +102,24 @@ class ZabacCrawler(BaseCrawler):
 
         data = match.groupdict()
 
-        store_id = data["store_id"]
         # Address: "Savska-Cesta-206" -> "Savska Cesta 206"
         address_raw = data["address"]
         street_address = address_raw.replace("-", " ")
 
+        store_id = self.STORE_IDS.get(street_address.lower())
+        if not store_id:
+            raise ValueError(
+                f"Unable to determine store ID for address: {street_address}"
+            )
+
         store = Store(
             chain=self.CHAIN,
-            store_type="",  # Store type is not available in the filename
-            store_id=f"PJ-{store_id}",
-            name=f"Žabac PJ-{store_id}",  # e.g. "Žabac PJ-11"
+            store_type=data["type"],
+            store_id=store_id,
+            name=f"Žabac {store_id}",
             street_address=street_address,
-            zipcode="",  # Zipcode is not available in the filename
-            city="",  # City is not available in the filename
+            zipcode=data["zipcode"],
+            city=data["city"],
             items=[],
         )
 
@@ -109,7 +131,6 @@ class ZabacCrawler(BaseCrawler):
     def get_store_prices(self, csv_url: str) -> list[Product]:
         """
         Fetch and parse store prices from a Žabac CSV URL.
-        The CSV is semicolon-separated and windows-1250 encoded.
 
         Args:
             csv_url: URL to the CSV file containing prices
@@ -118,8 +139,8 @@ class ZabacCrawler(BaseCrawler):
             List of Product objects
         """
         try:
-            content = self.fetch_text(csv_url, encodings=["windows-1250"])
-            return self.parse_csv(content, delimiter=";")
+            content = self.fetch_text(csv_url)
+            return self.parse_csv(content)
         except Exception as e:
             logger.error(
                 f"Failed to get Žabac store prices from {csv_url}: {e}",
@@ -129,33 +150,27 @@ class ZabacCrawler(BaseCrawler):
 
     def get_index(self, date: datetime.date) -> list[str]:
         """
-        Fetch and parse the Žabac index page to get CSV URLs.
-
-        Note: Žabac only shows current CSV files, so the date parameter is ignored.
+        Fetch and parse the Žabac index page to get CSV URLs for given date.
 
         Args:
-            date: The date parameter (ignored for Žabac)
+            date: The date parameter
 
         Returns:
-            List of all CSV URLs available on the index page.
+            List of CSV URLs available on the index page for the given date.
         """
-        logger.warning(
-            f"Žabac crawler ignores date parameter ({date:%Y-%m-%d}) - "
-            "only current CSV files are available"
-        )
-
         content = self.fetch_text(self.BASE_URL)
 
         if not content:
             logger.warning(f"No content found at Žabac index URL: {self.BASE_URL}")
             return []
 
-        all_urls = self.parse_index(content)
-
-        if not all_urls:
-            logger.warning("No Žabac CSV URLs found on index page")
-
-        return all_urls
+        url_date = f"{date.day}.{date.month}.{date.year}"
+        url_date_padded = f"{date.day:02d}.{date.month:02d}.{date.year}"
+        return [
+            url
+            for url in self.parse_index(content)
+            if url_date in url or url_date_padded in url
+        ]
 
     def get_all_products(self, date: datetime.date) -> list[Store]:
         """
@@ -214,7 +229,9 @@ class ZabacCrawler(BaseCrawler):
         if "product" in data and data["product"]:
             data["product"] = data["product"].strip()
 
-        # Call parent method for common fixups
+        # Unit is not available in the CSV
+        data["unit"] = ""
+
         return super().fix_product_data(data)
 
 
