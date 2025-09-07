@@ -43,7 +43,7 @@ class ZabacCrawler(BaseCrawler):
         "product": ("Naziv artikla / usluge", True),
         "brand": ("Marka", False),
         "quantity": ("Gramaža", False),
-        "category": ("Kategorija", False),
+        "category": ("Naziv grupe artikla", False),
     }
 
     # Store IDs are no longer included in the CSV filename, so use this lookup
@@ -164,9 +164,13 @@ class ZabacCrawler(BaseCrawler):
             logger.warning(f"No content found at Žabac index URL: {self.BASE_URL}")
             return []
 
-        # strftime doesn't support unpadded day and month
         url_date = f"{date.day}.{date.month}.{date.year}"
-        return [url for url in self.parse_index(content) if url_date in url]
+        url_date_padded = f"{date.day:02d}.{date.month:02d}.{date.year}"
+        return [
+            url
+            for url in self.parse_index(content)
+            if url_date in url or url_date_padded in url
+        ]
 
     def get_all_products(self, date: datetime.date) -> list[Store]:
         """
