@@ -142,33 +142,18 @@ class TrgovinaKrkCrawler(BaseCrawler):
         Returns:
             Dictionary with parsed store information
         """
-        # Format: "Supermarket [Address] [City]"
-        # Example: "Supermarket Andrije Gredicaka 12b OROSLAVJE"
+        # Examples:
+        # "Supermarket Set. sv. Bernardina 6C KRK"
+        # "Supermarket Trg sv. Jurja 11 A GORNJA STUBICA"
+        # Pattern: Supermarket (address ending with number+optional letter) (UPPERCASE CITY)
+        pattern = r"Supermarket (.*?[ 0-9][a-zA-Z]?) ([A-Z][ A-Z]*|[A-Z]+)$"
+        match = re.match(pattern, header_text)
 
-        # Remove "Supermarket " prefix
-        store_text = header_text.replace("Supermarket ", "")
+        if not match:
+            raise ValueError(f"Unable to parse store info from: {header_text}")
 
-        # Split by spaces and find the city (last uppercase word(s))
-        parts = store_text.split()
-
-        # Find where city starts (consecutive uppercase words at the end)
-        city_parts = []
-        address_parts = []
-
-        for i in range(len(parts) - 1, -1, -1):
-            if parts[i].isupper():
-                city_parts.insert(0, parts[i])
-            else:
-                address_parts = parts[: i + 1]
-                break
-
-        # If no lowercase parts found, assume last word is city
-        if not address_parts:
-            city_parts = parts[-1:]
-            address_parts = parts[:-1]
-
-        city = " ".join(city_parts) if city_parts else parts[-1]
-        address = " ".join(address_parts) if address_parts else " ".join(parts[:-1])
+        address = match.group(1).strip()
+        city = match.group(2).strip().title()
 
         # Generate a simple store ID from the address and city
         store_id = (
