@@ -129,7 +129,7 @@ class EurospinCrawler(BaseCrawler):
         store_type = parts[0].lower()
         store_id = parts[1]
         street_address = parts[2].replace("_", " ")
-        city = parts[3]
+        city = parts[3].replace("_", " ")
 
         # Valid zipcode is 5 digits
         zipcode = parts[4] if len(parts[4]) == 5 and parts[4].isdigit() else ""
