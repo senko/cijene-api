@@ -104,6 +104,10 @@ CREATE TABLE IF NOT EXISTS prices (
 -- Mark regular_price as required if the table already exists
 ALTER TABLE prices ALTER COLUMN regular_price SET NOT NULL;
 
+-- To speed up compute_chain_prices() and compute_chain_stats()
+CREATE INDEX CONCURRENTLY idx_prices_price_date_chain_product
+ON prices (price_date, chain_product_id);
+
 -- Prices table to store min/max/avg prices per chain
 CREATE TABLE IF NOT EXISTS chain_prices (
     id SERIAL PRIMARY KEY,
