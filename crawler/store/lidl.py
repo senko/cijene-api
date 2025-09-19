@@ -33,6 +33,7 @@ class LidlCrawler(BaseCrawler):
         "unit_price": ("CIJENA_ZA_JEDINICU_MJERE", False),
         "special_price": ("MPC_ZA_VRIJEME_POSEBNOG_OBLIKA_PRODAJE", False),
         "anchor_price": (ANCHOR_PRICE_COLUMN, False),
+        "best_price_30": ("NAJNIZA_CIJENA_U_POSLJ._30_DANA", False),
     }
 
     FIELD_MAP = {
