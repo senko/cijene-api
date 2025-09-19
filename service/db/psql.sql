@@ -114,3 +114,11 @@ CREATE TABLE IF NOT EXISTS chain_prices (
     avg_price DECIMAL(10, 2) NOT NULL,
     UNIQUE (chain_product_id, price_date)
 );
+
+  -- Drop the existing unique constraint and primary key
+  ALTER TABLE prices DROP CONSTRAINT IF EXISTS prices_chain_product_id_store_id_price_date_key;
+  ALTER TABLE prices DROP CONSTRAINT IF EXISTS prices_pkey;
+  ALTER TABLE prices DROP COLUMN IF EXISTS id;
+
+  -- Add the composite primary key
+  ALTER TABLE prices ADD PRIMARY KEY (chain_product_id, store_id, price_date);
