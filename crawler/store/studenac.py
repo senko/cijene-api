@@ -61,7 +61,7 @@ class StudenacCrawler(BaseCrawler):
         try:
             # The regex matches the last set of uppercase words (city)
             # and everything before it (street address)
-            pattern = r"^(.*?)([A-ZČĆĐŠŽ][A-ZČĆĐŠŽ\s]+)$"
+            pattern = r"^(.*?) ([A-ZČĆĐŠŽ][A-ZČĆĐŠŽ\s]+)$"
             match = re.match(pattern, address)
 
             if match:
