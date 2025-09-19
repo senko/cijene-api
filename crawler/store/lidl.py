@@ -76,10 +76,6 @@ class LidlCrawler(BaseCrawler):
             store_type, store_id, address, zipcode, city = m.groups()
             city = city.replace("_", " ")
             address = address.replace("_", " ")
-            if address.startswith(city + " "):
-                address = address[len(city) + 1 :]
-                if address.startswith("-"):
-                    address = address[1:]
 
             store = Store(
                 chain=self.CHAIN,
