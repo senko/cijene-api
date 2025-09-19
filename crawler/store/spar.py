@@ -76,6 +76,8 @@ class SparCrawler(BaseCrawler):
         "ozalj",
         "dugo_selo",
         "gospic",
+        "sv._ivan_zelina",
+        "kastel_sucurac",
     ]
     PRICE_MAP = {
         "price": ("MPC (EUR)", False),
