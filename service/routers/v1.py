@@ -440,6 +440,12 @@ async def search_products(
         False,
         description="Use fuzzy search, defaults to false (exact matches only)",
     ),
+    limit: int = Query(
+        20,
+        ge=1,
+        le=100,
+        description="Maximum number of results to return (1-100, default 20)",
+    ),
 ) -> ProductSearchResponse:
     """
     Search for products by name.
@@ -450,9 +456,9 @@ async def search_products(
         return ProductSearchResponse(products=[])
 
     if fuzzy:
-        products = await db.fuzzy_search_products(q)
+        products = await db.fuzzy_search_products(q, limit)
     else:
-        products = await db.search_products(q)
+        products = await db.search_products(q, limit)
 
     product_responses = await prepare_product_response(
         products=products,

@@ -448,7 +448,7 @@ class PostgresDatabase(Database):
                 rows = await conn.fetch(query, product_ids)
             return [ChainProductWithId(**row) for row in rows]  # type: ignore
 
-    async def search_products(self, query: str) -> list[ProductWithId]:
+    async def search_products(self, query: str, limit: int = 20) -> list[ProductWithId]:
         if not query.strip():
             return []
 
@@ -467,6 +467,8 @@ class PostgresDatabase(Database):
             params.append(f"%{word}%")
 
         where_clause = " AND ".join(where_conditions)
+        params.append(limit)
+        limit_param_idx = len(params)
         query_sql = f"""
             SELECT
                 p.ean,
@@ -476,15 +478,17 @@ class PostgresDatabase(Database):
             WHERE {where_clause}
             GROUP BY p.ean
             ORDER BY product_count DESC
+            LIMIT ${limit_param_idx}
         """
-
         async with self._get_conn() as conn:
             rows = await conn.fetch(query_sql, *params)
             eans = [row["ean"] for row in rows]
 
         return await self.get_products_by_ean(eans)
 
-    async def fuzzy_search_products(self, query: str) -> list[ProductWithId]:
+    async def fuzzy_search_products(
+        self, query: str, limit: int = 20
+    ) -> list[ProductWithId]:
         if not query.strip():
             return []
 
@@ -496,7 +500,7 @@ class PostgresDatabase(Database):
         # - <-> operator: trigram distance (0=identical, 1=completely different), also index-accelerated
         # - immutable_unaccent(): strips diacritics ("čaša" -> "casa") in index-compatible way
         # - 1 - distance = similarity score for ranking (1=perfect match, 0=no similarity)
-        # Requires matching index and function (see idx_chain_products_name_trgm and immuable_unaccent in psql.sql)
+        # Requires matching index and function (see idx_chain_products_name_trgm and immutable_unaccent in psql.sql)
         query_sql = """
             SELECT
                 p.ean,
@@ -507,10 +511,10 @@ class PostgresDatabase(Database):
             WHERE lower(immutable_unaccent(cp.name || ' ' || COALESCE(cp.brand, ''))) % immutable_unaccent($1)
             GROUP BY p.ean
             ORDER BY similarity_score DESC
-            LIMIT 50
+            LIMIT $2
         """
         async with self._get_conn() as conn:
-            rows = await conn.fetch(query_sql, normalized_query)
+            rows = await conn.fetch(query_sql, normalized_query, limit)
             eans = [row["ean"] for row in rows]
 
         return await self.get_products_by_ean(eans)

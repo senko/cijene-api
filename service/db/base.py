@@ -237,12 +237,13 @@ class Database(ABC):
         pass
 
     @abstractmethod
-    async def search_products(self, query: str) -> list[ProductWithId]:
+    async def search_products(self, query: str, limit: int = 20) -> list[ProductWithId]:
         """
         Search for products by name using full text search.
 
         Args:
             query: The search query string.
+            limit: Maximum number of results to return.
 
         Returns:
             A list of products matching the search query,
@@ -251,12 +252,15 @@ class Database(ABC):
         pass
 
     @abstractmethod
-    async def fuzzy_search_products(self, query: str) -> list[ProductWithId]:
+    async def fuzzy_search_products(
+        self, query: str, limit: int = 20
+    ) -> list[ProductWithId]:
         """
         Search for products by name using fuzzy matching (trigrams).
 
         Args:
             query: The search query string.
+            limit: Maximum number of results to return.
 
         Returns:
             A list of products matching the search query,
