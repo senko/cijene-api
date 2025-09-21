@@ -484,6 +484,37 @@ class PostgresDatabase(Database):
 
         return await self.get_products_by_ean(eans)
 
+    async def fuzzy_search_products(self, query: str) -> list[ProductWithId]:
+        if not query.strip():
+            return []
+
+        # Normalize query: strip diacritics and convert to lowercase
+        normalized_query = query.strip().lower()
+
+        # Trigram fuzzy search using PostgreSQL pg_trgm extension:
+        # - % operator: checks similarity > 0.3 threshold, uses GIN trigram index for fast filtering
+        # - <-> operator: trigram distance (0=identical, 1=completely different), also index-accelerated
+        # - immutable_unaccent(): strips diacritics ("čaša" -> "casa") in index-compatible way
+        # - 1 - distance = similarity score for ranking (1=perfect match, 0=no similarity)
+        # Requires matching index and function (see idx_chain_products_name_trgm and immuable_unaccent in psql.sql)
+        query_sql = """
+            SELECT
+                p.ean,
+                MAX(1 - (lower(immutable_unaccent(cp.name || ' ' || COALESCE(cp.brand, ''))) <-> immutable_unaccent($1)))
+                AS similarity_score
+            FROM chain_products cp
+            JOIN products p ON cp.product_id = p.id
+            WHERE lower(immutable_unaccent(cp.name || ' ' || COALESCE(cp.brand, ''))) % immutable_unaccent($1)
+            GROUP BY p.ean
+            ORDER BY similarity_score DESC
+            LIMIT 50
+        """
+        async with self._get_conn() as conn:
+            rows = await conn.fetch(query_sql, normalized_query)
+            eans = [row["ean"] for row in rows]
+
+        return await self.get_products_by_ean(eans)
+
     async def get_product_prices(
         self, product_ids: list[int], date: date
     ) -> list[dict[str, Any]]:

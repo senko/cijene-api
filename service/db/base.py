@@ -251,6 +251,20 @@ class Database(ABC):
         pass
 
     @abstractmethod
+    async def fuzzy_search_products(self, query: str) -> list[ProductWithId]:
+        """
+        Search for products by name using fuzzy matching (trigrams).
+
+        Args:
+            query: The search query string.
+
+        Returns:
+            A list of products matching the search query,
+            ordered by similarity score.
+        """
+        pass
+
+    @abstractmethod
     async def add_many_prices(self, prices: list[Price]) -> int:
         """
         Add multiple prices in a batch operation.

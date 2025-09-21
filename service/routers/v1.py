@@ -436,6 +436,10 @@ async def search_products(
         None,
         description="Comma-separated list of chain codes to include",
     ),
+    fuzzy: bool = Query(
+        False,
+        description="Use fuzzy search, defaults to false (exact matches only)",
+    ),
 ) -> ProductSearchResponse:
     """
     Search for products by name.
@@ -445,7 +449,10 @@ async def search_products(
     if not q.strip():
         return ProductSearchResponse(products=[])
 
-    products = await db.search_products(q)
+    if fuzzy:
+        products = await db.fuzzy_search_products(q)
+    else:
+        products = await db.search_products(q)
 
     product_responses = await prepare_product_response(
         products=products,

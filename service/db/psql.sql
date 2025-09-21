@@ -52,6 +52,19 @@ ADD COLUMN IF NOT EXISTS phone VARCHAR(50);
 -- Requires "cube" and "earthdistance" extensions for geospatial queries
 CREATE EXTENSION IF NOT EXISTS cube;
 CREATE EXTENSION IF NOT EXISTS earthdistance;
+
+-- Required extensions for fuzzy text search
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE EXTENSION IF NOT EXISTS unaccent;
+
+-- Create immutable wrapper for unaccent function (needed for indexes)
+CREATE OR REPLACE FUNCTION immutable_unaccent(text)
+RETURNS text
+LANGUAGE sql
+IMMUTABLE PARALLEL SAFE STRICT
+AS $function$
+    SELECT unaccent('unaccent', $1)
+$function$;
 ALTER TABLE stores
 ADD COLUMN IF NOT EXISTS earth_point earth GENERATED ALWAYS AS (ll_to_earth (lat, lon)) STORED;
 CREATE INDEX IF NOT EXISTS idx_stores_earth_point ON stores USING GIST (earth_point);
@@ -85,6 +98,10 @@ CREATE TABLE IF NOT EXISTS chain_products (
 );
 
 CREATE INDEX IF NOT EXISTS idx_chain_products_product_id ON chain_products (product_id);
+
+-- Trigram index for fuzzy search on product names (with diacritics stripped)
+CREATE INDEX IF NOT EXISTS idx_chain_products_name_trgm
+  ON chain_products USING gin (lower(immutable_unaccent(name || ' ' || COALESCE(brand, ''))) gin_trgm_ops);
 
 -- Prices table to store product prices
 CREATE TABLE IF NOT EXISTS prices (
