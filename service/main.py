@@ -27,6 +27,7 @@ app = FastAPI(
     description="Service for product pricing data by Croatian grocery chains",
     version=settings.version,
     debug=settings.debug,
+    root_path=settings.root_path,
     lifespan=lifespan,
     openapi_components={
         "securitySchemes": {"HTTPBearer": {"type": "http", "scheme": "bearer"}}
