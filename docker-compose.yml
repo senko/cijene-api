@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:17-alpine
+    image: postgres:16-alpine
     env_file:
       - .env
     volumes:
@@ -27,12 +27,12 @@ services:
       - ./data:/app/data
       - ./enrichment:/app/enrichment
     ports:
-      - "${PORT:-8000}:8000"
+      - "${EXTERNAL_PORT:-8000}:${PORT:-8000}"
     depends_on:
       db:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD-SHELL", "curl -f http://localhost:${PORT:-8000}/health"]
       interval: 30s
       timeout: 10s
       retries: 3
