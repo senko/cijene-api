@@ -1,7 +1,8 @@
+import datetime
 from decimal import Decimal
+
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
-import datetime
 
 from service.config import settings
 from service.db.models import ChainStats, ProductWithId, StorePrice

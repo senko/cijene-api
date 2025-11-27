@@ -2,9 +2,10 @@ import datetime
 import logging
 import os
 import re
-from urllib.parse import unquote, quote_plus
+from urllib.parse import quote_plus, unquote
 
 from bs4 import BeautifulSoup
+
 from crawler.store.models import Product, Store
 
 from .base import BaseCrawler

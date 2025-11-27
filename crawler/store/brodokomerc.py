@@ -1,13 +1,14 @@
 import datetime
 import logging
 import re
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
 
-from .base import BaseCrawler
 from crawler.store.models import Store
+
+from .base import BaseCrawler
 
 logger = logging.getLogger(__name__)
 

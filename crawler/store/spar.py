@@ -1,9 +1,8 @@
 import datetime
 import logging
 import re
-from typing import Optional
 from json import loads
-
+from typing import Optional
 
 from crawler.store.models import Store
 

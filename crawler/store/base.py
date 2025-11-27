@@ -1,16 +1,16 @@
-from csv import DictReader
-from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
-from logging import getLogger
-from tempfile import NamedTemporaryFile
-from typing import Any, BinaryIO, Generator
-from time import time
-from zipfile import ZipFile
 import datetime
-from bs4 import BeautifulSoup
-from re import Pattern
 import unicodedata
+from csv import DictReader
+from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
+from logging import getLogger
+from re import Pattern
+from tempfile import NamedTemporaryFile
+from time import time
+from typing import Any, BinaryIO, Generator
+from zipfile import ZipFile
 
 import httpx
+from bs4 import BeautifulSoup
 
 from .models import Product, Store
 

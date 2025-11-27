@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-import asyncio
 import argparse
+import asyncio
 import logging
+from csv import DictReader
 from decimal import Decimal
 from pathlib import Path
-from csv import DictReader
 from time import time
-from typing import List, Dict
+from typing import Dict, List
 
 from service.config import settings
 from service.db.models import Product

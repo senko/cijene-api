@@ -1,36 +1,34 @@
-from dataclasses import dataclass
-import os
 import datetime
-from typing import List
 import logging
+import os
+from dataclasses import dataclass
 from pathlib import Path
 from time import time
+from typing import List
 
-
+from crawler.store.boso import BosoCrawler
+from crawler.store.brodokomerc import BrodokomercCrawler
+from crawler.store.dm import DmCrawler
+from crawler.store.eurospin import EurospinCrawler
+from crawler.store.jadranka_trgovina import JadrankaTrgovinaCrawler
+from crawler.store.kaufland import KauflandCrawler
 from crawler.store.konzum import KonzumCrawler
+from crawler.store.ktc import KtcCrawler
 from crawler.store.lidl import LidlCrawler
+from crawler.store.lorenco import LorencoCrawler
+from crawler.store.metro import MetroCrawler
+from crawler.store.ntl import NtlCrawler
+from crawler.store.output import copy_archive_info, create_archive, save_chain
 from crawler.store.plodine import PlodineCrawler
 from crawler.store.ribola import RibolaCrawler
 from crawler.store.roto import RotoCrawler
 from crawler.store.spar import SparCrawler
 from crawler.store.studenac import StudenacCrawler
 from crawler.store.tommy import TommyCrawler
-from crawler.store.kaufland import KauflandCrawler
-from crawler.store.eurospin import EurospinCrawler
-from crawler.store.dm import DmCrawler
-from crawler.store.ktc import KtcCrawler
-from crawler.store.metro import MetroCrawler
 from crawler.store.trgocentar import TrgocentarCrawler
-from crawler.store.zabac import ZabacCrawler
-from crawler.store.vrutak import VrutakCrawler
-from crawler.store.ntl import NtlCrawler
 from crawler.store.trgovina_krk import TrgovinaKrkCrawler
-from crawler.store.brodokomerc import BrodokomercCrawler
-from crawler.store.lorenco import LorencoCrawler
-from crawler.store.boso import BosoCrawler
-
-
-from crawler.store.output import save_chain, copy_archive_info, create_archive
+from crawler.store.vrutak import VrutakCrawler
+from crawler.store.zabac import ZabacCrawler
 
 logger = logging.getLogger(__name__)
 

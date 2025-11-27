@@ -1,10 +1,11 @@
 import datetime
 import logging
-import urllib.parse
 import re
+import urllib.parse
 from typing import List
 
 from bs4 import BeautifulSoup
+
 from crawler.store.models import Product, Store
 
 from .base import BaseCrawler

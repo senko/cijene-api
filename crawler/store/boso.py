@@ -8,6 +8,7 @@ from typing import Optional
 from bs4 import BeautifulSoup
 
 from crawler.store.models import Store
+
 from .base import BaseCrawler
 
 logger = logging.getLogger(__name__)

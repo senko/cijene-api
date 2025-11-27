@@ -1,7 +1,7 @@
 import os
-from dotenv import load_dotenv
-
 from typing import TYPE_CHECKING
+
+from dotenv import load_dotenv
 
 if TYPE_CHECKING:
     from service.db.base import Database
