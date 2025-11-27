@@ -56,6 +56,7 @@ CRAWLERS = {
     BrodokomercCrawler.CHAIN: BrodokomercCrawler,
     LorencoCrawler.CHAIN: LorencoCrawler,
     BosoCrawler.CHAIN: BosoCrawler,
+    JadrankaTrgovinaCrawler.CHAIN: JadrankaTrgovinaCrawler,
 }
 
 
