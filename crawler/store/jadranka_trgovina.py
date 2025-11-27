@@ -75,7 +75,11 @@ class JadrankaTrgovinaCrawler(BaseCrawler):
             href = str(link_tag.get("href"))
             # Make absolute URL if needed
             if not href.startswith("http"):
-                href = f"{self.BASE_URL}{href}" if href.startswith("/") else f"{self.BASE_URL}/{href}"
+                href = (
+                    f"{self.BASE_URL}{href}"
+                    if href.startswith("/")
+                    else f"{self.BASE_URL}/{href}"
+                )
             urls.append(href)
 
         return urls
@@ -92,7 +96,9 @@ class JadrankaTrgovinaCrawler(BaseCrawler):
         """
         content = self.fetch_text(self.INDEX_URL)
         if not content:
-            logger.warning(f"No content found at Jadranka Trgovina index URL: {self.INDEX_URL}")
+            logger.warning(
+                f"No content found at Jadranka Trgovina index URL: {self.INDEX_URL}"
+            )
             return None
 
         urls = self.parse_index(content)
@@ -204,7 +210,9 @@ class JadrankaTrgovinaCrawler(BaseCrawler):
             data["unit"] = ""
 
         # If regular price is missing but special price exists, use special price
-        if (not data.get("price") or data["price"] is None) and data.get("special_price"):
+        if (not data.get("price") or data["price"] is None) and data.get(
+            "special_price"
+        ):
             data["price"] = data["special_price"]
 
         # If price is still missing, skip this product
