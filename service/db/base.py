@@ -4,16 +4,16 @@ from typing import Any
 
 from .models import (
     Chain,
+    ChainProduct,
+    ChainProductWithId,
     ChainStats,
     ChainWithId,
+    Price,
     Product,
     ProductWithId,
     Store,
-    ChainProduct,
-    Price,
     StorePrice,
     StoreWithId,
-    ChainProductWithId,
     User,
 )
 

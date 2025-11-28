@@ -1,11 +1,11 @@
 import datetime
 import logging
-from typing import Optional
 import re
+from typing import Optional
 
+from crawler.store.models import Product, Store
 
 from .base import BaseCrawler
-from crawler.store.models import Store, Product
 
 logger = logging.getLogger(__name__)
 

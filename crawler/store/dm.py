@@ -7,6 +7,7 @@ from tempfile import TemporaryFile
 from typing import Any, List
 
 import openpyxl
+
 from crawler.store.models import Product, Store
 
 from .base import BaseCrawler

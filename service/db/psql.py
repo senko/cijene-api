@@ -1,27 +1,29 @@
+import logging
+import os
 from contextlib import asynccontextmanager
-import asyncpg
+from datetime import date
 from typing import (
+    Any,
     AsyncGenerator,
     AsyncIterator,
     List,
-    Any,
 )
-import logging
-import os
-from datetime import date
+
+import asyncpg
+
 from .base import Database
 from .models import (
     Chain,
+    ChainProduct,
+    ChainProductWithId,
     ChainStats,
     ChainWithId,
+    Price,
     Product,
     ProductWithId,
     Store,
-    ChainProduct,
-    Price,
     StorePrice,
     StoreWithId,
-    ChainProductWithId,
     User,
 )
 

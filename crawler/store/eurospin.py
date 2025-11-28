@@ -4,6 +4,7 @@ import os
 from typing import List
 
 from bs4 import BeautifulSoup
+
 from crawler.store.models import Product, Store
 
 from .base import BaseCrawler

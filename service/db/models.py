@@ -1,8 +1,7 @@
-from typing import Optional
+from dataclasses import dataclass, fields
 from datetime import date, datetime
 from decimal import Decimal
-
-from dataclasses import dataclass, fields
+from typing import Optional
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
