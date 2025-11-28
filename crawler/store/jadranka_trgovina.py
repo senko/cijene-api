@@ -187,44 +187,6 @@ class JadrankaTrgovinaCrawler(BaseCrawler):
         logger.info(f"Jadranka Trgovina: {len(products)} products found")
         return [store]
 
-    def fix_product_data(self, data: dict) -> dict:
-        """
-        Clean and fix Jadranka Trgovina-specific product data.
-
-        Args:
-            data: Dictionary containing the parsed row data
-
-        Returns:
-            The cleaned data dictionary
-        """
-        # Clean up product name
-        if "product" in data and data["product"]:
-            data["product"] = data["product"].strip()
-
-        # Clean up brand
-        if "brand" in data and data["brand"]:
-            data["brand"] = data["brand"].strip()
-
-        # Ensure unit is set
-        if "unit" not in data or not data["unit"]:
-            data["unit"] = ""
-
-        # If regular price is missing but special price exists, use special price
-        if (not data.get("price") or data["price"] is None) and data.get(
-            "special_price"
-        ):
-            data["price"] = data["special_price"]
-
-        # If price is still missing, skip this product
-        if not data.get("price") or data["price"] is None:
-            raise ValueError("No price available for product")
-
-        # If unit_price is missing, use the regular price as fallback
-        if not data.get("unit_price") or data["unit_price"] is None:
-            data["unit_price"] = data["price"]
-
-        return super().fix_product_data(data)
-
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
