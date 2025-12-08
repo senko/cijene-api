@@ -1,3 +1,4 @@
+import re
 from csv import DictWriter
 from decimal import Decimal
 from logging import getLogger
@@ -97,6 +98,20 @@ def transform_products(
     return store_list, list(product_map.values()), price_list
 
 
+def normalize_whitespace(value: str) -> str:
+    """
+    Normalize whitespace in a string by replacing multiple whitespace
+    characters (spaces, tabs, newlines, etc.) with a single space.
+
+    Args:
+        value: String to normalize
+
+    Returns:
+        String with normalized whitespace
+    """
+    return re.sub(r'\s+', ' ', value)
+
+
 def save_csv(path: Path, data: list[dict], columns: list[str]):
     """
     Save data to a CSV file.
@@ -120,7 +135,10 @@ def save_csv(path: Path, data: list[dict], columns: list[str]):
         writer = DictWriter(f, fieldnames=columns)
         writer.writeheader()
         for row in data:
-            writer.writerow({k: str(v).strip() if v is not None else "" for k, v in row.items()})
+            writer.writerow({
+                k: normalize_whitespace(str(v).strip()) if v is not None else ""
+                for k, v in row.items()
+            })
 
 
 def save_chain(chain_path: Path, stores: list[Store]):
