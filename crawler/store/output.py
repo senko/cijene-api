@@ -120,7 +120,7 @@ def save_csv(path: Path, data: list[dict], columns: list[str]):
         writer = DictWriter(f, fieldnames=columns)
         writer.writeheader()
         for row in data:
-            writer.writerow({k: str(v) for k, v in row.items()})
+            writer.writerow({k: str(v).strip() if v is not None else "" for k, v in row.items()})
 
 
 def save_chain(chain_path: Path, stores: list[Store]):
