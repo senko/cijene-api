@@ -109,7 +109,7 @@ def normalize_whitespace(value: str) -> str:
     Returns:
         String with normalized whitespace
     """
-    return re.sub(r'\s+', ' ', value)
+    return re.sub(r"\s+", " ", value)
 
 
 def save_csv(path: Path, data: list[dict], columns: list[str]):
@@ -135,10 +135,12 @@ def save_csv(path: Path, data: list[dict], columns: list[str]):
         writer = DictWriter(f, fieldnames=columns)
         writer.writeheader()
         for row in data:
-            writer.writerow({
-                k: normalize_whitespace(str(v).strip()) if v is not None else ""
-                for k, v in row.items()
-            })
+            writer.writerow(
+                {
+                    k: normalize_whitespace(str(v).strip()) if v is not None else ""
+                    for k, v in row.items()
+                }
+            )
 
 
 def save_chain(chain_path: Path, stores: list[Store]):
