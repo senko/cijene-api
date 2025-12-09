@@ -37,7 +37,7 @@ class KauflandCrawler(BaseCrawler):
         "quantity": ("neto količina(KG)", False),
         "unit": ("jedinica mjere", False),
         "barcode": ("barkod", False),
-        "category": ("WG", False),
+        "category": ("kategorija proizvoda", False),
     }
 
     CITIES = [
@@ -199,7 +199,9 @@ class KauflandCrawler(BaseCrawler):
             List of Product objects
         """
         try:
-            content = self.fetch_text(csv_url, encodings=["windows-1250", "utf-8"])
+            content = self.fetch_text(
+                csv_url, encodings=["utf-8-sig", "windows-1250", "utf-8"]
+            )
             return self.parse_csv(content, delimiter="\t")
         except Exception as e:
             logger.error(
@@ -218,14 +220,13 @@ class KauflandCrawler(BaseCrawler):
                 date_str, price_str = match.groups()
 
                 try:
-                    row["Datum sidrenja"] = (
-                        datetime.datetime.strptime(
-                            date_str,
-                            "%d.%m.%Y",
-                        )
-                        .date()
-                        .strftime("%Y-%m-%d")
-                    )
+                    # Try 4-digit year first, then fall back to 2-digit year
+                    try:
+                        parsed_date = datetime.datetime.strptime(date_str, "%d.%m.%Y")
+                    except ValueError:
+                        parsed_date = datetime.datetime.strptime(date_str, "%d.%m.%y")
+
+                    row["Datum sidrenja"] = parsed_date.date().strftime("%Y-%m-%d")
                     row["Sidrena cijena"] = price_str
                 except (ValueError, IndexError) as e:
                     logger.warning(f"Error parsing anchor price {anchor_price}: {e}")
