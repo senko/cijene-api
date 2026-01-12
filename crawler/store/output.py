@@ -161,6 +161,12 @@ def save_chain(chain_path: Path, stores: list[Store]):
 
     makedirs(chain_path, exist_ok=True)
     store_list, product_list, price_list = transform_products(stores)
+
+    # Sort data before writing to CSV
+    store_list.sort(key=lambda x: str(x["store_id"]))
+    product_list.sort(key=lambda x: str(x["product_id"]))
+    price_list.sort(key=lambda x: (str(x["store_id"]), str(x["product_id"])))
+
     save_csv(chain_path / "stores.csv", store_list, STORE_COLUMNS)
     save_csv(chain_path / "products.csv", product_list, PRODUCT_COLUMNS)
     save_csv(chain_path / "prices.csv", price_list, PRICE_COLUMNS)
