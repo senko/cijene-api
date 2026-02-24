@@ -30,20 +30,20 @@ class ZabacCrawler(BaseCrawler):
     # Mapping for price fields from CSV columns
     PRICE_MAP = {
         # field: (column_name, is_required)
-        "price": ("Mpc", False),
-        "unit_price": ("Mpc", False),  # Use same as price
+        "price": ("MPC", False),
+        "unit_price": ("MPC", False),  # Use same as price
         "best_price_30": ("Najniža cijena u posljednjih 30 dana", False),
         "anchor_price": ("Sidrena cijena na 2.5.2025", False),
     }
 
     # Mapping for other product fields from CSV columns
     FIELD_MAP = {
-        "product_id": ("Artikl", True),
+        "product_id": ("Šifra", True),
         "barcode": ("Barcode", False),
-        "product": ("Naziv artikla / usluge", True),
+        "product": ("Naziv artikla", True),
         "brand": ("Marka", False),
         "quantity": ("Gramaža", False),
-        "category": ("Naziv grupe artikla", False),
+        "category": ("Naziv grupe artikala", False),
     }
 
     # Store IDs are no longer included in the CSV filename, so use this lookup
