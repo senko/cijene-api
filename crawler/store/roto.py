@@ -35,7 +35,7 @@ class RotoCrawler(BaseCrawler):
 
     FIELD_MAP = {
         "product": ("Naziv artikla", False),
-        "product_id": ("Šifra artikla", True),
+        "product_id": ("ŠIFRA ARTIKLA", True),
         "brand": ("BRAND", False),
         "quantity": ("neto količina", False),
         "unit": ("Jedinica mjere", False),
@@ -43,32 +43,38 @@ class RotoCrawler(BaseCrawler):
         "category": ("Kategorija proizvoda", False),
     }
 
-    def get_csv_url(self, soup: BeautifulSoup, date: datetime.date) -> str:
+    def get_csv_urls(self, soup: BeautifulSoup, date: datetime.date) -> list[str]:
         anchors = soup.select("a.cjenici-table-row")
         hr_date = date.strftime("%d.%m.%Y")
 
+        urls = []
         for anchor in anchors:
             url = anchor.attrs["href"]
             assert isinstance(url, str)
             url_date = urlparse(url).path.split(",")[-2].strip()
-            if url_date == hr_date:
-                return url
+            if url_date == hr_date and url not in urls:
+                urls.append(url)
 
-        raise ValueError(f"No price list found for {date}")
+        if not urls:
+            raise ValueError(f"No price list found for {date}")
+
+        return urls
 
     def get_all_products(self, date: datetime.date) -> list[Store]:
         html_content = self.fetch_text(self.INDEX_URL)
         soup = BeautifulSoup(html_content, "html.parser")
-        csv_url = self.get_csv_url(soup, date)
+        csv_urls = self.get_csv_urls(soup, date)
         addresses = self.parse_store_addresses(soup)
 
-        # Roto has the same prices for all stores
-        products = self.get_store_products(csv_url)
-        return list(self.get_stores(csv_url, products, addresses))
+        stores = []
+        for csv_url in csv_urls:
+            products = self.get_store_products(csv_url)
+            stores.extend(self.get_stores(csv_url, products, addresses))
+        return stores
 
     def get_store_products(self, csv_url: str) -> list[Product]:
         try:
-            content = self.fetch_text(csv_url, encodings=["cp1250"])
+            content = self.fetch_text(csv_url, encodings=["utf-8-sig", "cp1250"])
             return self.parse_csv(content, delimiter=";")
         except Exception:
             logger.exception(f"Failed to get store prices from {csv_url}")
