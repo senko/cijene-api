@@ -168,7 +168,16 @@ class StudenacCrawler(BaseCrawler):
             with open(temp_zip, "wb") as fp:
                 self.fetch_binary(url, fp)
 
-            subprocess.run(["unzip", "-x", temp_zip], cwd=temp_dir)
+            result = subprocess.run(
+                ["unzip", "-x", temp_zip],
+                cwd=temp_dir,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
+
+            if result.returncode != 0:
+                print(result.stdout.decode())
+                print(result.stderr.decode())
 
             for file in temp_path.iterdir():
                 if file.suffix != suffix:
