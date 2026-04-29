@@ -172,7 +172,7 @@ class DmCrawler(BaseCrawler):
         products = []
 
         try:
-            with warnings.catch_warnings():
+            with warnings.catch_warnings(record=False):
                 warnings.simplefilter("ignore", UserWarning)
                 workbook = openpyxl.load_workbook(BytesIO(excel_data), data_only=True)
             worksheet = workbook.active  # Get the active worksheet
