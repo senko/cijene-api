@@ -9,6 +9,7 @@ from typing import List
 from crawler.store.boso import BosoCrawler
 from crawler.store.branka import BrankaCrawler
 from crawler.store.brodokomerc import BrodokomercCrawler
+from crawler.store.bure import BureCrawler
 from crawler.store.djelo_vodice import DjeloVodiceCrawler
 from crawler.store.dm import DmCrawler
 from crawler.store.eurospin import EurospinCrawler
@@ -61,6 +62,7 @@ CRAWLERS = {
     GavranovicCrawler.CHAIN: GavranovicCrawler,
     BrankaCrawler.CHAIN: BrankaCrawler,
     DjeloVodiceCrawler.CHAIN: DjeloVodiceCrawler,
+    BureCrawler.CHAIN: BureCrawler,
 }
 
 
@@ -130,7 +132,8 @@ def crawl(
     root: Path,
     date: datetime.date | None = None,
     chains: list[str] | None = None,
-) -> Path:
+    createzip: bool = True,
+) -> None:
     """
     Crawl multiple retail chains for product/pricing data and save it.
 
@@ -168,8 +171,11 @@ def crawl(
             f"  * {chain}: {r.n_stores} stores, {r.n_products} products, {r.n_prices} prices in {r.elapsed_time:.2f}s"
         )
 
+    if createzip is False:
+        return
+
     copy_archive_info(path)
     create_archive(path, zip_path)
 
     logger.info(f"Created archive {zip_path} with data for {date:%Y-%m-%d}")
-    return zip_path
+    print(f"Archive created: {zip_path}")
