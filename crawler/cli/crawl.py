@@ -75,6 +75,13 @@ def main():
         help="List supported retail chains and exit (output_path is not required)",
     )
     parser.add_argument(
+        "-z",
+        "--create-zip",
+        choices=["true", "false"],
+        default="true",
+        help="Create ZIP file after crawl (default: true)",
+    )
+    parser.add_argument(
         "-v",
         "--verbose",
         choices=["debug", "info", "warning", "error", "critical"],
@@ -103,6 +110,8 @@ def main():
         args.output_path.mkdir(parents=True, exist_ok=True)
         print(f"Created directory: {args.output_path}")
 
+    create_zip = args.create_zip == "true"
+
     chains_to_crawl = None
     if args.chain:
         chains_to_crawl = [chain.strip() for chain in args.chain.split(",")]
@@ -124,8 +133,7 @@ def main():
         date_txt = args.date.strftime("%Y-%m-%d") if args.date else "today"
         print(f"Fetching price data from {chains_txt} for {date_txt} ...", flush=True)
 
-        zip_path = crawl(args.output_path, crawl_date, chains_to_crawl)
-        print(f"Archive created: {zip_path}")
+        crawl(args.output_path, crawl_date, chains_to_crawl, create_zip)
         return 0
     except Exception as e:
         print(f"Error during crawling: {e}")
