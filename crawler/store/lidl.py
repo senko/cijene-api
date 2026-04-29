@@ -24,7 +24,7 @@ class LidlCrawler(BaseCrawler):
     INDEX_URL = f"{BASE_URL}/cijene"
     TIMEOUT = 180.0  # Longer timeout for ZIP download
     ZIP_DATE_PATTERN = re.compile(
-        r".*/Popis_cijena_po_trgovinama_na_dan_(\d{1,2})[_.](\d{1,2})[_.](\d{4})\.zip"
+        r".*/Popis_cijena_po_trgovinama_na_dan[_.]+(\d{1,2})[_.]+(\d{1,2})[_.]+(\d{4})\.zip"
     )
 
     ANCHOR_PRICE_COLUMN = "Sidrena_cijena_na_02.05.2025"
