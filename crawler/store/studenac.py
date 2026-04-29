@@ -172,7 +172,7 @@ class StudenacCrawler(BaseCrawler):
                 ["unzip", "-x", temp_zip],
                 cwd=temp_dir,
                 stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
+                stderr=subprocess.PIPE,
             )
 
             if result.returncode != 0:
