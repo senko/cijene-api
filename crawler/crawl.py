@@ -9,6 +9,7 @@ from typing import List
 from crawler.store.boso import BosoCrawler
 from crawler.store.branka import BrankaCrawler
 from crawler.store.brodokomerc import BrodokomercCrawler
+from crawler.store.bure import BureCrawler
 from crawler.store.djelo_vodice import DjeloVodiceCrawler
 from crawler.store.dm import DmCrawler
 from crawler.store.eurospin import EurospinCrawler
@@ -61,6 +62,7 @@ CRAWLERS = {
     GavranovicCrawler.CHAIN: GavranovicCrawler,
     BrankaCrawler.CHAIN: BrankaCrawler,
     DjeloVodiceCrawler.CHAIN: DjeloVodiceCrawler,
+    BureCrawler.CHAIN: BureCrawler,
 }
 
 
