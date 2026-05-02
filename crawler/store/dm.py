@@ -2,6 +2,7 @@ import datetime
 import json
 import logging
 import re
+import warnings
 from io import BytesIO
 from tempfile import TemporaryFile
 from typing import Any, List
@@ -171,7 +172,9 @@ class DmCrawler(BaseCrawler):
         products = []
 
         try:
-            workbook = openpyxl.load_workbook(BytesIO(excel_data), data_only=True)
+            with warnings.catch_warnings(record=False):
+                warnings.simplefilter("ignore", UserWarning)
+                workbook = openpyxl.load_workbook(BytesIO(excel_data), data_only=True)
             worksheet = workbook.active  # Get the active worksheet
 
             if not worksheet:
