@@ -12,6 +12,7 @@ from crawler.store.brodokomerc import BrodokomercCrawler
 from crawler.store.bure import BureCrawler
 from crawler.store.djelo_vodice import DjeloVodiceCrawler
 from crawler.store.dm import DmCrawler
+from crawler.store.dukat import DukatCrawler
 from crawler.store.eurospin import EurospinCrawler
 from crawler.store.gavranovic import GavranovicCrawler
 from crawler.store.jadranka_trgovina import JadrankaTrgovinaCrawler
@@ -63,6 +64,7 @@ CRAWLERS = {
     BrankaCrawler.CHAIN: BrankaCrawler,
     DjeloVodiceCrawler.CHAIN: DjeloVodiceCrawler,
     BureCrawler.CHAIN: BureCrawler,
+    DukatCrawler.CHAIN: DukatCrawler,
 }
 
 
