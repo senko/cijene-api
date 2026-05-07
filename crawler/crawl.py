@@ -29,6 +29,7 @@ from crawler.store.ribola import RibolaCrawler
 from crawler.store.roto import RotoCrawler
 from crawler.store.spar import SparCrawler
 from crawler.store.stanic import StanicCrawler
+from crawler.store.stridon import StridonCrawler
 from crawler.store.studenac import StudenacCrawler
 from crawler.store.tommy import TommyCrawler
 from crawler.store.trgocentar import TrgocentarCrawler
@@ -67,6 +68,7 @@ CRAWLERS = {
     BureCrawler.CHAIN: BureCrawler,
     DukatCrawler.CHAIN: DukatCrawler,
     StanicCrawler.CHAIN: StanicCrawler,
+    StridonCrawler.CHAIN: StridonCrawler,
 }
 
 
