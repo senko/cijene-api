@@ -28,6 +28,14 @@ Trenutno podržani trgovački lanci:
 * Brodokomerc
 * Lorenco
 * Trgovina Krk
+* Roto
+* Jadranka Trgovina
+* Gavranović
+* Branka
+* Djelo Vodice
+* Bure
+* Dukat
+* Diskont Stanić (zahtjeva Google API ključ za pristup javnom Google Driveu)
 
 Popis trgovačkih lanaca preuzet sa [IamMusavaRibica/cijene.org](https://github.com/IamMusavaRibica/cijene.org) repozitorija
 pod AGPL licencom, od kojeg smo i posudili podršku za neke od podržanih trgovačkih lanaca. Hvala!
@@ -49,7 +57,7 @@ cd cijene-api
 uv sync --dev
 ```
 
-### Docker (preporučeno)
+### Docker
 
 Projekt uključuje potpunu Docker konfiguraciju za lakše pokretanje i deployment. Docker setup omogućava:
 
@@ -93,6 +101,10 @@ odabir datuma (default: trenutni dan), `-c` za odabir lanaca (default: svi) te
 ### Pokretanje u Windows okolini
 
 **Napomena:** Za Windows korisnike - postavite vrijednost `PYTHONUTF8` environment varijable na `1` ili pokrenite python s `-X utf8` flag-om kako bi izbjegli probleme s character encodingom. Više detalja [na poveznici](https://github.com/senko/cijene-api/issues/9#issuecomment-2911110424).
+
+### Google Drive API ključ
+
+Diskont Stanić sprema podatke o cijenama na Google Drive, koji ne dozvoljava anonimni pristup (download datoteke). Za pristup podacima potrebno je imati Google Cloud račun i kreirati API ključ sa pristupom za Google Storage / Google Drive. Taj ključ treba staviti u `.env` datoteku (vidjeti `.env.example` - to je jedina opcija koja je potrebna za crawler dio).
 
 ### Web servis
 
