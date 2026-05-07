@@ -1,6 +1,7 @@
 import datetime
 import logging
 import re
+from csv import DictReader
 from typing import Any
 from urllib.parse import urlparse
 
@@ -55,6 +56,30 @@ class LorencoCrawler(BaseCrawler):
                 return href
 
         return None
+
+    def read_csv(self, text: str, delimiter: str = ",") -> DictReader:
+        # Lorenco publishes two CSV variants: an older one with a single "MPC"
+        # column, and a newer one that splits price into "Cijena" (whole) +
+        # "CijenaDec" (hundredths). Declare a synthetic "MPC" fieldname so
+        # base header validation passes for both; parse_csv_row fills the
+        # value per row from whichever columns are present.
+        reader = super().read_csv(text, delimiter=delimiter)
+        if reader.fieldnames and "MPC" not in reader.fieldnames:
+            reader.fieldnames = list(reader.fieldnames) + ["MPC"]
+        return reader
+
+    def parse_csv_row(self, row: dict) -> Any:
+        # Lorenco's newer CSV variant has no "MPC" column; price is split
+        # across "Cijena" (whole part) + "CijenaDec" (hundredths), e.g.
+        # 1;40 → 1.40 EUR. Reassemble it here so the rest of the pipeline
+        # (PRICE_MAP -> "MPC") works for both variants without re-parsing
+        # the file. Detection is column-based, not filename-based, because
+        # the two variants have appeared under both filename prefixes.
+        if not (row.get("MPC") or "").strip():
+            whole = (row.get("Cijena") or "").strip()
+            dec = (row.get("CijenaDec") or "").strip()
+            row["MPC"] = f"{whole},{dec.zfill(2)}" if whole else ""
+        return super().parse_csv_row(row)
 
     def fix_product_data(self, data: dict[str, Any]) -> dict[str, Any]:
         """
