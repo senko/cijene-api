@@ -261,10 +261,11 @@ class BaseCrawler:
         """
         Parse a single row of CSV data into a Product object.
         """
+        row = {k.lower(): v for k, v in row.items()}
         data = {}
 
         for field, (column, is_required) in self.PRICE_MAP.items():
-            value = row.get(column)
+            value = row.get(column.lower())
             try:
                 data[field] = self.parse_price(value, is_required)
             except ValueError as err:
@@ -275,7 +276,7 @@ class BaseCrawler:
                 raise
 
         for field, (column, is_required) in self.FIELD_MAP.items():
-            value = row.get(column, "").strip()
+            value = row.get(column.lower(), "").strip()
             if not value and is_required:
                 raise ValueError(f"Missing required field: {field}")
             data[field] = value
@@ -330,10 +331,11 @@ class BaseCrawler:
 
         # Make sure all defined columns exist in the CSV
         csv_columns = list(reader.fieldnames)
+        csv_columns_lower = [c.lower() for c in csv_columns]
         price_columns = [column for column, _ in self.PRICE_MAP.values()]
         field_columns = [column for column, _ in self.FIELD_MAP.values()]
         for column in price_columns + field_columns:
-            if column not in csv_columns:
+            if column.lower() not in csv_columns_lower:
                 available = ", ".join(f'"{c}"' for c in csv_columns)
                 raise ValueError(
                     f'Column "{column}" not found in CSV file. CSV columns: {available}'
