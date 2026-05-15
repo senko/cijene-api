@@ -79,6 +79,13 @@ cp .env.docker.example .env
 docker-compose up -d
 ```
 
+**Pokreni samo crawler unutar Docker-a**
+
+```bash
+docker build -f crawler.Dockerfile -t crawler .
+docker run -v $(pwd)/output:/app/output crawler -c "dm, eurospin, kaufland, konzum, lidl, metro, plodine, spar, studenac, zabac" -z false -v info ./output
+```
+
 ## Korištenje
 
 ### Crawler
