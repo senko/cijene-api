@@ -168,7 +168,7 @@ def crawl(
     t0 = time()
     for chain in chains:
         chain_path = path / chain
-        if skip_existing == True and chain_path.exists() and len(list(chain_path.iterdir())) == 3:
+        if skip_existing and chain_path.exists() and len(list(chain_path.iterdir())) == 3:
             logger.info(f"Skipping {chain} on {date:%Y-%m-%d}, folder already exists with 3 files")
             continue
 
