@@ -13,7 +13,7 @@ services:
       - CRAWLER_SKIP_EXISTING=true
       - CRAWLER_VERBOSE=info
       - CRAWLER_OUTPUT=/app/output
-      - CRON_SCHEDULE=0 6-23 * * * # Run the script every hour between 06:00 and 23:00
+      - CRON_SCHEDULE=0 4-22 * * * # Run the script every hour between 04:00 and 22:00
     volumes:
       - ./output:/app/output
     restart: unless-stopped
