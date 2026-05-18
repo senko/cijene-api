@@ -1,0 +1,19 @@
+services:
+  crawler-scheduled:
+    container_name: cijene-crawler-scheduled
+    build:
+      context: .
+      dockerfile: crawler-scheduled.Dockerfile
+      network: host
+    user: "1000:1000"
+    environment:
+      - TZ=Europe/Zagreb
+      - CRAWLER_CHAIN=dm, eurospin
+      - CRAWLER_CREATE_ZIP=false
+      - CRAWLER_SKIP_EXISTING=true
+      - CRAWLER_VERBOSE=info
+      - CRAWLER_OUTPUT=/app/output
+      - CRON_SCHEDULE=0 6-23 * * * # Run the script every hour between 06:00 and 23:00
+    volumes:
+      - ./output:/app/output
+    restart: unless-stopped
