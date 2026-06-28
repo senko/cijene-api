@@ -28,7 +28,7 @@ id,chain_code,code,type,address,city,zipcode,lat,lon,phone
 76,konzum,0115,supermarket,Svilajska 20,Šibenik,22000,43.7496902,15.8921162,+385800400000
 53,konzum,0872,supermarket,Josipa Strossmayera 6,Zadar,23000,44.11687,15.232444,+385800400000
 64,konzum,3256,supermarket,Kardinala Kuharića 10,Ludbreg,42230,46.2485,16.62124,+385800400000
-27,konzum,0154,supermarket,Hum Na Sutli 157,Hum Na Sutli,49231,46.222503,15.698871,+385800400000
+27,konzum,0154,supermarket,Hum Na Sutli 157,Hum na Sutli,49231,46.222503,15.698871,+385800400000
 54,konzum,0760,supermarket,Vukovarska 4,Sinj,21230,43.70266,16.642487,+385800400000
 14,konzum,0907,supermarket,Ive Tijardovića 4A,Osijek,31000,45.556167,18.720548,+385800400000
 83,konzum,0333,supermarket,Trg Žrtava Fašizma 18,Zaprešić,10290,45.856784,15.804258,+385800400000
@@ -43,15 +43,15 @@ id,chain_code,code,type,address,city,zipcode,lat,lon,phone
 39,konzum,0454,supermarket,Zagrebačka 18,Gospić,53000,44.552646,15.374567,+385800400000
 78,konzum,3291,hipermarket,Put Kozjaka 2,Kaštel Sućurac,21212,43.5481498,16.4085484,+385800400000
 11,konzum,0205,hipermarket,Sarajevska 6,Zagreb,10000,45.769508,16.003862,+385800400000
-60,konzum,0204,supermarket,Žitna 1A,Ivanić Grad,10310,45.706284,16.411398,+385800400000
+60,konzum,0204,supermarket,Žitna 1A,Ivanić-Grad,10310,45.706284,16.411398,+385800400000
 16,konzum,1710,supermarket,Gornja Čibača 14,Mlini,20207,42.63169,18.16508,+385800400000
 48,konzum,0638,supermarket,Muntriljska 1A,Pazin,52000,45.2408746,13.9358071,+385800400000
 75,konzum,0354,supermarket,Tn V. Rubin,Rovinj,52210,45.062971,13.664928,+385800400000
 37,konzum,1625,supermarket,Magistrala 67,Vodice,22211,43.7654825,15.7964316,+385800400000
 85,konzum,0865,supermarket,Mala Raduča 20,Primošten,22202,43.587574,15.923807,+385800400000
 77,konzum,0895,supermarket,1. Svibnja 4,Umag,52470,45.432167,13.521987,+385800400000
-15,konzum,0159,supermarket,Trg A. Starčevića 5,Sv. Ivan Zelina,10380,45.960006,16.24208,+385800400000
-5,konzum,0767,supermarket,Kneza Branimira 32,Biograd Na Moru,23210,43.9411553,15.445804,+385800400000
+15,konzum,0159,supermarket,Trg A. Starčevića 5,Sveti Ivan Zelina,10380,45.960006,16.24208,+385800400000
+5,konzum,0767,supermarket,Kneza Branimira 32,Biograd na Moru,23210,43.9411553,15.445804,+385800400000
 13,konzum,0209,supermarket,Kralja Zvonimira 8,Brckovljani,10370,45.823146,16.294286,+385800400000
 29,konzum,0277,hipermarket,Zagrebačka Av. 108,Zagreb,10000,45.797905,15.893106,+385800400000
 68,konzum,1410,supermarket,Osječka 6,Virovitica,33000,45.821838,17.409494,+385800400000
@@ -174,20 +174,20 @@ id,chain_code,code,type,address,city,zipcode,lat,lon,phone
 565,studenac,T783,supermarket,Put Kućom 1A,Grohote,,43.391121,16.285588,
 172,konzum,3206,supermarket,Selska Cesta 144,Zagreb,10000,45.790903,15.94464,+385800400000
 180,konzum,0590,supermarket,Svačićeva 2-4,Split,21000,43.51128,16.437,+385800400000
-4718,eurospin,310008,diskontna_prodavaonica,Obrtnicka ulica 2,Cakovec,40000,46.3897328060728,16.4142719,
+4718,eurospin,310008,diskontna_prodavaonica,Obrtnicka ulica 2,Čakovec,40000,46.3897328060728,16.4142719,
 174,konzum,0734,supermarket,Otok Oštarijski 51D,Ogulin,47300,45.2387753,15.2522902,+385800400000
 177,konzum,0284,supermarket,Podštore 1,Delnice,51300,45.393131,14.805815,+385800400000
 4699,eurospin,310009,diskontna_prodavaonica,Celine 2,Vrbovec,10340,45.8867316647728,16.4112611576727,
-4700,eurospin,310010,diskontna_prodavaonica,Ulica Mate Vlašica 51A,Porec,52440,45.2316858919283,13.6194421344003,
+4700,eurospin,310010,diskontna_prodavaonica,Ulica Mate Vlašica 51A,Poreč,52440,45.2316858919283,13.6194421344003,
 582,lidl,259,supermarket,Sv. Leopolda Mandića 17,Dugopolje,21204,43.58798,16.57114,
 183,konzum,1531,supermarket,Industrijska 15,Pula,52100,44.8874424,13.8528214,+385800400000
 26,konzum,1818,supermarket,J.J.Strossmayera 16,Vukovar,32000,45.3530929,19.0017508,+385800400000
 806,plodine,170,supermarket,Zagrebacka 1A,Vukovar,32000,45.338,19.024,
-807,plodine,027,supermarket,Zagrebacka 2,Cakovec,40000,46.38355,16.42967,
+807,plodine,027,supermarket,Zagrebacka 2,Čakovec,40000,46.38355,16.42967,
 808,plodine,038,supermarket,Zagrebacka 3,Kutina,44320,45.48375,16.76197,
 809,plodine,069,supermarket,Zagrebacka Ulica 2B,Petrinja,44250,45.44012,16.2686,
 171,konzum,0067,supermarket,Ivana Meštrovića 21,Drniš,22320,43.86176,16.16538,+385800400000
-146,konzum,3281,supermarket,Dr. Franje Tuđmana 82,Biograd Na Moru,23210,43.9414005,15.4532645,+385800400000
+146,konzum,3281,supermarket,Dr. Franje Tuđmana 82,Biograd na Moru,23210,43.9414005,15.4532645,+385800400000
 810,plodine,130,supermarket,Zagrebacka Ulica 60,Vrbovec,10340,45.8852,16.40581,
 176,konzum,0450,supermarket,M. Tita 80,Opatija,51410,45.338829,14.309156,+385800400000
 571,studenac,1078,supermarket,Ulica Marijana Cvetkovića 12,Sisak,,45.45795691,16.38868435,
@@ -206,7 +206,7 @@ id,chain_code,code,type,address,city,zipcode,lat,lon,phone
 20,konzum,0328,supermarket,Ulica Luje Adamovića 3A,Rovinj,52210,45.0777118,13.6427461,+385800400000
 688,plodine,054,hipermarket,Put Pazdigrada 5,Split,21000,43.50893,16.49298,
 694,plodine,152,supermarket,Alojzija Stepinca 201,Vinkovci,32100,45.28746249531147,18.75428977923105,
-695,plodine,124,supermarket,Ante Starcevica 47,Korcula,20260,42.95764,17.13324,
+695,plodine,124,supermarket,Ante Starcevica 47,Korčula,20260,42.95764,17.13324,
 696,plodine,128,supermarket,Antuna Mihanovica 82,Prelog,40323,46.34219,16.60045,
 702,plodine,005,supermarket,Biogradska 68,Zadar,23000,44.10171,15.25668,
 703,plodine,028,supermarket,Bizovacka 10,Valpovo,31550,45.65027,18.41978,
@@ -214,28 +214,28 @@ id,chain_code,code,type,address,city,zipcode,lat,lon,phone
 707,plodine,112,supermarket,Cesta Dalmatinskih Brigada 9A,Matulji,51211,45.36302,14.31619,
 708,plodine,097,supermarket,Cikovici 9B,Kastav,51215,45.36541,14.34993,
 709,plodine,156,supermarket,Ciponjac 1,Novalja,53291,44.54674967170437,14.896218787390419,
-4156,plodine,154,supermarket,Duga Ulica 59A,Varazdinske Toplice,42223,46.208976681396,16.43077178650441,
+4156,plodine,154,supermarket,Duga Ulica 59A,Varaždinske Toplice,42223,46.208976681396,16.43077178650441,
 4157,plodine,166,supermarket,Golubovecka 36B,Donja Stubica,49240,45.979,15.983,
-713,plodine,017,supermarket,Gospodarska 33,Varazdin,42000,46.292,16.35348,
-714,plodine,062,supermarket,Gospodarska 12,Ludberg,42230,46.2431,16.63089,
-4160,plodine,033,supermarket,Grgura Ninskog 19,Nova Gradiska,35400,45.25613,17.39241,
+713,plodine,017,supermarket,Gospodarska 33,Varaždin,42000,46.292,16.35348,
+714,plodine,062,supermarket,Gospodarska 12,Ludbreg,42230,46.2431,16.63089,
+4160,plodine,033,supermarket,Grgura Ninskog 19,Nova Gradiška,35400,45.25613,17.39241,
 689,plodine,008,hipermarket,Stefanovecki Zavoj 10,Zagreb,10000,45.81921,16.04291,
 617,lidl,150,supermarket,Trg Križnog Puta 5,Daruvar,43500,45.58866,17.21874,
 619,lidl,153,supermarket,Stjepana Radića 68,Virovitica,33000,45.82824,17.393,
-699,plodine,120,supermarket,Bana Josipa Jelacica 1B,Orebic,20250,42.98199810257302,17.195858014798763,
+699,plodine,120,supermarket,Bana Josipa Jelacica 1B,Orebić,20250,42.98199810257302,17.195858014798763,
 700,plodine,075,supermarket,Banija 88,Karlovac,47000,45.50559,15.55082,
 701,plodine,050,supermarket,Bartola Kasica 7,Rijeka,51000,45.35563,14.36585,
-705,plodine,034,supermarket,Budacka Ulica 25,Gospic,53000,44.56813,15.38777,
+705,plodine,034,supermarket,Budacka Ulica 25,Gospić,53000,44.56813,15.38777,
 706,plodine,076,supermarket,Carlotte Grisi 1,Novigrad,52466,45.31969,13.56868,
-710,plodine,102,supermarket,Creska 2A,Porec,52440,45.23756,13.60415,
-711,plodine,117,supermarket,Crna Rika 3,Ploce,20340,43.052748436179684,17.438356797994462,
+710,plodine,102,supermarket,Creska 2A,Poreč,52440,45.23756,13.60415,
+711,plodine,117,supermarket,Crna Rika 3,Ploče,20340,43.052748436179684,17.438356797994462,
 712,plodine,178,supermarket,Digitronska 27A,Buje,52460,45.415,13.66,
 715,plodine,039,supermarket,Hrvoja Vukcica Hrvatinica 5,Vinkovci,32100,45.28299,18.80303,
 716,plodine,053,supermarket,Huttlerova 30,Osijek,31000,45.55327,18.71419,
 718,plodine,016,supermarket,Ivana Česmičkog 5a,Koprivnica,48000,46.18329,16.83838,
 719,plodine,011,supermarket,Ivana Meštrovića 70,Šibenik,22000,43.75343,15.88204,
 717,plodine,093,supermarket,Istarska 1P,Funtana,52452,45.17711,13.60759,
-4166,plodine,095,supermarket,Jadranska cesta 78,Sv. Filip i Jakov,23207,43.96556,15.42154,
+4166,plodine,095,supermarket,Jadranska cesta 78,Sveti Filip i Jakov,23207,43.96556,15.42154,
 721,plodine,122,supermarket,Jadranska Ulica 44A,Posedarje,23242,44.21281,15.46941,
 722,plodine,161,supermarket,Janka Leskovara 12 2,Pregrada,49218,46.15936,15.75592,
 723,plodine,116,supermarket,Jelsa 1018A,Jelsa,21465,43.16456,16.68029,
@@ -244,17 +244,17 @@ id,chain_code,code,type,address,city,zipcode,lat,lon,phone
 725,plodine,012,supermarket,Jurja Žakna 12,Pula,52100,44.87917,13.86465,
 726,plodine,084,supermarket,Kardinala Alojzija Stepinca 112,Trogir,21220,43.51865,16.24388,
 727,plodine,174,supermarket,Karlovacka Cesta 125A,Ozalj,47280,45.598,15.4866,
-728,plodine,113,supermarket,Karlov Vrt 2A,Zminj,52341,45.14506,13.9016,
+728,plodine,113,supermarket,Karlov Vrt 2A,Žminj,52341,45.14506,13.9016,
 729,plodine,056,supermarket,Kastavska Cesta 19,Matulji,51211,45.36631,14.33126,
 4178,plodine,143,supermarket,Klokovec 260A,Krapinske Toplice,49217,46.0933,15.8379,
 730,plodine,009,supermarket,Kotorska 9,Crikvenica,51260,45.173857,14.694748,
-731,plodine,032,supermarket,Kralja Petra Kresimira Iv 4B,Nasice,31500,45.49887,18.09656,
+731,plodine,032,supermarket,Kralja Petra Kresimira Iv 4B,Našice,31500,45.49887,18.09656,
 732,plodine,149,supermarket,Kralja Tomislava 65,Novska,44330,45.335788034376364,16.975863782890183,
 733,plodine,142,supermarket,Krizine 10,Tribunj,22212,43.75968518672553,15.75276002072453,
 734,plodine,137,supermarket,Labinska 51A,Rijeka,51000,45.34054,14.38225,
 735,plodine,129,supermarket,Ljubljanska Avenija 2B,Zagreb,10000,45.79855,15.88916,
-736,plodine,051,supermarket,Mate Vlasica 38,Porec,52440,45.23029,13.61685,
-737,plodine,042,supermarket,Milana Novacica 15,Cazma,43240,45.75004,16.61589,
+736,plodine,051,supermarket,Mate Vlasica 38,Poreč,52440,45.23029,13.61685,
+737,plodine,042,supermarket,Milana Novacica 15,Čazma,43240,45.75004,16.61589,
 738,plodine,083,supermarket,Mundanije 12B,Rab,51280,44.76291,14.76743,
 739,plodine,071,supermarket,Munida 3B,Medulin,52203,44.82682,13.9311,
 740,plodine,086,supermarket,Mutilska Ulica 60B,Pula,52100,44.86344,13.85722,
@@ -262,9 +262,9 @@ id,chain_code,code,type,address,city,zipcode,lat,lon,phone
 7129,ntl,31038,supermarket,Frankopanska 70,Ludbreg,,,,
 7131,ntl,10101,supermarket,Frana Galovica 11A,Krapina,,,,
 616,lidl,148,supermarket,Ulica Kralja Zvonimira 14,Slatina,33520,45.69955,17.70642,
-684,plodine,064,hipermarket,Ante Starcevica 21,Zapresic,10290,45.85896,15.79901,
+684,plodine,064,hipermarket,Ante Starcevica 21,Zaprešić,10290,45.85896,15.79901,
 685,plodine,066,hipermarket,Radna zona R-29 344,Kukuljanovo,51227,45.33629,14.49687,
-686,plodine,001,hipermarket,Marinici 182A,Viskovo,51216,45.37131,14.38999,
+686,plodine,001,hipermarket,Marinici 182A,Viškovo,51216,45.37131,14.38999,
 690,plodine,091,hipermarket,Stoja 14A,Pula,52100,44.8604,13.82496,
 687,plodine,055,hipermarket,Haleuša 1,Zagreb,10000,45.80428,16.10255,
 691,plodine,108,hipermarket,Ulica Martina Kontusa 5,Rijeka,51000,45.32448,14.46986,
@@ -288,7 +288,7 @@ id,chain_code,code,type,address,city,zipcode,lat,lon,phone
 826,tommy,10316,supermarket,Donji Put 2,Jezera,22242,43.789674,15.631721,
 827,tommy,10362,supermarket,Dr Franje Tuđmana 107,Vrsi,23235,44.24025,15.216343,
 828,tommy,10355,supermarket,Dr Franje Tuđmana 18,Sukošan,23206,44.04492,15.31075,
-829,tommy,10322,supermarket,Franje Tuđmana 82,Biograd Na Moru,23210,43.94049,15.44831,
+829,tommy,10322,supermarket,Franje Tuđmana 82,Biograd na Moru,23210,43.94049,15.44831,
 830,tommy,10335,supermarket,Dubravica 15,Orebić,20250,42.981039,17.198743,
 831,tommy,10128,supermarket,Dubrovačka 1,Split,21000,43.505376,16.456221,
 832,tommy,10270,supermarket,Franje Tuđmana 1038,Kaštel Novi,21216,43.550998,16.334346,+385914952472
@@ -299,7 +299,7 @@ id,chain_code,code,type,address,city,zipcode,lat,lon,phone
 837,tommy,10297,supermarket,Kamenar 2,Primošten,22202,43.586112,15.942799,
 838,tommy,10342,supermarket,Koparska 64,Pula,52100,44.877071,13.86114,
 839,tommy,10182,supermarket,Kralja Dmitra Zvonimira 4,Benkovac,23420,44.032947,15.617168,
-840,tommy,10325,supermarket,Kralja Tomislava 100,Baška-Krk,51523,44.971906,14.755594,
+840,tommy,10325,supermarket,Kralja Tomislava 100,Baška,51523,44.971906,14.755594,
 841,tommy,10175,supermarket,Kralja Tomislava 7,Dubrovnik,20000,42.655249,18.076738,+385914952488
 842,tommy,10151,supermarket,Kralja Zvonimira 18,Makarska,21300,43.297089,17.016332,
 843,tommy,10183,supermarket,Leopolda Mandića 18,Dugopolje,21204,43.58718,16.570176,+385914952471
@@ -331,7 +331,7 @@ id,chain_code,code,type,address,city,zipcode,lat,lon,phone
 1936,spar,8707,hipermarket,Skorpikova 34 2,Zagreb,,45.796448,15.856233,+38513441800
 881,tommy,10329,supermarket,Ulica Europske Zajednice 1,Makarska,21300,43.303949,17.010696,+385914952485
 871,tommy,10143,supermarket,Svetonedeljska 13,Samobor,10430,45.799382,15.722346,
-49,konzum,0444,supermarket,Trg Vladimira Nazora 1,Ivanić Grad,10310,45.704795,16.394638,+385800400000
+49,konzum,0444,supermarket,Trg Vladimira Nazora 1,Ivanić-Grad,10310,45.704795,16.394638,+385800400000
 872,tommy,10353,supermarket,Tolstojeva 4,Selca,21425,43.29723,16.85008,
 882,tommy,10312,supermarket,Ulica Ivana Pavla Ii 99,Privlaka,23233,44.255696,15.128884,
 883,tommy,10125,supermarket,Ulica Kneza Branimira 1,Metković,20350,43.057087,17.652714,+385914952476
@@ -353,7 +353,7 @@ id,chain_code,code,type,address,city,zipcode,lat,lon,phone
 1940,spar,8714,hipermarket,Ulica Vice Vukova 6,Zagreb,,45.770435,15.939004,+38515566745
 184,konzum,0897,supermarket,Dražica 18B,Mali Lošinj,51550,44.528288,14.464584,+385800400000
 1941,spar,8715,hipermarket,Vukovarska 207,Split,,43.513233,16.502001,+38521564585
-720,plodine,099,supermarket,Jadranska Magistrala 13,Pakostane,23211,43.91538,15.5101,
+720,plodine,099,supermarket,Jadranska Magistrala 13,Pakoštane,23211,43.91538,15.5101,
 887,tommy,10300,supermarket,Ćirila I Metoda 11,Vodice,22211,43.760564,15.784699,
 888,tommy,10339,supermarket,Čatrnja 172,Rakovica,47245,44.99364,15.65034,
 743,plodine,010,supermarket,Novigradska 24,Umag,52470,45.42233,13.52712,
@@ -361,15 +361,15 @@ id,chain_code,code,type,address,city,zipcode,lat,lon,phone
 1943,spar,8718,hipermarket,Josipa Jovica 93,Split,,43.518795,16.483847,+38521493940
 876,tommy,10199,supermarket,Ul Bana Jelačića 43,Vis,21480,43.061172,16.172762,
 163,konzum,3254,supermarket,Ulica Josipa Broza - Tita 88A,Mursko Središće,40315,46.5068567,16.4316551,+385800400000
-749,plodine,169,supermarket,Otocka Cesta 14,Pasman,23262,43.956,15.365,
+749,plodine,169,supermarket,Otocka Cesta 14,Pašman,23262,43.956,15.365,
 697,plodine,151,supermarket,Augusta Senoe 2B,Daruvar,43500,45.593,17.2238,
 742,plodine,049,supermarket,Nova Cesta 28,Ogulin,47300,45.26464,15.22038,
-744,plodine,044,supermarket,Optujska 151,Varazdin,42000,46.31736,16.31674,
+744,plodine,044,supermarket,Optujska 151,Varaždin,42000,46.31736,16.31674,
 877,tommy,10145,supermarket,Ulica 142 Brigade 1,Drniš,22320,43.860126,16.159058,
 745,plodine,007,supermarket,Osjecka 50,Rijeka,51000,45.34002,14.42771,
 4195,plodine,148,supermarket,Osjecka Ulica 1J,Beli Manastir,31300,45.76584010726687,18.61959585288368,
 1659,lidl,181,supermarket,Plano-Aerodrom 1 Pr,Trogir,21220,43.53365,16.2822,
-746,plodine,041,supermarket,Osjecka Ulica 62H,Pozega,34000,45.34325,17.69616,
+746,plodine,041,supermarket,Osjecka Ulica 62H,Požega,34000,45.34325,17.69616,
 822,tommy,10110,supermarket,Cesta Dr Franje Tuđmana 878,Kaštel Stari,21216,43.553701,16.348878,
 849,tommy,10328,supermarket,Narodnog preporoda 1,Šibenik,22000,43.705023,15.919531,
 866,tommy,10356,supermarket,Sali II 1C,Sali,23281,43.93338,15.16868,
@@ -385,7 +385,7 @@ id,chain_code,code,type,address,city,zipcode,lat,lon,phone
 618,lidl,152,supermarket,Zagrebačka Ulica 10,Vrbovec,10340,45.8868,16.41369,
 1677,lidl,203,supermarket,Trg Hrvatskog Proljeća 9,Slavonski Brod,35000,45.16219,18.01386,
 748,plodine,110,supermarket,Otocka Cesta 10,Kali,23272,44.0674,15.199615944475621,
-750,plodine,127,supermarket,Pačipolje 20,Murter - Betina,22244,43.811554,15.603198,
+750,plodine,127,supermarket,Pačipolje 20,Betina,22244,43.811554,15.603198,
 751,plodine,026,supermarket,Pakracka Ulica 7,Bjelovar,43000,45.887125,16.844211,
 752,plodine,046,supermarket,Petra Zoranica 20,Benkovac,23420,44.0310527,15.61411,
 753,plodine,109,supermarket,Pirovacka Ulica 1A,Pirovac,22213,43.8169,15.6679,
@@ -402,21 +402,21 @@ id,chain_code,code,type,address,city,zipcode,lat,lon,phone
 1957,spar,87006,supermarket,Vlaska 44,Zagreb,,45.81377,15.983645,+38515559640
 1958,spar,87007,supermarket,Polacisce 4,Zadar,,44.110916,15.237522,+38523233680
 1959,spar,87008,supermarket,Ehrlichova 9A,Zagreb,,45.774319,15.98309,+38515559560
-1960,spar,87009,supermarket,Svetojelenska Cesta 25,Cakovec,,46.395512,16.430429,+38540493840
+1960,spar,87009,supermarket,Svetojelenska Cesta 25,Čakovec,,46.395512,16.430429,+38540493840
 1974,spar,87026,supermarket,Riva Boduli 1,Rijeka,,45.325449,14.442172,+38551501890
 1975,spar,87027,supermarket,Pulska Ulica 2C,Labin,,45.097473,14.115026,+38552495611
 1976,spar,87029,supermarket,Tina Ujevica 17,Zagreb,,45.79001,15.949567,+38515548427
 1977,spar,87030,supermarket,Martinkovac 127,Rijeka,,45.355304,14.362497,+38551425750
 1978,spar,87031,supermarket,Gospodarska 1A,Buje,,45.411334,13.664214,+38552554711
-1980,spar,87033,supermarket,Osjecka 10,Pozega,,45.339676,17.682629,+38534492720
+1980,spar,87033,supermarket,Osjecka 10,Požega,,45.339676,17.682629,+38534492720
 1981,spar,87036,supermarket,Tresnjevka 1 1,Jastrebarsko,,45.662994,15.64497,+38514103346
 1982,spar,87034,supermarket,Dugoselska Cesta 20,Sesvetski Kraljevec,,45.816772,16.173244,+38515563442
 1983,spar,87038,supermarket,Ante Topica Mimare 57,Zagreb,,45.808479,15.902051,+38515556263
 1984,spar,87037,supermarket,Vrtnjakovec 115A,Krapinske Toplice,,46.080742,15.848856,
-1985,spar,87039,supermarket,Tomasa Goricanca 1,Cakovec,,46.37974,16.443668,+38540493932
+1985,spar,87039,supermarket,Tomasa Goricanca 1,Čakovec,,46.37974,16.443668,+38540493932
 1986,spar,87040,supermarket,Grana 150 2,Novi Marof,,46.156262,16.333652,+38542554055
 1987,spar,87041,supermarket,Ivane Brlic Mazuranic 2A,Zagreb,,45.806656,15.905995,+38515560932
-1988,spar,87042,supermarket,Stjepana Majdeka 53,Ivanic Grad,,45.696911,16.403229,+38517002576
+1988,spar,87042,supermarket,Stjepana Majdeka 53,Ivanić-Grad,,45.696911,16.403229,+38517002576
 1989,spar,87044,supermarket,Priljevo 36,Vukovar,,45.367902,18.971596,
 1990,spar,87043,supermarket,Stubicka Cesta 17 D,Marija Bistrica,,46.004758,16.110079,
 1991,spar,87051,supermarket,Bozidara Magovca 47,Zagreb,,45.770966,15.994373,+38515520107
@@ -432,7 +432,7 @@ id,chain_code,code,type,address,city,zipcode,lat,lon,phone
 2001,spar,87061,supermarket,Gracani 7,Zagreb,,45.8584786,15.9733957,+38514623998
 2003,spar,87063,supermarket,Dobroniceva7,Zagreb,,45.7927447,15.901004,+38515520108
 2004,spar,87066,supermarket,Aleja Pomoraca 21,Zagreb,,45.7733848,15.9740029,+38515520056
-2005,spar,87068,supermarket,Gjalskoga 66,Zapresic,,45.870695,15.795225,+38515520292
+2005,spar,87068,supermarket,Gjalskoga 66,Zaprešić,,45.870695,15.795225,+38515520292
 2006,spar,87069,supermarket,Trg Ane Rukavine 1,Zagreb,,45.7725672,15.9625638,+38515520063
 2007,spar,87070,supermarket,Borongajska Cesta 75,Zagreb,,45.8113659,16.0180663,+38515520082
 2008,spar,87074,supermarket,Zagrebacka 3,Zagreb,,45.8136947,15.9318485,+38513751471
@@ -451,7 +451,7 @@ id,chain_code,code,type,address,city,zipcode,lat,lon,phone
 2024,spar,87089,supermarket,Kneza Trpimira 14,Osijek,,45.5499746,18.6926062,+38531274704
 2021,spar,87086,supermarket,Gruska 18,Zagreb,,45.7950336,15.9939786,+38516310031
 2022,spar,87087,supermarket,Vi Oranicki Odvojak 2,Zagreb,,45.8011542,15.9096837,+38513877974
-2025,spar,87090,supermarket,Zagrebacka Ulica 81,Varazdin,,46.2975155,16.3430054,+38542240940
+2025,spar,87090,supermarket,Zagrebacka Ulica 81,Varaždin,,46.2975155,16.3430054,+38542240940
 2026,spar,87091,supermarket,Kolodvorska 31A,Koprivnica,,46.16417,16.818287,+38548622266
 2027,spar,87092,supermarket,Andrije Hebranga 2A,Bjelovar,,45.9051343,16.8483519,+38543212801
 2028,spar,87094,supermarket,Kralja Zvonimira 59,Vinkovci,,45.2954363,18.8083804,+38532308792
@@ -467,16 +467,16 @@ id,chain_code,code,type,address,city,zipcode,lat,lon,phone
 1948,spar,8723,hipermarket,Ante Starcevica 5A,Zadar,,44.107436,15.240645,+38523501300
 1950,spar,8728,hipermarket,Rakarska Ulica 13,Velika Gorica,,45.719841,16.07801,+38514106040
 1951,spar,8729,hipermarket,Kukuljanovo 362,Kukuljanovo,,45.333339,14.509055,+38551413108
-1952,spar,87001,supermarket,Optujska 171,Varazdin,,46.318836,16.307058,+38542490991
-1954,spar,87003,supermarket,Put Vida 6,Sibenik,,43.756092,15.878343,+38522247420
+1952,spar,87001,supermarket,Optujska 171,Varaždin,,46.318836,16.307058,+38542490991
+1954,spar,87003,supermarket,Put Vida 6,Šibenik,,43.756092,15.878343,+38522247420
 1955,spar,87004,supermarket,Ulica Akcije Maslenica 1,Zadar,,44.117107,15.269299,+38523400160
 1961,spar,87011,supermarket,Franje Candeka 8A,Rijeka,,45.339337,14.41544,+38551445080
 1962,spar,87012,supermarket,Licka Ulica 1 3,Split,,43.516013,16.44367,+38521552421
 1963,spar,87014,supermarket,Poljicka 2 1,Split,,43.504687,16.453897,+38521491196
 1964,spar,87015,supermarket,Dankovecka 4,Zagreb,,45.8310816,16.0548507,+38515520870
-1965,spar,87016,supermarket,Medimurska Ulica 31C,Varazdin,,46.315341,16.350685,+38542410260
+1965,spar,87016,supermarket,Medimurska Ulica 31C,Varaždin,,46.315341,16.350685,+38542410260
 1966,spar,87017,supermarket,Ulica Grada Mainza 16,Zagreb,,45.811544,15.950938,+38515540215
-1967,spar,87018,supermarket,Vinka Mederala 2A I 2B,Varazdin,,46.299461,16.328825,+38542440312
+1967,spar,87018,supermarket,Vinka Mederala 2A I 2B,Varaždin,,46.299461,16.328825,+38542440312
 1968,spar,87019,supermarket,Gospodska 2,Zagreb,,45.8133064,15.8867033,+38515512835
 1969,spar,87020,supermarket,Trg Zrtava Fasizma 6,Zagreb,,45.810504,15.988179,+38515999062
 1970,spar,87021,supermarket,Sporova Jama 1A,Kastav,,45.370812,14.351765,+38551445710
@@ -485,20 +485,20 @@ id,chain_code,code,type,address,city,zipcode,lat,lon,phone
 1973,spar,87024,supermarket,Jadranska Cesta 160,Bibinje,,44.061568,15.295524,+38523299908
 2023,spar,87088,supermarket,Petra Svacica 2,Slavonski Brod,,45.1627928,18.0072789,+38535410206
 2034,spar,87101,supermarket,Gajeva 47,Daruvar,,45.5925375,17.2181589,+38543332127
-2035,spar,87103,supermarket,Vinogradska 4,Nasice,,45.489587,18.093547,+38531615146
+2035,spar,87103,supermarket,Vinogradska 4,Našice,,45.489587,18.093547,+38531615146
 2036,spar,87104,supermarket,Osjecka Ulica 29,Rijeka,,45.339259,14.428212,+38551515100
-3963,kaufland,1630,hipermarket,114. Brigade 6,Split-Ravne njive,21000,43.520154,16.4673139,
-3964,kaufland,2030,hipermarket,Andrije Hebranga 2,Zadar - Višnjik,23000,44.1180689,15.2407993,
-3965,kaufland,5630,hipermarket,Antuna Šoljana 43,Zagreb Jankomir,10000,45.8035425,15.8768462,
-3966,kaufland,3430,hipermarket,Bistrička 6,Zagreb Sesvete,10360,45.832848,16.1077439,
-3967,kaufland,5930,hipermarket,Jablanska ulica br. 80,Zagreb - Jablanska,10000,45.7959372,15.9187045,
-3968,kaufland,5230,hipermarket,Jaruscica 6,Zagreb Blato,,45.76926,15.933706,+385800223223
+3963,kaufland,1630,hipermarket,114. Brigade 6,Split,21000,43.520154,16.4673139,
+3964,kaufland,2030,hipermarket,Andrije Hebranga 2,Zadar,23000,44.1180689,15.2407993,
+3965,kaufland,5630,hipermarket,Antuna Šoljana 43,Zagreb,10000,45.8035425,15.8768462,
+3966,kaufland,3430,hipermarket,Bistrička 6,Sesvete,10360,45.832848,16.1077439,
+3967,kaufland,5930,hipermarket,Jablanska ulica br. 80,Zagreb,10000,45.7959372,15.9187045,
+3968,kaufland,5230,hipermarket,Jaruscica 6,Zagreb,,45.76926,15.933706,+385800223223
 3969,kaufland,3130,hipermarket,Josipa Reihl-Kira 40,Osijek,,45.544809,18.70986,+385800223223
-3970,kaufland,4430,hipermarket,Julija Knifera 1,Zagreb Središće,10010,45.7785684,15.9848821,
+3970,kaufland,4430,hipermarket,Julija Knifera 1,Zagreb,10010,45.7785684,15.9848821,
 3971,kaufland,2630,hipermarket,Jurja Zakna 3,Pula,,44.8785417,13.8629083,+385800223223
 2037,spar,87105,supermarket,Santoriova 13,Pula,,44.868413,13.863369,+38552541222
 2038,spar,87106,supermarket,Nova Cesta 68,Opatija,,45.344095,14.311315,+38551712440
-2039,spar,87107,supermarket,Obala Rade Koncara 1A,Porec,,45.2236933,13.5967813,+38552427757
+2039,spar,87107,supermarket,Obala Rade Koncara 1A,Poreč,,45.2236933,13.5967813,+38552427757
 2040,spar,87108,supermarket,Spinciceva 2J,Split,,43.503819,16.456495,+38521541560
 2041,spar,87109,supermarket,Getaldiceva Bb,Knin,,44.041802,16.202809,+38522661843
 2042,spar,87112,supermarket,Subiceva 5 7,Split,,43.508628,16.438376,+38514103346
@@ -506,14 +506,14 @@ id,chain_code,code,type,address,city,zipcode,lat,lon,phone
 2044,spar,87123,supermarket,Zagrebacka Ulica 40,Zlatar,,46.087154,16.079531,+38549493300
 2045,spar,87124,supermarket,Ivana Gorana Kovacica 51,Ivanec,,46.228109,16.120457,+38542499005
 2046,spar,87126,supermarket,Boskoviceva 24,Split,,43.508965,16.467761,
-2047,spar,87127,supermarket,Kutinska Ulica 16,Popovaca,,45.56808,16.631885,+385444954041
+2047,spar,87127,supermarket,Kutinska Ulica 16,Popovača,,45.56808,16.631885,+385444954041
 2048,spar,87133,supermarket,Put Bagata 11,Nin,,44.24074,15.171045,
 2049,spar,87134,supermarket,Toplicka Cesta 87 A,Donja Stubica,,45.978763,15.952426,+38549410063
 2050,spar,87135,supermarket,Ulica Janka Leskovara 46,Pregrada,,46.154274,15.756806,
-2051,spar,87155,supermarket,Osjecka 21,Cepin,,45.524858,18.580793,+38531411040
+2051,spar,87155,supermarket,Osjecka 21,Čepin,,45.524858,18.580793,+38531411040
 2052,spar,87140,supermarket,Karlovacka Cesta 74,Ozalj,,45.605032,15.48319,
 2053,spar,87142,supermarket,Zagrebacka Ulica 154,Dugo Selo,,45.809809,16.209187,
-2054,spar,87156,supermarket,Budacka 100,Gospic,,44.556943,15.382206,+38553333601
+2054,spar,87156,supermarket,Budacka 100,Gospić,,44.556943,15.382206,+38553333601
 2055,spar,87169,supermarket,Bolnicka Ulica 80K,Pakrac,,45.429555,17.187067,
 2056,spar,87171,supermarket,Svilajska Ulica 35B,Osijek,,45.560726,18.635883,+38531629537
 3920,konzum,3274,supermarket,Carlotta Grisi 5 Sveti Anton,Novigrad,52466,45.31911,13.56748,+385800400000
@@ -524,25 +524,25 @@ id,chain_code,code,type,address,city,zipcode,lat,lon,phone
 764,plodine,144,supermarket,Put Svetog Petra 2,Privlaka,23233,44.163966,15.188902,
 766,plodine,171,supermarket,Ruzice Mihic 20,Rijeka,51000,45.35614,14.4242,
 765,plodine,003,supermarket,Ruziceva 29,Rijeka,51000,45.33042,14.45185,
-4217,plodine,106,supermarket,Satnije Putalj 5,Kastel Sucurac,21212,43.5498,16.41238,
+4217,plodine,106,supermarket,Satnije Putalj 5,Kaštel Sućurac,21212,43.5498,16.41238,
 1944,spar,8719,hipermarket,Rimske Centurijacije 101,Pula,,44.869064,13.863956,+38552255960
 1953,spar,87002,supermarket,Ivana Fuderera Hanzike 3,Valpovo,,45.650528,18.434608,+38531399371
-1979,spar,87032,supermarket,Tadije Smiciklasa 5A,Krizevci,,46.027715,16.541013,+38548493960
+1979,spar,87032,supermarket,Tadije Smiciklasa 5A,Križevci,,46.027715,16.541013,+38548493960
 2002,spar,87062,supermarket,Avenija Dubrovnik 42,Zagreb,,45.7773198,15.9973576,+38515520096
 4000,kaufland,4330,supermarket,Miljenka Buljana 5,Sinj,,43.7017441,16.6441836,+385800223223
 3990,kaufland,3030,hipermarket,Vlahe Paljetka 4,Bjelovar,,45.9031056,16.8521901,+385800223223
 3977,kaufland,2830,hipermarket,Naselje Slavonija 2 Kc Br 5,Slavonski Brod,,45.162523,18.0185522,+385800223223
-4407,spar,87035,supermarket,Zagrebačka ulica 137,Sv. Ivan Zelina,10380,45.945709,16.239463,
-4001,kaufland,1130,supermarket,Obrtnicka Ulica 1,Cakovec,,46.3887923,16.413936,+385800223223
+4407,spar,87035,supermarket,Zagrebačka ulica 137,Sveti Ivan Zelina,10380,45.945709,16.239463,
+4001,kaufland,1130,supermarket,Obrtnicka Ulica 1,Čakovec,,46.3887923,16.413936,+385800223223
 4002,kaufland,4730,supermarket,Priljevo 209,Vukovar,,45.3671359,18.9661504,+385800223223
-4010,kaufland,6830,supermarket,Varteksova ulica 2,Varaždin-Biškupec,42000,46.2920308,16.3430472,
+4010,kaufland,6830,supermarket,Varteksova ulica 2,Varaždin,42000,46.2920308,16.3430472,
 4417,spar,87049,supermarket,Dr. Franje Tuđmana 344,Kaštel Sućurac,21212,43.547547,16.412994,
-4011,kaufland,2530,supermarket,Vukovarska Ulica 10,Sibenik,,43.7226812,15.906328,+385800223223
+4011,kaufland,2530,supermarket,Vukovarska Ulica 10,Šibenik,,43.7226812,15.906328,+385800223223
 4003,kaufland,6730,supermarket,Put Gaceleza 1D,Vodice,,43.7667702,15.7726119,+385800223223
 4012,kaufland,5030,supermarket,Zagrebacka Ulica 67,Dugo Selo,,45.8057627,16.2255784,+385800223223
 4430,spar,87064,supermarket,H. Macanovica 29,Zagreb,,45.7892198,15.9297565,+38515520212
 4004,kaufland,4130,supermarket,Stjepana Ivicevica 66,Makarska,,43.285267,17.0301762,+385800223223
-4005,kaufland,6130,supermarket,Ulica 4. gardijske brigade 69,Zadar - Sinjoretovo,23000,44.1050064,15.2640331,
+4005,kaufland,6130,supermarket,Ulica 4. gardijske brigade 69,Zadar,23000,44.1050064,15.2640331,
 3991,kaufland,1530,hipermarket,Zagrebacka 49A,Sisak,,45.4956039,16.3654333,+385800223223
 4131,plodine,073,hipermarket,Karla Metikoša 4,Zagreb,10000,45.77958,16.00289,
 4137,plodine,059,supermarket,Antona Mataije 17,Novi Vinodolski,51250,45.13214,14.78304,
@@ -550,61 +550,61 @@ id,chain_code,code,type,address,city,zipcode,lat,lon,phone
 4350,spar,8702,hipermarket,Jankomir 33.,Zagreb,,45.798813,15.884793,+38515603450
 4352,spar,8704,hipermarket,Sv. Leopolda B. Mandica 7,Osijek,,45.553349,18.675232,+38531495200
 4431,spar,87065,supermarket,V. Kovacica 3A,Zagreb,,45.7769683,15.9862571,+38515520074
-3978,kaufland,2730,hipermarket,Njemacka Ulica 40 40,Pozega,,45.3364962,17.6843431,+385800223223
+3978,kaufland,2730,hipermarket,Njemacka Ulica 40 40,Požega,,45.3364962,17.6843431,+385800223223
 4433,spar,87067,supermarket,V. Varicaka 12,Zagreb,,45.7658805,15.9882617,+38515520086
 3992,kaufland,5830,hipermarket,Zagrebačka cesta 136,Zagreb,10000,45.805056,15.9210394,
 3979,kaufland,6030,hipermarket,Novigradska Ulica 22,Umag,,45.4230146,13.5274861,+385800223223
 4446,spar,87080,supermarket,Trg K. P. Kresimira Iv Bb,Velika Gorica,,45.7114968,16.0777912,+38515605347
-3993,kaufland,1730,hipermarket,Zametska 44,Rijeka Zamet,51000,45.3404219,14.3982677,
+3993,kaufland,1730,hipermarket,Zametska 44,Rijeka,51000,45.3404219,14.3982677,
 4007,kaufland,7330,supermarket,Ulica Josipa Broza Tita 25,Zabok,,46.0220817,15.9064266,+385800223223
 4359,spar,8713,hipermarket,Prilaz V. Holjevca 12,Karlovac,,45.506001,15.544376,+38547493953
 4363,spar,8717,hipermarket,Avenija V. Holjevca 62,Zagreb,,45.754963,15.988217,+38515510840
-4008,kaufland,7430,supermarket,Ulica Sima Savinovica 2,Cibaca,,42.6312817,18.1629281,+385800223223
-3994,kaufland,6230,supermarket,Barutanski jarak 54,Zagreb-Barutanski Jarak,10000,45.8275561,16.0076427,
+4008,kaufland,7430,supermarket,Ulica Sima Savinovica 2,Čibača,,42.6312817,18.1629281,+385800223223
+3994,kaufland,6230,supermarket,Barutanski jarak 54,Zagreb,10000,45.8275561,16.0076427,
 3995,kaufland,1330,supermarket,Franje Račkog 95,Đakovo,31400,45.3097863,18.3971084,
 4459,spar,87093,supermarket,Kralja P. Kresimira Iv 10,Karlovac,,45.482459,15.5479107,+38547423157
-3980,kaufland,6330,hipermarket,Osječka 39,Rijeka Škurinje,51000,45.3411084,14.42536,
+3980,kaufland,6330,hipermarket,Osječka 39,Rijeka,51000,45.3411084,14.42536,
 3996,kaufland,2230,supermarket,Ljudevita Posavskog 51,Velika Gorica,,45.7182836,16.0545651,+385800223223
 4371,spar,8726,hipermarket,Ul. Grada Wirgesa 2 D,Samobor,,45.800002,15.727765,+38514104160
 4396,spar,87025,supermarket,Bujska Ul. Via Buie Br. 1,Umag,,45.4296679,13.5324262,+38552554695
-3972,kaufland,1930,hipermarket,Kneza Branimira 119,Zagreb Ravnice,10000,45.8175925,16.0368355,
+3972,kaufland,1930,hipermarket,Kneza Branimira 119,Zagreb,10000,45.8175925,16.0368355,
 3973,kaufland,3230,hipermarket,Kneza Lj Posavskog 32,Kutina,,45.4764156,16.7779583,+385800223223
-3981,kaufland,7130,hipermarket,Planinska 2F,Zagreb Peščenica,10000,45.8091237,16.0136506,
+3981,kaufland,7130,hipermarket,Planinska 2F,Zagreb,10000,45.8091237,16.0136506,
 3974,kaufland,4230,hipermarket,Kneza Trpimira 301,Trogir,,43.5334333,16.2809326,+385800223223
-3982,kaufland,4630,hipermarket,Poljička cesta 34,Split-Trstenik,21000,43.5086934,16.4748003,
-3983,kaufland,3330,hipermarket,Rusevje 1,Zapresic,,45.8460161,15.8152294,+385800223223
-3975,kaufland,2330,hipermarket,Koprivnicka 17,Varazdin,,46.3150864,16.3367476,+385800223223
+3982,kaufland,4630,hipermarket,Poljička cesta 34,Split,21000,43.5086934,16.4748003,
+3983,kaufland,3330,hipermarket,Rusevje 1,Zaprešić,,45.8460161,15.8152294,+385800223223
+3975,kaufland,2330,hipermarket,Koprivnicka 17,Varaždin,,46.3150864,16.3367476,+385800223223
 3984,kaufland,2930,hipermarket,Sajmiste 2,Virovitica,,45.8284584,17.3975921,+385800223223
 3976,kaufland,1430,hipermarket,Lapovacka 15,Vinkovci,,45.2922418,18.7960238,+385800223223
 3986,kaufland,1230,hipermarket,Ul Ivana Cesmickog 26,Koprivnica,,46.1714136,16.8191018,+385800223223
 4464,spar,87098,supermarket,N. Šubića Zrinskog 38,Grubišno Polje,43290,45.702308,17.176227,
-4009,kaufland,3830,supermarket,Ulica Spinè - Via Spinè 2,Rovinj - Rovigno,52210,45.089669,13.6561027,
-3987,kaufland,1830,hipermarket,Ul. Karela Zahradnika 16a,Zagreb Sloboština,10000,45.7615145,15.9863167,
+4009,kaufland,3830,supermarket,Ulica Spinè - Via Spinè 2,Rovinj,52210,45.089669,13.6561027,
+3987,kaufland,1830,hipermarket,Ul. Karela Zahradnika 16a,Zagreb,10000,45.7615145,15.9863167,
 4399,spar,87028,supermarket,Ul. Rudolfa Fizira 3,Ludbreg,,46.248342,16.625435,+38542488852
 3997,kaufland,6530,supermarket,Magistralna ulica 1,Biograd na Moru,23210,43.945218,15.4532205,
 4467,spar,87102,supermarket,Trg Hrv. Branitelja 9,Pleternica,,45.28647,17.801996,+38534251448
-3998,kaufland,2130,supermarket,Maksimilijana Benkovica 34,Nova Gradiska,,45.2531662,17.3861179,+385800223223
-3999,kaufland,5130,supermarket,Mate Vlasica 55,Porec,,45.2317313,13.6209554,+385800223223
+3998,kaufland,2130,supermarket,Maksimilijana Benkovica 34,Nova Gradiška,,45.2531662,17.3861179,+385800223223
+3999,kaufland,5130,supermarket,Mate Vlasica 55,Poreč,,45.2317313,13.6209554,+385800223223
 4488,spar,87167,supermarket,D.Tomljanovica Gavrana 2B,Senj,,44.992551,14.902086,+38553648808
 4691,eurospin,310013,diskontna_prodavaonica,Ulica Rimske centurijacije 100,Pula,52100,44.8672159274826,13.8677362972405,
 4705,eurospin,310004,diskontna_prodavaonica,Zagrebacka 52,Požega,34000,45.3310983782781,17.6473567153455,
 4706,eurospin,310021,diskontna_prodavaonica,Ulica Matije Gupca 59,Zadar,23000,44.13982711472352,15.227578238619998,
-3989,kaufland,3630,hipermarket,Vile Velebita 6,Zagreb St. Grad,10040,45.8343091,16.0582077,
-4720,eurospin,310023,supermarket,Žutska ulica broj 1,Biograd,23000,43.94750286231922,15.455257182543464,
+3989,kaufland,3630,hipermarket,Vile Velebita 6,Zagreb,10040,45.8343091,16.0582077,
+4720,eurospin,310023,supermarket,Žutska ulica broj 1,Biograd na Moru,23000,43.94750286231922,15.455257182543464,
 4701,eurospin,310033,supermarket,Koprivnicka ulica 34A,Ludbreg,42230,46.24254202888648,16.626361095312884,
 4707,eurospin,310024,diskontna_prodavaonica,Ulica Mihovila P Miškine 5,Koprivnica,48000,46.16522049991776,16.83267541198777,
 4712,eurospin,310026,diskontna_prodavaonica,Štrmac 303,Labin,52220,45.118812856870925,14.118963530976623,
 4695,eurospin,310027,diskontna_prodavaonica,Ulica Istarskih narodnjaka 17 Stop Shop,Pazin,52000,45.23322379875835,13.922143986505635,
-5293,ktc,PJPJ44,trgovina,Pavla Radica 46 A,Pozega,,45.3424690278,17.6667064556,+38534638152
-4738,studenac,T993,supermarket,Dražnikova 76t,Zaton - Nin,,44.23433593773776,15.165757577500694,
+5293,ktc,PJPJ44,trgovina,Pavla Radica 46 A,Požega,,45.3424690278,17.6667064556,+38534638152
+4738,studenac,T993,supermarket,Dražnikova 76t,Zaton,,44.23433593773776,15.165757577500694,
 4737,studenac,T598,supermarket,Bijela Uvala 5,Funtana,,45.188370009506,13.594310029221,
-4218,plodine,048,supermarket,Savska Ulica 91,Ivanic Grad,10310,45.69925,16.38647,
+4218,plodine,048,supermarket,Savska Ulica 91,Ivanić-Grad,10310,45.69925,16.38647,
 5275,ktc,PJPJ07,trgovina,Trg Svetog Florijana 1,Križevci,48260,46.0228126996,16.5455353114,
-4716,eurospin,310028,diskontna_prodavaonica,Stop shop,Ðakovo,31400,45.28570790951743,18.407304411982036,
+4716,eurospin,310028,diskontna_prodavaonica,Stop shop,Đakovo,31400,45.28570790951743,18.407304411982036,
 767,plodine,088,supermarket,Maršala Tita 2 A,Lovran,51415,45.30178,14.27937,
 3988,kaufland,3530,hipermarket,Ulica Grada Wirgesa 2 G,Samobor,,45.7997005,15.7350093,+385800223223
 4698,eurospin,310030,supermarket,Cesta Dalmatinskih brigada 7a,Matulji,51211,45.363658324611094,14.31928182280965,
-4690,eurospin,310032,diskontna_prodavaonica,Ulica hrvatskog preporoda 70 Dugo Selo,Dugo_Selo,10370,45.80463627507239,16.22793419531369,
+4690,eurospin,310032,diskontna_prodavaonica,Ulica hrvatskog preporoda 70 Dugo Selo,Dugo Selo,10370,45.80463627507239,16.22793419531369,
 4715,eurospin,310034,diskontna_prodavaonica,Ulica Veceslava Holjevca 15,Jastrebarsko,10450,45.663746226268444,15.647826425971509,
 4703,eurospin,310035,diskontna_prodavaonica,Zvonarska ulica 63,Vinkovci,32100,45.28919207166565,18.819046369106744,
 3985,kaufland,1030,hipermarket,Trg Hrvatskih Branitelja 5,Karlovac,,45.4884653,15.5457591,+385800223223
@@ -612,28 +612,28 @@ id,chain_code,code,type,address,city,zipcode,lat,lon,phone
 768,plodine,035,supermarket,Sime Kurelica 28,Pazin,52000,45.24091,13.91505,
 6003,spar,87045,supermarket,Prilaz A. B. Simica 1,Vinkovci,,45.295667,18.801053,
 5280,ktc,PJPJ48,trgovina,Zagrebacka 48,Vrbovec,,45.8856153252,16.4072421556,+38512793242
-5299,ktc,PJPJ7B,trgovina,Gospodarska 3,Varazdin,,46.2901789659,16.3394497826,+38542658850
+5299,ktc,PJPJ7B,trgovina,Gospodarska 3,Varaždin,,46.2901789659,16.3394497826,+38542658850
 5268,ktc,PJPJ88,trgovina,Trg Eugena Kumičića 11,Koprivnica,48000,46.1617546958,16.8390479979,
 5274,ktc,PJPJ73,trgovina,Zagrebacka 49,Sisak,,45.4959120698,16.3664015267,+38544660951
-5289,ktc,PJPJ95,trgovina,Nikole Tesle 18,Krizevci,,46.01593297,16.5366682961,+38548628597
+5289,ktc,PJPJ95,trgovina,Nikole Tesle 18,Križevci,,46.01593297,16.5366682961,+38548628597
 5286,ktc,PJPJ8B,trgovina,Trg Kralja Petra Kresimira Iv 1,Velika Gorica,,45.7122643221,16.0777099979,+38516458600
-5278,ktc,PJPJ89,trgovina,Franje Vidovica 59 B,Cazma,,45.74783459791844,16.601352313495358,+38543550900
+5278,ktc,PJPJ89,trgovina,Franje Vidovica 59 B,Čazma,,45.74783459791844,16.601352313495358,+38543550900
 5267,ktc,PJPJ06,trgovina,Trg Josipa Jurja Strossmayera 8,Križevci,48260,46.0236593838827,16.54652388106501,
 5277,ktc,PJPJ43,trgovina,Industrijska 7,Slatina,,45.71059481110965,17.696182573571708,+38533638021
 4708,eurospin,310003,supermarket,4 Gardijske Brigade 1,Zadar,23000,44.1133728070591,15.2553206153455,
 5288,ktc,PJPJ60,trgovina,Prilaz Janka Tomica 1,Zabok,,46.0210675558,15.9029532268,+38549658966
 4714,eurospin,310011,diskontna_prodavaonica,Ulica Vlahe Paljetka 7,Bjelovar,43000,45.9039863123547,16.8534102730182,
-5297,ktc,PJPJ76,trgovina,Nikole Subica Zrinskog Bb,Grubisno Polje,,45.703104473,17.1772723961,+38543639170
+5297,ktc,PJPJ76,trgovina,Nikole Subica Zrinskog Bb,Grubišno Polje,,45.703104473,17.1772723961,+38543639170
 5276,ktc,PJPJ50,trgovina,Pakracka Ulica 1,Bjelovar,,45.890070550723976,16.851035575036672,+38543638884
-5292,ktc,PJPJ86,trgovina,Tekstilna 1 A,Mursko Sredisce,,46.5081327433,16.4282814826,+38540644230
-5298,ktc,PJPJ42,trgovina,Petra Preradovica 2,Pitomaca,,45.9494073029,17.2307681556,+38533638902
+5292,ktc,PJPJ86,trgovina,Tekstilna 1 A,Mursko Središće,,46.5081327433,16.4282814826,+38540644230
+5298,ktc,PJPJ42,trgovina,Petra Preradovica 2,Pitomača,,45.9494073029,17.2307681556,+38533638902
 5291,ktc,PJPJ78,trgovina,Krste Frankopana 35,Daruvar,,45.5919687321,17.2324436402,+38543638380
 5269,ktc,PJPJ40,trgovina,Ivana Cesmickog 15,Koprivnica,,46.1810618195,16.8351909384,+38548628330
 5272,ktc,PJPJ79,trgovina,Ivana Gundulica 14,Petrinja,,45.43976279204582,16.276676815617,+38544500551
 5294,ktc,PJPJ8A,trgovina,Senjska Ulica 118,Karlovac,,45.4773892149,15.5439324537,+38547658100
 5300,ktc,PJPJ69,trgovina,Ivana Gundulica 1 B,Pakrac,,45.4448269257,17.1975960133,+38534638970
 5270,ktc,PJPJ54,trgovina,Sisacka Ulica 14,Kutina,,45.467055491400664,16.773530865767658,+38544660871
-5290,ktc,PJPJ93,trgovina,Nikole Tesle 18,Krizevci,,46.01593297,16.5366682961,+38548628597
+5290,ktc,PJPJ93,trgovina,Nikole Tesle 18,Križevci,,46.01593297,16.5366682961,+38548628597
 4693,eurospin,310012,diskontna_prodavaonica,Zagrebacka ul 49G,Sisak,44000,45.4962628419612,16.3573007453809,
 5279,ktc,PJPJ41,trgovina,Nikole Tesle 12 B,Sisak,,45.489823442330945,16.387442512411997,+38544660926
 5296,ktc,PJPJ75,trgovina,Trg Hrvatskih Branitelja 252,Bjelovar,,45.90161745920553,16.83920862049195,+38543633170
@@ -641,43 +641,43 @@ id,chain_code,code,type,address,city,zipcode,lat,lon,phone
 5282,ktc,PJPJ77,trgovina,Bobovje 52 C,Krapina,,46.14602840298506,15.87320704073756,+38549658100
 5281,ktc,PJPJ46,trgovina,Vukovarska cesta 3,Virovitica,33000,45.8214782631,17.3896377114,
 5273,ktc,PJPJ74,trgovina,Varaždinska ul. 38,Jalžabet,42203,46.26787365679486,16.49383938202531,
-4692,eurospin,310006,diskontna_prodavaonica,Ulica Juraja Dobrile 1C,Velika_Gorica,10410,45.7241981698684,16.0624537582077,
-4704,eurospin,310014,diskontna_prodavaonica,Ulica Petra Svacica 2B,Slavonski_Brod,35000,45.1620085970305,18.0173613179285,
-5285,ktc,PJPJ87,trgovina,Gospodarska 3,Varazdin,,46.2901789659,16.3394497826,+38542658850
+4692,eurospin,310006,diskontna_prodavaonica,Ulica Juraja Dobrile 1C,Velika Gorica,10410,45.7241981698684,16.0624537582077,
+4704,eurospin,310014,diskontna_prodavaonica,Ulica Petra Svacica 2B,Slavonski Brod,35000,45.1620085970305,18.0173613179285,
+5285,ktc,PJPJ87,trgovina,Gospodarska 3,Varaždin,,46.2901789659,16.3394497826,+38542658850
 5271,ktc,PJPJ90,trgovina,Ii Savski Odvojak 1,Dugo Selo,,45.79652360918616,16.228689828329454,+38516886239
-5284,ktc,PJPJ64,trgovina,Sportska 4,Cakovec,,46.3896796849,16.4189068114,+38540638271
+5284,ktc,PJPJ64,trgovina,Sportska 4,Čakovec,,46.3896796849,16.4189068114,+38540638271
 4717,eurospin,310015,diskontna_prodavaonica,Solinska ulica 84,Split,21000,43.52816523167,16.4832424386179,
 4702,eurospin,310016,supermarket,Ulica Furicevo 20,Viškovo,51216,45.3706710010536,14.3854457576727,
 4694,eurospin,310017,diskontna_prodavaonica,Gacka ulica 70,Osijek,31000,45.5480123805596,18.6908381888518,
-4710,eurospin,310019,diskontna_prodavaonica,Ulica Ante Starcevica 20,Zaprešic,10290,45.8592921877258,15.7982244576727,
+4710,eurospin,310019,diskontna_prodavaonica,Ulica Ante Starcevica 20,Zaprešić,10290,45.8592921877258,15.7982244576727,
 4221,plodine,022,supermarket,Sjeverna Vezna Cesta 31,Slavonski Brod,35000,45.17912,18.0132,
-4222,plodine,096,supermarket,Skabrnjska 14,Kastel Stafilic,21217,43.55031,16.32321,
+4222,plodine,096,supermarket,Skabrnjska 14,Kaštel Štafilić,21217,43.55031,16.32321,
 769,plodine,019,supermarket,Skolska 3,Sisak,44000,45.46547,16.38162,
 5287,ktc,PJPJ58,trgovina,Ivanečko naselje 1c,Ivanec,42240,46.2335431882,16.1444738403,
 5283,ktc,PJPJ62,trgovina,Zrinskih Bb,Prelog,,46.32535020011806,16.61457737578113,+38540638161
 7136,ntl,31039,supermarket,Radnička 1,Novi Marof,,,,
 7130,ntl,20206,supermarket,TRG SV. JOSIPA 2,Slatina,,,,
-4696,eurospin,310018,supermarket,Zagrebacka cesta 162A,Zagreb_Dubec,10360,45.8272837858503,16.0817360240415,
+4696,eurospin,310018,supermarket,Zagrebacka cesta 162A,Zagreb,10360,45.8272837858503,16.0817360240415,
 4709,eurospin,310005,diskontna_prodavaonica,Ulica hrvatskih branitelja 2,Samobor,10430,45.8107400608298,15.7144251921177,
 6887,trgocentar,P120,supermarket,Vladimira Nazora 58,Sveti Ivan Zelina,,45.96658,16.25044,
 775,plodine,074,supermarket,S S Kranjcevica 4,Novalja,53291,44.55235,14.88604,
 6884,trgocentar,P195,supermarket,Varazdinska 2A,Zlatar,,16.07808,46.09327,+38549268005
 7135,ntl,10102,supermarket,Soblinečka 55,Soblinec,,,,
-6883,trgocentar,P060,supermarket,Bana Josipa Jelacica 139,Zapresic,,15.8025,45.87014,+38516313053
+6883,trgocentar,P060,supermarket,Bana Josipa Jelacica 139,Zaprešić,,15.8025,45.87014,+38516313053
 7134,ntl,20202,supermarket,Ulica kralja Tomislava 0,Čepin,,,,
 771,plodine,172,supermarket,Stancija Kaligari 2,Poreč,52440,45.212,13.671,
 4711,eurospin,310002,diskontna_prodavaonica,I Štefanovecki zavoj 12,Zagreb,10000,45.8186907749337,16.0436990999999,
-770,plodine,131,supermarket,Splitska 28A,Metkovic,20350,43.05417,17.64833,
+770,plodine,131,supermarket,Splitska 28A,Metković,20350,43.05417,17.64833,
 179,konzum,0803,supermarket,Velimira Škorpika 23,Šibenik,22000,43.7130031,15.9134474,+385800400000
 4697,eurospin,310036,diskontna_prodavaonica,Ulica Ote Horvata 1 33000 Virovitica,Virovitica,33000,45.82096817224478,17.39309639714273,
-7133,ntl,31020,supermarket,Podravska 11,Varazdin,,,,
+7133,ntl,31020,supermarket,Podravska 11,Varaždin,,,,
 772,plodine,072,supermarket,Stara Cesta 9,Senj,53270,44.99115,14.90355,
 773,plodine,020,supermarket,Štrmac 320,Labin,52220,45.09464,14.12185,
 774,plodine,070,supermarket,Sv Vid 200,Malinska,51511,45.12833,14.5419,
-776,plodine,037,supermarket,Tomislavova 51,Krizevci,48260,46.01451,16.54591,
+776,plodine,037,supermarket,Tomislavova 51,Križevci,48260,46.01451,16.54591,
 6885,trgocentar,P080,supermarket,103 Brigade 8,Zabok,,15.90014,46.02166,+38549225764
-6888,trgocentar,P220,supermarket,Hum Na Sutli 185,Hum Na Sutli,,15.70261,46.22192,+38549419513
-6886,trgocentar,P100,supermarket,Vrankovec,Sv Kriz Zacretje,,,,+38549227424
+6888,trgocentar,P220,supermarket,Hum Na Sutli 185,Hum na Sutli,,15.70261,46.22192,+38549419513
+6886,trgocentar,P100,supermarket,Vrankovec,Sveti Križ Začretje,,,,+38549227424
 8372,tommy,10260,supermarket,Brajde 9,Tar,52465,45.297914,13.620814,+385913192260
 8377,tommy,10109,supermarket,Domovinskog Rata 93,Split,21000,43.51958,16.47262,
 8378,tommy,10364,supermarket,Don Frane Bulića 66B,Solin,21210,43.54335,16.47951,
@@ -695,7 +695,7 @@ id,chain_code,code,type,address,city,zipcode,lat,lon,phone
 8389,tommy,10340,supermarket,Jelsa 1047,Jelsa,21450,43.158519,16.682693,
 8390,tommy,10297,supermarket,Kamenar 2,Primošten,22202,43.586112,15.942799,
 8391,tommy,10342,supermarket,Koparska 64,Pula,52100,44.877071,13.86114,
-8393,tommy,10325,supermarket,Kralja Tomislava 100,Baška-Krk,51523,44.971906,14.755594,
+8393,tommy,10325,supermarket,Kralja Tomislava 100,Baška,51523,44.971906,14.755594,
 8394,tommy,10175,supermarket,Kralja Tomislava 7,Dubrovnik,20000,42.655249,18.076738,+385914952488
 8395,tommy,10151,supermarket,Kralja Zvonimira 18,Makarska,21300,43.297089,17.016332,
 8396,tommy,10183,supermarket,Leopolda Mandića 18,Dugopolje,21204,43.58718,16.570176,+385914952471
@@ -762,7 +762,7 @@ id,chain_code,code,type,address,city,zipcode,lat,lon,phone
 594,lidl,118,supermarket,Sisačka 1A,Petrinja,44250,45.44089,16.29629,
 781,plodine,081,supermarket,Turion 22C,Cres,51557,44.96317,14.40783,
 602,lidl,129,supermarket,Josipa J. Strossmayera 89,Našice,31500,45.49711,18.09958,
-793,plodine,177,supermarket,Ul 113 Sibenske Brigade Hv A 195,Sibenik,22000,43.759,15.9,
+793,plodine,177,supermarket,Ul 113 Sibenske Brigade Hv A 195,Šibenik,22000,43.759,15.9,
 610,lidl,141,supermarket,Vukovarska Ulica 32,Donji Miholjac,31540,45.7621,18.17015,
 612,lidl,143,supermarket,Marmontova Aleja 6,Karlovac,47000,45.49387,15.53834,
 613,lidl,144,supermarket,Ulica Ivana Gorana Kovačića 18,Ivanec,42240,46.22875,16.12098,
@@ -783,7 +783,7 @@ id,chain_code,code,type,address,city,zipcode,lat,lon,phone
 600,lidl,127,supermarket,Hektorovićeva 38 C,Solin,21210,43.5325,16.4894,
 603,lidl,130,supermarket,Put Lore 4,Split,21000,43.52242,16.43664,
 10046,plodine,162,supermarket,Dol 1A,Vis,21480,43.0629,16.1656,
-783,plodine,159,supermarket,Ulica 34 Inzenjerijske Bojne 2,Cakovec,40000,46.38897612413197,16.451664267138437,
+783,plodine,159,supermarket,Ulica 34 Inzenjerijske Bojne 2,Čakovec,40000,46.38897612413197,16.451664267138437,
 629,lidl,170,supermarket,Oranički Odvojak 1,Zagreb,10000,45.81069,15.90874,
 787,plodine,068,supermarket,Gen Nikole Maštrovića 8,Otočac,53220,44.87222,15.23733,
 788,plodine,060,supermarket,Ulica Josipa Broza Tita 6,Zabok,49210,46.02198,15.90519,
@@ -792,7 +792,7 @@ id,chain_code,code,type,address,city,zipcode,lat,lon,phone
 596,lidl,121,supermarket,Križevačka Ulica 21,Koprivnica,48000,46.15998,16.82496,
 8421,tommy,10246,supermarket,Stjepana Radića 139,Šibenik,22000,43.723266,15.908653,+385914952481
 630,lidl,174,supermarket,Ulica Nikole Tesle 2,Križevci,48260,46.02116,16.53767,
-778,plodine,029,supermarket,Trg Kralja Tomislava 10,Pitomaca,33405,45.95302,17.23401,
+778,plodine,029,supermarket,Trg Kralja Tomislava 10,Pitomača,33405,45.95302,17.23401,
 10635,ntl,20201,supermarket,K. TOMISLAVA 3,Bilje,,,,
 625,lidl,159,supermarket,Braće Božić 4 A,Rovinj,52210,45.08,13.65592,
 604,lidl,131,supermarket,Crna Rika 7,Ploče,20340,43.05017,17.44001,
@@ -811,7 +811,7 @@ id,chain_code,code,type,address,city,zipcode,lat,lon,phone
 590,lidl,111,supermarket,Bizovačka 1,Valpovo,31550,45.64964,18.4192,
 584,lidl,266,supermarket,Ulica Pušća 150,Omišalj,51511,45.21708,14.56428,
 587,lidl,105,supermarket,Zeleno Polje 8 A,Osijek,31000,45.55236,18.73155,
-785,plodine,098,supermarket,Ulica Dr Franje Tudjmana 7,Sukosan,23206,44.05814,15.30048,
+785,plodine,098,supermarket,Ulica Dr Franje Tudjmana 7,Sukošan,23206,44.05814,15.30048,
 599,lidl,126,supermarket,Kralja P. Krešimira Iv 4 B,Kutina,44320,45.47996,16.77314,
 786,plodine,063,supermarket,Dr Franje Tuđmana 83 A,Jastrebarsko,15450,45.66366,15.64518,
 638,lidl,190,supermarket,Zagrebačka Ulica 51,Novska,44330,45.34528,16.9731,
@@ -825,12 +825,12 @@ id,chain_code,code,type,address,city,zipcode,lat,lon,phone
 577,lidl,252,supermarket,Optujska Ulica 74,Varaždin,42000,46.31862,16.31384,
 664,lidl,220,supermarket,Ulica Frana Galovića 7 A,Krapina,49000,46.1567,15.87402,
 665,lidl,223,supermarket,Petra Jurčića 2A,Rijeka,51000,45.34249,14.39038,
-789,plodine,114,supermarket,Kralja Tomislava 57,Sveta Nedjelja,10431,45.80616,15.7855,
-790,plodine,043,supermarket,Ulica Kralja Zvonimira 4,Cepin,31431,45.52505,18.57631,
+789,plodine,114,supermarket,Kralja Tomislava 57,Sveta Nedelja,10431,45.80616,15.7855,
+790,plodine,043,supermarket,Ulica Kralja Zvonimira 4,Čepin,31431,45.52505,18.57631,
 791,plodine,111,supermarket,Sv. Martina 4 A,Vrsar,52450,45.15286,13.61724,
 792,plodine,045,supermarket,Ulica Vice Vukova 2,Zagreb,10000,45.77322,15.94292,
 797,plodine,052,supermarket,Velimira Škorpika 16,Šibenik,22000,43.70883,15.90857,
-798,plodine,175,supermarket,Viskovo 32,Viskovo,51216,45.378,14.385,
+798,plodine,175,supermarket,Viskovo 32,Viškovo,51216,45.378,14.385,
 800,plodine,121,supermarket,Vrgorska 2,Makarska,21300,43.28504,17.03377,
 644,lidl,196,supermarket,Nova Cesta 7,Zagreb,10000,45.80789,15.954,
 801,plodine,013,supermarket,Vrh Martinscice 69D,Kostrena,51221,45.31081,14.48513,
@@ -843,7 +843,7 @@ id,chain_code,code,type,address,city,zipcode,lat,lon,phone
 654,lidl,208,supermarket,Mel 1 A,Novi Vinodolski,51250,45.12843,14.78693,
 802,plodine,065,supermarket,Vrsanska 28,Krk,51500,45.032,14.57029,
 658,lidl,212,supermarket,Slavenskog 1,Zagreb,10000,45.79588,15.90046,
-803,plodine,023,supermarket,Vukovarska 10,Zupanja,31270,45.09362,18.70109,
+803,plodine,023,supermarket,Vukovarska 10,Županja,31270,45.09362,18.70109,
 804,plodine,021,supermarket,Vukovarska 87,Rijeka,51000,45.34305,14.41298,
 4260,plodine,147,supermarket,Vukovarska 97B,Donji Miholjac,31540,45.76031799355524,18.184468086504637,
 660,lidl,214,supermarket,Lujzinska Cesta 40,Delnice,51300,45.39251,14.79644,
@@ -878,7 +878,7 @@ id,chain_code,code,type,address,city,zipcode,lat,lon,phone
 578,lidl,253,supermarket,Vukovarska Ulica 190,Split,21000,43.51535,16.49133,
 659,lidl,213,supermarket,Ulica J. J. Strossmayera 350,Osijek,31000,45.5657,18.63687,
 670,lidl,229,supermarket,Vršanska 18 A,Krk,51500,45.03509,14.56873,
-635,lidl,184,supermarket,Jadranska Magistrala 1A,Biograd Na Moru,23210,43.94502,15.4539,
+635,lidl,184,supermarket,Jadranska Magistrala 1A,Biograd na Moru,23210,43.94502,15.4539,
 637,lidl,188,supermarket,Velimira Škorpika 10,Šibenik,22000,43.71047,15.91035,
 641,lidl,193,supermarket,Ulica Europske Zajednice 2,Makarska,21300,43.28871,17.02372,
 633,lidl,182,supermarket,Ulica Anđelke I Belizara Božikovića 2,Dugo Selo,10370,45.80608,16.22689,
