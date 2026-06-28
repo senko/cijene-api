@@ -6,6 +6,7 @@ from os import makedirs
 from pathlib import Path
 from zipfile import ZipFile, ZIP_DEFLATED
 
+from .cities import normalize_city
 from .models import Store
 
 logger = getLogger(__name__)
@@ -66,7 +67,7 @@ def transform_products(
             "store_id": store.store_id,
             "type": store.store_type,
             "address": store.street_address,
-            "city": store.city,
+            "city": normalize_city(store.city),
             "zipcode": store.zipcode or "",
         }
         store_list.append(store_data)

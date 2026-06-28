@@ -18,6 +18,8 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev --no-install-project
 
 COPY crawler/ ./crawler/
+# cities.csv (city-name map) is loaded at runtime by crawler/store/cities.py.
+COPY enrichment/ ./enrichment/
 RUN uv sync --frozen --no-dev
 
 FROM python:3.13.13-alpine3.23 AS crawler

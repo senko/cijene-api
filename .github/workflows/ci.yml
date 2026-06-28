@@ -44,3 +44,6 @@ jobs:
 
       - name: Check type hints with ty
         run: uv run ty check
+
+      - name: Run tests with pytest
+        run: uv run pytest
