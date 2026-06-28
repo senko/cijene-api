@@ -70,6 +70,7 @@ class SparCrawler(BaseCrawler):
         "popovaca",
         "nin",
         "donja_stubica",
+        "donji_stupnik",
         "pregrada",
         "cepin",
         "ozalj",
