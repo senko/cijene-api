@@ -66,10 +66,12 @@ FROM common AS production-api
 EXPOSE 8000
 RUN uv sync --frozen --no-dev
 COPY --chown=appuser:appuser service/ ./service/
+COPY --chown=appuser:appuser common/ ./common/
 COPY --chown=appuser:appuser enrichment/ ./enrichment/
 CMD ["uv", "run", "-m", "service.main"]
 
 FROM common AS production-crawler
 RUN uv sync --frozen --no-dev
 COPY --chown=appuser:appuser crawler/ ./crawler/
+COPY --chown=appuser:appuser common/ ./common/
 CMD ["uv", "run", "-m", "crawler.cli.crawl", "/app/output"]

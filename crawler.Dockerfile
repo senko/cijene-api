@@ -18,6 +18,8 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev --no-install-project
 
 COPY crawler/ ./crawler/
+# Shared code imported by the crawler (e.g. common/barcodes.py from output.py).
+COPY common/ ./common/
 # cities.csv (city-name map) is loaded at runtime by crawler/store/cities.py.
 COPY enrichment/ ./enrichment/
 RUN uv sync --frozen --no-dev

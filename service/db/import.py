@@ -11,6 +11,7 @@ from tempfile import TemporaryDirectory
 from time import time
 from typing import Any, Dict, List
 
+from common.barcodes import normalize_barcode
 from service.config import settings
 from service.db.models import Chain, ChainProduct, Price, Store
 from service.db.stats import compute_stats
@@ -107,6 +108,9 @@ async def process_products(
             return data
 
         if len(barcode) >= 8 and barcode.isdigit():
+            # Canonicalize real EANs (strip leading zeros) so zero-padded and
+            # bare variants of the same GTIN map to one global product.
+            data["barcode"] = normalize_barcode(barcode)
             return data
 
         product_id = data.get("product_id", "")
