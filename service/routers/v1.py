@@ -4,6 +4,7 @@ from decimal import Decimal
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 
+from common.barcodes import normalize_barcode
 from service.config import settings
 from service.db.models import ChainStats, ProductWithId, StorePrice
 from service.routers.auth import RequireAuth
@@ -296,7 +297,9 @@ async def get_product(
     equal to the specified date. If no date is provided, current date is used.
     """
 
-    products = await db.get_products_by_ean([ean])
+    # Strip leading zeros so a padded query (0000054490970) finds the
+    # canonical row stored bare (54490970); synthetic chain:code is left as-is.
+    products = await db.get_products_by_ean([normalize_barcode(ean) or ean])
     if not products:
         raise HTTPException(
             status_code=404,
@@ -372,8 +375,11 @@ async def get_prices(
             detail="EANs parameter is required and must be non-empty",
         )
 
-    # Parse EAN codes
-    ean_list = [e.strip() for e in eans.split(",") if e.strip()]
+    # Parse EAN codes, stripping leading zeros so padded queries resolve to the
+    # canonical (bare) rows stored in the DB.
+    ean_list = [
+        normalize_barcode(s) or s for s in (e.strip() for e in eans.split(",")) if s
+    ]
     if not ean_list:
         raise HTTPException(
             status_code=400,

@@ -2068,8 +2068,8 @@ barcode,brand,name,unit,quantity
 8076809574969,Mulino Bianco,Keksi Baiocchi,kg,0.168
 8076809572828,Mulino Bianco,Keks Tarallucci,kg,0.350
 8606108584132,Indomie,Instant Juha Govedina 5x70g,kg,0.35
-0089686170115,Indomie,Juha pileća instant s tjesteninom,kg,0.35
-0089686170269,Indomie,Juha okusa povrća s tjesteninom,kg,0.375
+89686170115,Indomie,Juha pileća instant s tjesteninom,kg,0.35
+89686170269,Indomie,Juha okusa povrća s tjesteninom,kg,0.375
 8606108584644,Indomie,Juha instant s rezancima okus govedina XXL,kg,0.700
 8606108584620,Indomie,Juha instant s rezancima okus piletine XXL,kg,0.700
 7622202213984,7 Days,Kroasan 7 Days Mini Double Kakao/Vanilija 185g,g,185.0
@@ -2740,7 +2740,7 @@ barcode,brand,name,unit,quantity
 3608580705130,Bonne Maman,Džem Jagoda,kg,0.370
 3608580705161,Bonne Maman,Marmelada Naranča,kg,0.370
 5410233710822,Realemon,Sok od limuna,L,0.25
-0011210000018,Tabasco,Tabasco umak ljuti,L,0.06
+11210000018,Tabasco,Tabasco umak ljuti,L,0.06
 5410233740829,Realime,Sok od limete,L,0.25
 8715035110304,Kikkoman,Umak od soje,L,0.250
 8715035110205,Kikkoman,Umak od soje,L,0.15
@@ -5603,7 +5603,7 @@ barcode,brand,name,unit,quantity
 4006824000246,Develey,Umak BBQ Squeeze,L,0.25
 4006824000970,Develey,Umak slatko kiseli,L,0.25
 4006824991032,Develey,Curry Umak Pikant,L,0.250
-0054881005555,Ahmad,Čaj English Breakfast,g,40.00
+54881005555,Ahmad,Čaj English Breakfast,g,40.00
 8008698012857,Schär,Schär Petit keksi,kg,0.165
 8008698003503,Schär,Krekeri Bez Glutena,kg,0.21
 8008698001059,Schär,Kruh Bon Matin,kg,0.2
@@ -7423,7 +7423,7 @@ barcode,brand,name,unit,quantity
 8008110002015,Wudy,Hrenovke Mini,kg,0.100
 3850102008636,Kraš,Keks Domaćica Speculas,kg,0.275
 3850139282139,PIK Vrbovec,Šunka Natur narezana,kg,0.100
-024000024675,Del Monte,Kompot Mješavina Voća,kg,0.420
+24000024675,Del Monte,Kompot Mješavina Voća,kg,0.420
 8594005025936,Republica,Republica Mojito,L,0.25
 8595054905767,Dobra,Dobra rižina kaša čokolada,g,60
 7613287311412,Maggi,Juha krem brokula mrkva,g,52
@@ -7686,7 +7686,7 @@ barcode,brand,name,unit,quantity
 40084107,Kinder,Kinder Jaje Surprise,kom,1
 3856015322531,Planet of Plants,Namaz POP,g,225.0
 3850104277399,Mirela,Sardina s povrćem,g,100.0
-024000181521,Del Monte,Kompot Breskve Polovice u Sirupu,kg,0.420
+24000181521,Del Monte,Kompot Breskve Polovice u Sirupu,kg,0.420
 3838945508100,Fructal,Fruc Piće Crni Ribiz i Aronija,L,1.5
 5449000234001,Schweppes,Schweppes Bitter Lemon,L,1.32
 3838945028561,Fructal,Nektar Fructal Jagoda,L,0.2
@@ -8053,7 +8053,7 @@ barcode,brand,name,unit,quantity
 8720181471759,Dove,Gel za tuširanje Dove Fresh Care,L,0.25
 8720181291852,Dove,Dezodorans Dove Soft Feel,L,0.15
 8720181291999,Dove,Dezodorans u spreju Dove Original 200 ml,L,0.200
-0089686170054,Indomie,Juha instant pileća 5x75g,kg,0.375
+89686170054,Indomie,Juha instant pileća 5x75g,kg,0.375
 5449000275677,Cappy,Cappy Limunada Menta,L,0.4
 5000112653793,Cappy,Cappy Limunada Menta Limun,L,1.25
 50112234,Cappy,Sok Cappy Jabuka 100%,L,0.33
@@ -8131,7 +8131,7 @@ barcode,brand,name,unit,quantity
 4011800841812,Schwartau,Džem šumsko voće Extra,kg,0.340
 4011800295011,Corny,Corny Protein Čokolada,g,50
 4011800840815,Schwartau,Džem od borovnice Extra,kg,0.340
-0813497006215,Bumbu,Rum Bumbu Original,L,0.7
+813497006215,Bumbu,Rum Bumbu Original,L,0.7
 3850116684710,Ledo,Kroketi od krumpira,kg,1.00
 8700216156172,Head & Shoulders,Šampon Head & Shoulders Citrus,L,0.800
 8700216156134,Head & Shoulders,Šampon Head & Shoulders Classic Clean,L,0.800
@@ -8902,7 +8902,7 @@ barcode,brand,name,unit,quantity
 5900951253577,Cesar,Cesar Izbor u Želeu 4x100g,kg,0.400
 5900951253553,Cesar,Cesar Izbor u Umaku,kg,0.400
 8002410031690,Chilly,Intimni sapun Chilly Delicate,L,0.250
-0080432402931,Chivas Regal,Chivas Regal 12 YO,L,0.7
+80432402931,Chivas Regal,Chivas Regal 12 YO,L,0.7
 49814521,Chupa Chups,Lizalica Best of,g,12
 84196675,Chupa Chups,Lizalica Fruit,g,12.0
 5997536134314,Danone,Actimel Kids Jagoda Banana,kg,0.400
@@ -8920,7 +8920,7 @@ barcode,brand,name,unit,quantity
 3831070658948,Afrodita,Afrodita Sun Kids Mlijeko ZF50,L,0.200
 3831070652618,Afrodita,Sun Care Marmelada Suho Ulje,L,0.150
 3830001296716,Afrodita,Odstranjivač laka za nokte kamilica uljni,L,0.125
-054881000208,Ahmad,Čaj Limun i Đumbir,g,40.000
+54881000208,Ahmad,Čaj Limun i Đumbir,g,40.000
 3859893167898,Histris,Trajna Istarska Kobasica od Boškarina,kg,0.200
 3859893167973,Histris,Trajna salama od boškarina,kg,0.08
 5900300349395,Signal,Pasta za zube Signal White System,ml,125.0
@@ -8948,7 +8948,7 @@ barcode,brand,name,unit,quantity
 3858890879353,Jana,Voda Jana negazirana,L,0.75
 3858891010076,JGL,Dječja mast,L,0.15
 3858891010090,JGL,Dječja mast,L,0.5
-080686000389,Jim Beam,Jim Beam Whiskey Bourbon 40%,L,0.7
+80686000389,Jim Beam,Jim Beam Whiskey Bourbon 40%,L,0.7
 4014500503684,Jogobella,Jogurt Jogobella Exotic,kg,0.15
 9000331607955,Manner,Manner Tortice,kg,0.400
 9000331607917,Manner,Napolitanke lješnjak,kg,0.400
@@ -8982,7 +8982,7 @@ barcode,brand,name,unit,quantity
 5999109581501,Finish,Finish Quantum tablete za perilicu posuđa 100 kom,kom,100
 84196842,Chupa Chups,Lizalica Melody Pops,g,15
 5000189974579,Nestlé,Kit Kat Mini Vrećica,kg,0.200
-054881013666,Ahmad,Čaj Detox,g,40.000
+54881013666,Ahmad,Čaj Detox,g,40.000
 8720181410673,Coccolino,Omekšivač Coccolino Sensitive,L,1.7
 8720181410680,Coccolino,Omekšivač Coccolino Blue Splash,L,1.7
 8714789732671,Colgate,Vodica za usta Colgate Blue,L,0.5
@@ -11344,7 +11344,6 @@ barcode,brand,name,unit,quantity
 5997321758954,Airwick,Airwick Gel Magnolija,g,150
 8606017378808,Pardon,Štapići kikiriki,kg,0.100
 3859889425018,Megafit,Šumeće tablete Vitamin C 90g,g,90.0
-0000090020841,Bravo,Nektar Bravo Multivitamin,L,2.00
 9008700237819,Rauch,Sok Happy Day Naranča Sunshine,L,0.2
 9008700141772,Yippy,Sok Yippy Breskva,L,0.2
 3830084190673,Zala,Zala Negazirana Voda,L,1.5
@@ -11896,7 +11895,7 @@ barcode,brand,name,unit,quantity
 4014400923162,Toffifee,Bombonijera Toffifee Božićni Motiv,kg,0.25
 4000539103063,Lindt,Praline Classic,kg,0.125
 8411778600132,Zanuy,Umak Cheddar sa Sirom,kg,0.3
-046000283234,Old El Paso,Umak Salsa za Kuhanje,g,226
+46000283234,Old El Paso,Umak Salsa za Kuhanje,g,226
 8411778600149,Dupin,Umak Guacamole,kg,0.3
 8411778600118,Dupin,Umak Salsa Taco,kg,0.315
 5400265030869,Hamlet,Praline Image Brown,kg,0.125
@@ -11930,25 +11929,25 @@ barcode,brand,name,unit,quantity
 8698701042256,Dupin,Čokoladno jaje Dubai,g,92
 4008713706352,Joe's Farm,Corn Flakes,kg,1.000
 4008713111408,Brüggen,Corn Flakes,kg,0.375
-0637793001039,Mackays,Džem Đumbir Ekstra,kg,0.340
-0637793000957,Mackays,Marmelada Naranča s Viskiem,kg,0.34
-0637793000940,Mackays,Marmelada naranča i limun s đumbirom,kg,0.340
-0637793001015,Mackays,Džem Jagoda Šampanjac,kg,0.34
-0637793001053,Mackays,Džem Limun Curd,kg,0.34
-0637793002500,Mackays,Marmelada Naranča Dundee,kg,0.34
+637793001039,Mackays,Džem Đumbir Ekstra,kg,0.340
+637793000957,Mackays,Marmelada Naranča s Viskiem,kg,0.34
+637793000940,Mackays,Marmelada naranča i limun s đumbirom,kg,0.340
+637793001015,Mackays,Džem Jagoda Šampanjac,kg,0.34
+637793001053,Mackays,Džem Limun Curd,kg,0.34
+637793002500,Mackays,Marmelada Naranča Dundee,kg,0.34
 5901646030145,Dupin,Salvete Uskrs Mix,kom,20
 4000539727009,Lindt,Čokolada Lindt Teddy Bear,g,100
 8004735096637,Zaini,Zaini Čoko Fruit ribizl i kupina,kg,0.125
 5400265019055,Hamlet,Praline Gold,g,125.0
-0637793000902,Mackays,Marmelada Naranča Seville,kg,0.34
-0637793002517,Mackays,Džem Borovnica i Crni Ribiz,kg,0.34
-0070177177669,Twinings,Čaj Đumbir Limun,g,30
-0070177173159,Twinings,Čaj Twinings Zeleni s Limunom,g,40
-0070177177744,Twinings,Čaj Pure Peppermint,kg,0.04
-0070177177683,Twinings,Čaj Kamilica Med Vanilija,g,30
-0070177077563,Twinings,Čaj Earl Grey,g,50
-0070177077693,Twinings,Čaj English Breakfast,g,50
-0070177173203,Twinings,Čaj Zeleni s Mentom,g,37.5
+637793000902,Mackays,Marmelada Naranča Seville,kg,0.34
+637793002517,Mackays,Džem Borovnica i Crni Ribiz,kg,0.34
+70177177669,Twinings,Čaj Đumbir Limun,g,30
+70177173159,Twinings,Čaj Twinings Zeleni s Limunom,g,40
+70177177744,Twinings,Čaj Pure Peppermint,kg,0.04
+70177177683,Twinings,Čaj Kamilica Med Vanilija,g,30
+70177077563,Twinings,Čaj Earl Grey,g,50
+70177077693,Twinings,Čaj English Breakfast,g,50
+70177173203,Twinings,Čaj Zeleni s Mentom,g,37.5
 5907653104763,Balviten,Kuglice čokoladne hrskave bez glutena,g,140
 8410223907895,El Almendro,Pločice tamna čokolada,kg,0.1
 8001585002108,Balconi,Rolada Kakao,kg,0.25
@@ -12239,10 +12238,10 @@ barcode,brand,name,unit,quantity
 8008343880664,Rummo,Rummo Penne Rigate Bez Glutena,kg,0.5
 3045320089349,Bonne Maman,Džem Malina,kg,0.37
 5410233711829,Realemon,Sok od limuna,L,0.5
-0011210009530,Tabasco,Umak Tabasco Zeleni,L,0.06
+11210009530,Tabasco,Umak Tabasco Zeleni,L,0.06
 8008343201070,Rummo,Rummo Tagliatelle No. 107,kg,0.5
 8710605026535,Go-Tan,Nikas Umak Wok Sezam,L,0.24
-0011210697003,Tabasco,Umak Sriracha,kg,0.3
+11210697003,Tabasco,Umak Sriracha,kg,0.3
 8003753900469,Illy,Kava Illy mljevena jače pržena,kg,0.25
 8003753902630,Illy,Kava Illy mljevena za filter aparate,kg,0.25
 8003753198200,Illy,Illy Lungo Kapsule,g,111.6
@@ -12486,7 +12485,6 @@ barcode,brand,name,unit,quantity
 9005800223056,Nivea,Gel za tuširanje Nivea Creme Care,L,0.5
 4005808762415,Labello,Balzam za usne Pearly Shine,g,4.8
 9005800363059,Labello,Labello Blackberry Shine,g,4.8
-0000042158486,Nivea,Nivea Krema,L,0.03
 9005800283913,Nivea,Nivea Uljni Losion za Tijelo Roses i Argan Oil,L,0.2
 9005800345123,Nivea,Nivea Krema za ruke Care & Protect,L,0.075
 9005800333595,Nivea,Nivea Deo Fresh Blossom,L,0.15
@@ -12520,7 +12518,6 @@ barcode,brand,name,unit,quantity
 4005808255832,Nivea,Šampon Nivea Men Strong Power,L,0.25
 9005800318851,Nivea,Nivea Micelarni Šampon Pure Color,L,0.4
 9005800293189,Nivea,Nivea Micelarni šampon za lomljivu kosu,L,0.4
-0000042246534,Nivea,Nivea Kremasti Gel za Kosu,L,0.15
 9005800223483,Nivea,Šampon Nivea Color Care & Protect,L,0.4
 9005800283685,Nivea,Nivea Care & Hold Sprej za kosu,L,0.25
 5900017063911,Nivea,Šampon Hairmilk Shine,L,0.4
@@ -12528,7 +12525,7 @@ barcode,brand,name,unit,quantity
 4005808730704,Nivea,Nivea Deo Invisible Black & White,L,0.25
 9005800379074,Nivea,Deo Men Black White Fresh,L,0.25
 9005800369778,Nivea,Deo Stick Derma Dry Control ženski,L,0.05
-0000042242055,Nivea,Nivea Men Sensitive Protect Roll-on,L,0.05
+42242055,Nivea,Nivea Men Sensitive Protect Roll-on,L,0.05
 9005800366449,Nivea,Deo Roll On Nivea Fresh Sensation,L,0.05
 4005900681874,Nivea,Nivea Men Sensitive krema,L,0.05
 9005800252704,Nivea,Labello Original,g,4.8
@@ -12654,7 +12651,7 @@ barcode,brand,name,unit,quantity
 3859889463713,Šember,Pjenušac Šember Rose,L,0.75
 3859890469148,Adžić,Vino Rose Lucija,L,0.75
 3859890469056,Adžić,Graševina Adžić Hrnjevac,L,0.75
-0698929000395,Martin Miller's,Gin Martin Miller's,L,0.7
+698929000395,Martin Miller's,Gin Martin Miller's,L,0.7
 3859892908058,Zdjelarević,Graševina Zdjelarević Selekcija,L,0.75
 3859892908065,Zdjélarević,Chardonnay ZWS,L,0.75
 3859892908041,Zdjelarević,Cabernet Sauvignon Superior Zdjelarević ZOI Suho,L,0.75
@@ -12772,7 +12769,7 @@ barcode,brand,name,unit,quantity
 3857500058935,Jakovac,Graševina Jakovac Vrh,L,0.75
 3859893565007,Fakin,Malvazija Fakin Vrh Suho 2023,L,0.75
 3859893565014,Fakin,Teran Fakin ZOI Suho 2022,L,0.75
-0783591081800,Dubrovnik Republic,Gin Dubrovnik Republic,L,0.5
+783591081800,Dubrovnik Republic,Gin Dubrovnik Republic,L,0.5
 3857500090225,Old Pilot's,Old Pilot's Barrel Aged Gin,L,0.7
 3858894590452,Dum Dum,Vodka Dum Dum,L,1.0
 3858894590490,KG Zelina,Domaći Ultra Dum Dum,L,1.0
@@ -12802,8 +12799,8 @@ barcode,brand,name,unit,quantity
 3859890376538,Perković,Liker Borovnica,L,1
 3859892745905,Suza,Liker Fiuman Biljni,L,0.7
 3859892745271,Suza,Pelinkovac Mali Zmaj,L,0.7
-0745125703312,Jedna,Rakija Šljivovica Jedna,L,0.5
-0745125703305,JEDNA,Rakija Travarica Jedna,L,0.5
+745125703312,Jedna,Rakija Šljivovica Jedna,L,0.5
+745125703305,JEDNA,Rakija Travarica Jedna,L,0.5
 3859891224029,Kupife,Kupinovo vino Kupife,L,0.75
 3859891224609,Bokun,Vrganj Suhi,kg,0.05
 9001414024348,Kotanyi,Češnjak u granulama,kg,0.86
@@ -12818,7 +12815,7 @@ barcode,brand,name,unit,quantity
 3859536305403,Griffin,Sauvignon Ivančić Griffin Vrh Suho 2022,L,0.75
 3857500082503,Piena,Pjenušavo vino Piena Brut Charmat,L,0.75
 3857500058546,Belaj,Blend Dvorac Belaj,L,0.75
-0745178995030,Inkoras,Burnum Cuvee Bijeli,L,0.75
+745178995030,Inkoras,Burnum Cuvee Bijeli,L,0.75
 3857500082510,Piena,Pjenušac Piena Rose Brut,L,0.75
 3857500058522,Belaj,Malvazija Istarska,L,0.75
 5000299101209,Four Roses,Whiskey Four Roses Bourbon,L,1.0
@@ -12830,7 +12827,7 @@ barcode,brand,name,unit,quantity
 4000152008073,Nimco,Gin 5 Corners Premium,L,0.7
 4000152003306,Moretto,Liker Medica,L,1.0
 4000152003337,Moretto,Liker Biska,L,1
-0745760434602,Artisan,Gin Artisan,L,0.5
+745760434602,Artisan,Gin Artisan,L,0.5
 7804303371217,Montes,Vino Montes Alpha Syrah,L,0.75
 7804303271142,Montes,Vino Cabernet Sauvignon Reserva,L,0.75
 7804303271166,Montes,Vino Merlot Reserva,L,0.75
@@ -12840,7 +12837,7 @@ barcode,brand,name,unit,quantity
 7804303000407,Kaiken,Vino Kaiken Torrontes,L,0.75
 3830001600155,Jeruzalem Ormož,Traminac Jeruzalem Ormož,L,0.75
 8032894130831,Panarea Island,Gin Panarea Island,L,0.7
-0080432400432,Chivas Regal,Whisky Chivas Regal 12YO,L,1
+80432400432,Chivas Regal,Whisky Chivas Regal 12YO,L,1
 5000299211243,Chivas Regal,Whisky Royal Salute 21YO,L,0.7
 5011007021160,Jameson,Whiskey Jameson,L,4.5
 5000299284926,Chivas Regal,Whisky Chivas Regal 25YO,L,0.7
@@ -12886,7 +12883,7 @@ barcode,brand,name,unit,quantity
 3185370722329,Dom Pérignon,Šampanjac Dom Pérignon Vintage,L,0.75
 5000281005416,Talisker,Viski Talisker 10 YO,L,0.7
 5000281005409,Lagavulin,Viski Lagavulin 16 YO,L,0.70
-082000789611,Bulleit,Whiskey Bourbon Bulleit,L,0.7
+82000789611,Bulleit,Whiskey Bourbon Bulleit,L,0.7
 5000267023601,Johnnie Walker,Whisky Johnnie Walker Black Label 12YO,L,1.0
 5000267196626,Johnnie Walker,Whisky Johnnie Walker Black Label + 2 Čaše,L,0.7
 3052910057909,Monin,Sirup Monin Ranch Limun,L,0.7
@@ -12902,9 +12899,9 @@ barcode,brand,name,unit,quantity
 3052910041229,Monin,Sirup Prženi Lješnjak,L,0.7
 3047102308426,Aberlour,Aberlour 12 YO,L,0.7
 3052910013134,Monin,Sirup Monin Amaretto,L,0.7
-0080432115305,Olmeca,Tequila Anejo Gold,L,0.7
-0080432115251,Olmeca,Tequila Olmeca Blanco,L,0.7
-080432107126,Olmeca,Olmeca Tekila Dark Chocolate,L,0.7
+80432115305,Olmeca,Tequila Anejo Gold,L,0.7
+80432115251,Olmeca,Tequila Olmeca Blanco,L,0.7
+80432107126,Olmeca,Olmeca Tekila Dark Chocolate,L,0.7
 3859889063029,Antunović,Plavac Antunović kvalitetno vino,L,0.75
 3859889063166,Antunović,Plavac Mali Zenith Antunović Vrhunsko Suho Vino,L,0.75
 3859889063012,Antunović,Postup Antunović Vrhunsko Suho Vino,L,0.75
@@ -13188,7 +13185,7 @@ barcode,brand,name,unit,quantity
 6199470001120,Tito's,Tito's Vodka Bez Glutena,L,0.75
 5060210700522,Kilchoman,Whisky Kilchoman Machir Bay,L,0.7
 3024480004522,Remy Martin,Konjak Remy Martin XO,L,0.7
-0810035510104,Shanky's Whip,Liker Shanky's Whip,L,0.7
+810035510104,Shanky's Whip,Liker Shanky's Whip,L,0.7
 6001495062577,Amarula,Liker Amarula Cream,L,0.7
 9013100040280,Mozart,Liker Mozart Pure Black Chocolate,L,0.5
 9013100053303,Mozart,Liker Mozart White Chocolate Vanilla Cream,L,0.5
@@ -13224,7 +13221,7 @@ barcode,brand,name,unit,quantity
 8710625170003,De Kuyper,Sirup Grenadine,L,0.7
 3049197210776,Courvoisier,Courvoisier Cognac VSOP,L,0.7
 8711566013701,Ketel One,Ketel One Vodka 40%,L,0.7
-0860008141224,Skrewball,Skrewball Whiskey Original,L,0.7
+860008141224,Skrewball,Skrewball Whiskey Original,L,0.7
 5000299618769,Beefeater,Beefeater Gin 0.0%,L,0.7
 5000299296721,Malfy,"Malfy Gin Poklon paket 41% (Original, Limun, Grejp, Naranča)",L,0.200
 4589633900025,Ki No Bi,Gin Ki No Bi,L,0.7
@@ -13247,7 +13244,7 @@ barcode,brand,name,unit,quantity
 6412700021027,Finlandia,Finlandia Vodka,L,1.00
 5900191011456,Luksusowa,Vodka Luksusowa,L,1.0
 7312040017072,Absolut,Vodka Absolut,L,0.5
-0089540453705,Canadian Club,Whiskey Canadian Special Old,L,0.7
+89540453705,Canadian Club,Whiskey Canadian Special Old,L,0.7
 5010106110065,Ballantine's,Whisky Ballantine's 30 Y.O.,L,0.7
 5010106014936,Ballantine's,Ballantine's Finest Viski,L,4.5
 5099873167984,Jack Daniel's,Jack Daniel's Whiskey,L,3.00
@@ -13290,7 +13287,7 @@ barcode,brand,name,unit,quantity
 3859893677106,Ventus,Plavac Mali Bura,L,0.75
 3857000002827,Murska Dekla,Gin Murska Dekla London Dry,L,0.7
 3859893795015,Murska Dekla,Gin Murska Dekla Old Tom,L,0.5
-0725765684011,Poetica Distillery,Gin Poetica London Dry,L,0.7
+725765684011,Poetica Distillery,Gin Poetica London Dry,L,0.7
 3859892634070,Petrač,Vino Karizma Petrač (Cab. Sauv. + Merlot) ZOI Suho 2020,L,0.75
 3859890234012,Petrač,Graševina Petrač,L,0.75
 3857500027320,Josipović,Pjenušac Josipović Jazz,L,0.75
@@ -13471,7 +13468,7 @@ barcode,brand,name,unit,quantity
 3859889094085,Kasačko,Kasačko Pivo,L,0.5
 3859892262624,Insako,Mrežica za pisoar,kom,1
 8691959414080,Prenosim,Prenosim Tekući Sapun Orhideja,L,5.00
-0075496331884,Angostura,Rum Angostura 5YO,L,0.7
+75496331884,Angostura,Rum Angostura 5YO,L,0.7
 7350041950103,Heering,Liker od višnje Heering,L,0.7
 3830001715378,Heineken,Pivo Heineken 0.0%,L,0.33
 3830001715187,Heineken,Pivo Heineken Zero Limenka,L,0.33
@@ -13510,7 +13507,7 @@ barcode,brand,name,unit,quantity
 3859893576034,Primarius,"Pivo Zornjak hoppy amber ale 5,1%",L,0.5
 3859893576065,Primarius,Pivo Primarius Blagoslov APA,L,0.5
 3859893576096,Primarius,Pivo Primarius Cjepivo,L,0.5
-0764460287950,Gardia,Pivo Gardia Bezglutensko Lager,L,0.33
+764460287950,Gardia,Pivo Gardia Bezglutensko Lager,L,0.33
 3857500106858,Saperlot,Pivo Lager Boy,L,0.33
 3857500106841,Saperlot,Pivo Saperlot Witch Hat American Porter,L,0.33
 5310008006795,Tikveš,Bela Voda Bijelo,L,0.75
@@ -13704,7 +13701,7 @@ barcode,brand,name,unit,quantity
 3859892261030,Piližota,Babić Piližota Crna Etiketa Vrh Suho 2018,L,0.75
 3859890442356,Josić,Vino Josić Grand Cuvee,L,0.75
 3857500084200,Merga Victa,Vino Pošip,L,0.75
-0764460712728,Gavran,Gin Raven's 23 London Dry,L,0.7
+764460712728,Gavran,Gin Raven's 23 London Dry,L,0.7
 3859890079019,Bibich,Bibich Bas de Bas,L,0.75
 3859889611749,Žito,Jaja Žito A Klasa Razred L,kom,10
 3859889611756,Žito,Jaja Žito M,kom,10
@@ -13935,14 +13932,14 @@ barcode,brand,name,unit,quantity
 3858891560496,Ultra,Kukuruzne pahuljice,kg,0.25
 3858891568669,Ultra,Muesli Ultra Fit Hrskavi Voćni,kg,0.25
 3858891568652,Ultra,Musli Ultra Fit hrskavi s čokoladom,g,250
-0054881009690,Ahmad,Čaj Ahmad Earl Grey,kg,0.05
-0054881005906,Ahmad,Čaj Ahmad English Breakfast,kg,0.05
-0054881005890,Ahmad,Čaj Ahmad Zeleni,kg,0.05
-0054881027472,Ahmad,Čaj Ahmad Kuglica English Breakfast,g,25
-0054881027489,Ahmad,Čaj Ahmad Kuglica Earl Grey,kg,0.025
-0054881027496,Ahmad,Čaj Ahmad English Tea No.1,kg,0.025
-0054881015011,Ahmad,Čaj Ahmad Earl Grey,kg,0.03
-0054881014137,Ahmad,Čaj Ahmad English Breakfast,kg,0.06
+54881009690,Ahmad,Čaj Ahmad Earl Grey,kg,0.05
+54881005906,Ahmad,Čaj Ahmad English Breakfast,kg,0.05
+54881005890,Ahmad,Čaj Ahmad Zeleni,kg,0.05
+54881027472,Ahmad,Čaj Ahmad Kuglica English Breakfast,g,25
+54881027489,Ahmad,Čaj Ahmad Kuglica Earl Grey,kg,0.025
+54881027496,Ahmad,Čaj Ahmad English Tea No.1,kg,0.025
+54881015011,Ahmad,Čaj Ahmad Earl Grey,kg,0.03
+54881014137,Ahmad,Čaj Ahmad English Breakfast,kg,0.06
 3850145104241,Iskra Zelina,Ultra Plus Odčepljivač Odvoda,L,1.0
 3850145104296,Iskra Zelina,Solna kiselina Ultra,L,1
 3850145104289,Iskra Zelina,Izbjeljivač Ultra+,L,1.0
@@ -13975,14 +13972,14 @@ barcode,brand,name,unit,quantity
 5412514111144,Poco Loco,Tortilla Chips Chili,g,200
 5412514935115,La Fiesta,Umak Guacamole Dip,kg,0.3
 4006824007207,Develey,Umak američki za hot dog,L,0.25
-0041500888125,Frank's RedHot,Frank's RedHot Umak Original,L,0.148
-0041500888200,Frank's RedHot,Umak Buffalo Wings,L,0.148
-0041500888149,Frank's RedHot,Umak Ekstra Ljuti,L,0.148
+41500888125,Frank's RedHot,Frank's RedHot Umak Original,L,0.148
+41500888200,Frank's RedHot,Umak Buffalo Wings,L,0.148
+41500888149,Frank's RedHot,Umak Ekstra Ljuti,L,0.148
 5901384505400,Ajinomoto,Salvia - Jelo u čaši Korean BBQ,g,93
 5901384505370,Ajinomoto,Jelo u čaši Pad Thai,kg,0.093
 5901384503741,Ajinomoto,Ramen Juha u Čaši Soja,g,63
 5901384503734,Salvia,Ramen Juha u Čaši Piletina,g,63.0
-0069276220031,Patak's,Namaz Mango Chutney,kg,0.34
+69276220031,Patak's,Namaz Mango Chutney,kg,0.34
 5011308700917,Patak's,Pasta Tikka Masala,g,165
 3800200451704,Salvia,Bruschetta Krambals Šumske Gljive i Maslac,g,70
 3800200451773,Huligan,Huligan Pereci Mini Honey Mustard,g,65.0
@@ -14000,23 +13997,21 @@ barcode,brand,name,unit,quantity
 5901384503758,Ajinomoto,Ramen Japanska Juha u Čaši Miso,g,66.0
 8006837001137,Morato,Kruh Toast American Sandwich Integralni,kg,0.6
 9120012040953,Shan Shi,Kokosovo mlijeko,L,0.4
-0054881005630,Ahmad,Čaj Ahmad Ceylon,kg,0.04
-0054881000031,Ahmad,Čaj Ahmad Šipak i Višnja,kg,0.04
-0054881005517,Ahmad,Čaj Earl Grey,g,40
-0054881008945,Ahmad,Čaj Zeleni,g,40.000
-0054881007535,Ahmad,Čaj zeleni s limunom,kg,0.04
-0054881007511,Ahmad,Čaj zeleni s mentom,kg,0.04
-0054881005654,Ahmad,Čaj Zeleni s Jasminom,g,40
-0054881000024,Ahmad,Čaj Ahmad Menta Limun,g,40.0
-0054881000062,Ahmad,Čaj Ahmad Kamilica Limun,g,30
-0054881005593,Ahmad,Čaj Ahmad Darjeeling,kg,0.04
-0054881007115,Ahmad,Čaj Ahmad Crni s Vanilijom,g,40
-0054881000055,Ahmad,Čaj Ahmad Šumsko Voće,g,40
-0054881006163,Ahmad,Čaj Ahmad English Tea No. 1,g,40
-0054881000208,Ahmad,Čaj limun i đumbir,g,40
-0054881013666,Ahmad,Čaj Detox,g,40
-0054881000017,Ahmad,Čaj Rooibos & Cinnamon,kg,0.03
-0054881008594,Ahmad,Čaj Earl Grey,kg,0.1
+54881005630,Ahmad,Čaj Ahmad Ceylon,kg,0.04
+54881000031,Ahmad,Čaj Ahmad Šipak i Višnja,kg,0.04
+54881005517,Ahmad,Čaj Earl Grey,g,40
+54881008945,Ahmad,Čaj Zeleni,g,40.000
+54881007535,Ahmad,Čaj zeleni s limunom,kg,0.04
+54881007511,Ahmad,Čaj zeleni s mentom,kg,0.04
+54881005654,Ahmad,Čaj Zeleni s Jasminom,g,40
+54881000024,Ahmad,Čaj Ahmad Menta Limun,g,40.0
+54881000062,Ahmad,Čaj Ahmad Kamilica Limun,g,30
+54881005593,Ahmad,Čaj Ahmad Darjeeling,kg,0.04
+54881007115,Ahmad,Čaj Ahmad Crni s Vanilijom,g,40
+54881000055,Ahmad,Čaj Ahmad Šumsko Voće,g,40
+54881006163,Ahmad,Čaj Ahmad English Tea No. 1,g,40
+54881000017,Ahmad,Čaj Rooibos & Cinnamon,kg,0.03
+54881008594,Ahmad,Čaj Earl Grey,kg,0.1
 8000506014008,Salvia,Njoki od krumpira,kg,0.5
 8008698010051,Dr. Schär,Tjestenina Penne Bez Glutena,kg,0.25
 8008698001929,Dr. Schär,Salvia Napolitanke Lješnjak Bez Glutena,kg,0.125
@@ -14027,19 +14022,19 @@ barcode,brand,name,unit,quantity
 8001720445357,Bauli,Bauli Mini Croissant Čokolada,kg,0.075
 8008698054086,Dr. Schar,Keks Wafer Pocket Lješnjak Bez Glutena,kg,0.05
 9002600283099,Shan Shi,Umak Japanski Teriyaki,kg,0.12
-0054881000048,Ahmad,Čaj Ahmad Citrus Mix,kg,0.04
-054881020350,Ahmad,Čaj Slim Limun/Zeleni Čaj,g,30
-054881020367,Ahmad,Čaj Energy Grejp/Guarana,g,30
-054881020381,Ahmad,Čaj Sleep Kamilica/Med/Lavanda,g,30.0
+54881000048,Ahmad,Čaj Ahmad Citrus Mix,kg,0.04
+54881020350,Ahmad,Čaj Slim Limun/Zeleni Čaj,g,30
+54881020367,Ahmad,Čaj Energy Grejp/Guarana,g,30
+54881020381,Ahmad,Čaj Sleep Kamilica/Med/Lavanda,g,30.0
 9120012040151,Shan Shi,Tjestenina s jajima medium,kg,0.250
 9002600282399,Shan Shi,Tjestenina za Wok,kg,0.25
-0054881025195,Ahmad,Čaj Crni,g,40.0
-0054881025225,Ahmad,Čaj Ahmad Zeleni,g,30
+54881025195,Ahmad,Čaj Crni,g,40.0
+54881025225,Ahmad,Čaj Ahmad Zeleni,g,30
 8008698009024,Dr. Schar,Mramorni kolač bez glutena,kg,0.25
 8008698013663,Dr. Schär,Kolač s limunom,kg,0.25
 8008698044742,Dr. Schar,Kreker Schar Pocket,g,50
-0077330347990,Kelsen,Salvia Danski Keks Božićni Motiv Limenka,kg,0.34
-0077330348270,Salvia,Keks Danski Božićni Motiv,kg,0.454
+77330347990,Kelsen,Salvia Danski Keks Božićni Motiv Limenka,kg,0.34
+77330348270,Salvia,Keks Danski Božićni Motiv,kg,0.454
 3178531008110,St Michel,Keks Mini Madeleines,kg,0.250
 3178530415735,St Michel,Keksi Mini Madeleines Multipack,kg,0.150
 8008698046616,Dr. Schär,Muffin Marelica,kg,0.05
@@ -14049,7 +14044,7 @@ barcode,brand,name,unit,quantity
 8003185005107,Monari,Aceto Balsamico Spray,L,0.25
 8001720031017,Bauli,Colomba Classica,kg,0.5
 8034097876127,Motta,Coniglietto Choco Kolač,kg,0.7
-054881008020,Ahmad,Čaj Zeleni 100 g,g,100
+54881008020,Ahmad,Čaj Zeleni 100 g,g,100
 8001720447962,Bauli,Torta Limoncino,kg,0.4
 8001720435242,Bauli,Torta Tiramisu,kg,0.45
 8001720435501,Bauli,Colomba Classic,kg,0.7
@@ -14850,7 +14845,6 @@ barcode,brand,name,unit,quantity
 8693029030077,Elvan,Bomboni Toffix Mix,kg,1.000
 8004235007560,Zig Zag,Zig Zag Losion Tropical Lime,L,0.1
 8004235007317,Zig Zag,Zig Zag Gel Nakon Uboda,L,0.015
-80432402931,Chivas Regal,Chivas Regal 12YO,L,0.7
 42213277,Monkey 47,Monkey 47 Schwarzwald Dry Gin,L,0.5
 5000289925433,Gordon's,Gin Gordon's Dry,L,1.0
 3018300000245,Grand Marnier,Grand Marnier Cordon Rouge Liker,L,0.7
@@ -15617,7 +15611,6 @@ barcode,brand,name,unit,quantity
 9120097312099,Milino,Choco Nut Snack,g,29
 8000005048030,Vegetalcrem,Zamjena za vrhnje Vegetal Crem Cucina,L,0.200
 4025700001023,Milka,Milka čokolada s lješnjakom,g,100
-011210007253,Tabasco,Tabasco Umak Češnjak,ml,60
 5900259130839,Cheetos,Cheetos Pizza,g,85
 5706516031501,Popz,Kokice za mikrovalnu Popz 3x90g,kg,0.27
 8711327583610,Magnum,Sladoled Magnum Starchaser,ml,85.0
@@ -15851,7 +15844,7 @@ barcode,brand,name,unit,quantity
 8606015853185,Fun&Fit,Muesli s orašastim voćem,kg,0.25
 7300400482790,Wasa,Wasa Kreker Mak i Morska Sol,kg,0.245
 8606015846880,Duel,Duel Soft Lotus omekšivač za rublje,L,1.6
-079200558338,Nerds,Nerds Bomboni Rainbow,g,141
+79200558338,Nerds,Nerds Bomboni Rainbow,g,141
 5941664011641,McVities,Digestive keksi s mliječnom čokoladom,g,150
 3858883221855,...,Okruglice od šljiva,kg,1.0
 8410376036169,Gullon,Keks Maria Bez Glutena,kg,0.38
@@ -16054,7 +16047,7 @@ barcode,brand,name,unit,quantity
 3800082907542,Savi,Krekeri Pizza,kg,0.400
 3503780002204,Granini,Nektar Mango,L,1.00
 4823071643084,Gowipes,Gowipes 2u1 - vlažne maramice i vlažni toaletni papir Disney Frozen,kom,1
-024000012412,Del Monte,Kompot Ananas Komadići u Sirupu,kg,0.570
+24000012412,Del Monte,Kompot Ananas Komadići u Sirupu,kg,0.570
 8714100699904,Knorr,Knorr Pasta Snack Rajčica/Mozzarella,g,72.0
 5995706499096,Foltin,Žele bomboni Xmas,g,100.000
 8711327585324,Magnum,Sladoled Starchaser,L,0.440
@@ -16357,7 +16350,7 @@ barcode,brand,name,unit,quantity
 3858884352800,Frigo,Frigo set četvrtasti 3/1,kom,1
 8595241526140,Franz Josef,Tuna salata kvinoja,g,160
 3800213633340,Sli-Met,Čoko Kuglice,kg,0.36
-089686170047,Indomie,Instant Juha s Rezancima Okusa Specijalne Piletine,g,75
+89686170047,Indomie,Instant Juha s Rezancima Okusa Specijalne Piletine,g,75
 7622210230416,Philadelphia,Philadelphia bez laktoze,kg,0.150
 5900928007264,Dijo,Pšenična Tortilja Grill,g,250.0
 9062300129127,Hipp,Hipp Bio Kašica Breskva s Kruškom,g,190.0
@@ -16511,7 +16504,7 @@ barcode,brand,name,unit,quantity
 5411188083214,Provamel,Provamel Bio Haferdink Natur,L,1
 8606100820665,Fresh,Vlažne maramice Junior,kom,15
 3859892800307,Royal,Krem Banana,g,500.0
-079200616007,Nerds,Nerds Bomboni grožđe i jagoda,g,141
+79200616007,Nerds,Nerds Bomboni grožđe i jagoda,g,141
 4823071623697,Vortex,"Vortex spužvasta krpa, celuloza",kom,3
 4770299403214,Džiugas,Hrskave loptice sa sirom karamelizirani luk,g,50
 3859893778629,Forum Orgo,Vege Burger Crni Grah i Curry,g,200
@@ -16592,7 +16585,7 @@ barcode,brand,name,unit,quantity
 8594012793538,Giana,Sardina s čilijem u biljnom ulju,g,125
 3858891292052,My Life,My Life Kaša Malina,g,65
 7622300756383,Milka,Philadelphia Milka sirni namaz,g,175
-034000702329,Reese's,Reese's Peanut Butter Cups,g,42
+34000702329,Reese's,Reese's Peanut Butter Cups,g,42
 3856015330352,Zvijezda,Margo Nova,kg,0.5
 5948688045379,Stumble Guys,Stumble Guys Tropical,L,0.25
 4003834000112,Dr. Oetker,Svježi kvasac,g,42
@@ -16688,7 +16681,7 @@ barcode,brand,name,unit,quantity
 4000521036287,Dr. Oetker,Dr. Oetker Pastelne Perle,g,33.0
 3859892050238,Zoda,Spužva za suđe velika,kom,5
 3831051015043,Zelene doline,Sir Trapist 45% m.m.,g,300
-034000433032,Reese's,Reese's Peanut Butter Cups White,g,39.5
+34000433032,Reese's,Reese's Peanut Butter Cups White,g,39.5
 3831051017313,Proteini.si,Proteinski napitak keks,L,0.25
 8003410344254,Segafredo,Kava Segafredo Moka,kg,0.25
 3902634650118,Vipa,Čips Paprika,g,140.000
@@ -16819,10 +16812,9 @@ barcode,brand,name,unit,quantity
 3859890063209,Bibo,Bibo biorazgradive vlažne maramice,kom,60.00
 3831051009035,Zelene Doline,Desert Jogurtno Vrhnje Višnja,g,150
 3856015330642,Zvijezda,Zvijezda Američki Dressing,L,0.25
-089686170108,Indomie,Indomie instant juha okus piletina,g,70
+89686170108,Indomie,Indomie instant juha okus piletina,g,70
 3858894140800,E Buono,Grah šareni,kg,0.400
 3858881775367,Anamaria,Cappuccino Golden Classic,g,200
-089686170269,Indomie,Instant juha s rezancima okusa povrća,kg,0.375
 5203225003985,Riddle,Riddle Vafel s kikiriki maslacem i mliječnom čokoladom,g,45
 3856014107924,Koestlin,Keks Speculaas,kg,0.225
 3435649848466,Vernet,Mahune zelene,kg,0.4
@@ -16853,7 +16845,6 @@ barcode,brand,name,unit,quantity
 5904730983846,LOL,LOL Cherry Surprise,L,0.25
 3858881774933,Anamaria,Cappuccino Rum Kokos,g,144
 8606015858111,Fun&Fit,Zobena kaša čokolada,g,60
-089686170115,Indomie,Indomie Juha Piletina 5/1,g,350
 3858894140992,Marsli,Piškote,g,200.0
 8600050604283,Panona,Panona Tjestenina Spirala,g,400
 3859888378018,Medo Flor,Med Cvjetni,kg,0.9
@@ -16894,7 +16885,6 @@ barcode,brand,name,unit,quantity
 3830066283119,Hod,Smokva suha,g,200.000
 8600104005042,Jaffa,Čoko Štrudla s Jaffa Narančom,g,264
 3859890063162,Bibo,Maramice za skidanje šminke,kom,25
-089686170054,Indomie,Instant juha s rezancima okusa piletina,kg,0.375
 3830000629898,Nara,Nara sok,L,0.5
 3870007063356,Vispak,Juha pileća s tjesteninom,g,52
 3859893567001,Izidor,Kukuruzno žuto brašno,kg,1.0
@@ -17149,11 +17139,11 @@ barcode,brand,name,unit,quantity
 9002975002066,Haribo,Bomboni Haribo Zlatni Medo Kiseli,kg,0.10
 8720181468438,Dove,Gel za tuširanje Dove Silky Velvet XXL,L,0.45
 8720182258830,Dove,Sapun Dove Gentle Exfoliating,kg,0.090
-024000027584,Del Monte,Kompot kruška polovice u sirupu,kg,0.42
-024000001645,Del Monte,Kompot Ananas Komadići u Soku,kg,0.56
-024000011859,Del Monte,Kompot Ananas Kolut u Soku,kg,0.565
-024000181590,Del Monte,Kompot Breskva Polovice u Sirupu,kg,0.470
-024000181453,Del Monte,Kompot marelica polovice u sirupu,kg,0.24
+24000027584,Del Monte,Kompot kruška polovice u sirupu,kg,0.42
+24000001645,Del Monte,Kompot Ananas Komadići u Soku,kg,0.56
+24000011859,Del Monte,Kompot Ananas Kolut u Soku,kg,0.565
+24000181590,Del Monte,Kompot Breskva Polovice u Sirupu,kg,0.470
+24000181453,Del Monte,Kompot marelica polovice u sirupu,kg,0.24
 8015854140866,Gecchele,Gecchele Biskvit Mramorni,kg,0.400
 8015854121025,Gecchele,Lisnati štapići,g,125
 8001060001404,Sacla,Masline crne pečene,g,100
@@ -17183,7 +17173,7 @@ barcode,brand,name,unit,quantity
 8801056094034,Lotte,Aloe Vera Jagoda,L,0.24
 3858892751374,Flora,Toaletni papir Flora Super Soft Kamilica 3SL 16/1,kom,16.00
 8032523373066,Mace,Sok Mace Šipak Jabuka Crveno Voće Nar Grožđe,L,0.25
-0813497006192,Bumbu,Bumbu Rum Cream,L,0.7
+813497006192,Bumbu,Bumbu Rum Cream,L,0.7
 8605073300068,Helf,Bomboni Helf Original,g,80
 3245990043317,Hennessy,Hennessy V.S. Konjak,L,0.7
 4000521029487,Dr. Oetker,Riža na mlijeku High Protein,g,104
@@ -17891,13 +17881,7 @@ barcode,brand,name,unit,quantity
 8410522009672,Agrosevilla,Masline crne bez koštica,g,75
 8410522000389,Agro Sevilla,Masline Zelene Bez Koštice,kg,0.075
 8410522000303,Agrosevilla,Masline zelene punjene paprikom,kg,0.10
-054881000055,Ahmad,Čaj šumsko voće,kg,0.04
-054881006163,Ahmad,Ahmad čaj English Tea No.1,g,40
-054881008945,Ahmad,Ahmad Čaj Zeleni,kg,0.04
-054881005630,Ahmad,Čaj Ceylon,g,40
-054881005517,Ahmad,Ahmad Čaj Earl Grey,kg,0.04
-054881009546,Ahmad,Čaj zeleni s jasminom,kg,0.10
-054881007535,Ahmad,Čaj zeleni s limunom,kg,0.04
+54881009546,Ahmad,Čaj zeleni s jasminom,kg,0.10
 3858895020132,Histris,Histris - Trajna Istarska Kobasica s Orasima,kg,0.200
 3858895020071,Histris,Salama Pancettosa,kg,0.300
 3859893167485,Histris,Histris Kobasica od jelena,g,200
@@ -17972,7 +17956,6 @@ barcode,brand,name,unit,quantity
 3859888499867,Klara M,Klara M - Istarske široke lazanje,kg,0.25
 3859888499942,Klara,Tijesto Istarske Lazanjice,kg,0.25
 3858881090187,Koestlin,Keks Piknik Bez Šećera,kg,0.24
-054881005890,Ahmad,Čaj Zeleni,kg,0.05
 8008110001353,AIA,AIA Pureći File Odresci,kg,0.45
 8718951321434,Colgate,Colgate Pasta Kids Print,L,0.05
 8714789954431,Colgate,Četkica Colgate Slim Soft Charcoal,kom,1
@@ -18179,7 +18162,7 @@ barcode,brand,name,unit,quantity
 4008455584812,Dr. Beckmann,Dr. Beckmann Listići za pranje rublja Color,kom,20
 3859890197546,Croma,Svinjska crijeva 10m 38/42,kom,1
 3859892658229,Croma,Svinjska crijeva tanka 10m 36/38,kom,1
-089686170313,Indomie,Indomie Juha Povrće Noodles,g,75
+89686170313,Indomie,Indomie Juha Povrće Noodles,g,75
 8003510020560,Intesa,Lak za kosu Intesa Extra Strong,L,0.50
 3859893064876,Moje Malo Zlato,Kruh kukuruzni miješani bez glutena,kg,0.36
 3859888430365,Cro Go,Voćni kolač,kg,0.50
@@ -18198,7 +18181,6 @@ barcode,brand,name,unit,quantity
 3850108877991,Vindija,Iso Sport Limun Grejp,L,4.00
 9000101736748,Palette,Boja za kosu Palette Deluxe 4-6,kom,1
 5941035012642,Elephant,Elephant Pereci Lomljeni Roštilj,g,125
-011210006508,Tabasco,Tabasco Habanero umak,L,0.06
 3859893082405,Hedona,Čokolada mliječna s brusnicama i lješnjacima,g,100
 3859893082597,Hedona,Praline Jagoda Lješ Kokos,g,90
 3859893082771,Hedona,Hedona Namaz Čokolada Lješnjak 60%,kg,0.200
@@ -18515,8 +18497,8 @@ barcode,brand,name,unit,quantity
 8004180500000,Aperitivo,Liker Aperitivo,L,1.0
 8003535081690,Witors,Čokoladna Mini Jaja Lješnjak Krema,g,115
 3872084016072,Eurocompany99,Mješavina orašastih plodova,kg,0.300
-0680275029144,English Tea Shop,Čaj Earl Grey,g,45
-0680275029236,English Tea Shop,Čaj Super Berries,kg,0.04
+680275029144,English Tea Shop,Čaj Earl Grey,g,45
+680275029236,English Tea Shop,Čaj Super Berries,kg,0.04
 8003130141119,San Carlo,Čips paprika,kg,0.15
 8586000135543,St. Nicolaus,Martignac Special 38%,L,0.7
 8586000131880,St. Nicolaus,Vodka Nicolaus Extra Fine 38%,L,0.7
@@ -18552,11 +18534,6 @@ barcode,brand,name,unit,quantity
 5901086000333,Teekanne,Čaj Zeleni Nature,g,35
 3858890478051,Boom Box,Keks Zobeni Kakao,kg,0.200
 3858894541713,Doora,Džem Jagoda,kg,0.68
-054881000062,Ahmad,Ahmad Čaj Kamilica i Limunska Trava,kg,0.03
-054881005654,Ahmad,Čaj zeleni s jasminom,kg,0.04
-054881007115,Ahmad,Čaj crni s vanilijom,kg,0.04
-054881007511,Ahmad,Ahmad Zeleni Čaj s Mentom,kg,0.04
-054881000048,Ahmad,Ahmad Čaj Citrus Mix,g,40
 8717438743318,Barkleys,Barkleys bomboni đumbir i naranča,g,50
 5941445676212,Nutline,Badem Prženi,g,125
 3859890630791,Vedrini,Vedrini Exotic Mix,kg,0.400
@@ -19048,7 +19025,7 @@ barcode,brand,name,unit,quantity
 3859888433267,Koleda,Makaroni s jajima,kg,0.400
 3859888433250,Koleda,Koleda školjkice s jajima,kg,0.4
 3859888433281,Koleda,Tijesto pužići s jajima,kg,0.400
-0071409543214,Mane 'n Tail,Šampon Mane 'n Tail,L,0.355
+71409543214,Mane 'n Tail,Šampon Mane 'n Tail,L,0.355
 4027800402205,Wilkinson,Patrone Wilkinson Hydro 5,kom,4
 4027800439935,Wilkinson,Wilkinson Hydro 5 Skin Protection Brijač + 1 Britvica,kom,1
 4027800503605,Wilkinson,Patrone Wilkinson Essentials 3 Hybrid,kom,4
@@ -19087,7 +19064,7 @@ barcode,brand,name,unit,quantity
 8700216614931,Oral B,Četkica za zube Oral B iO2 Black,kom,1
 3850139030570,PIK Vrbovec,Šunka seljačka,kg,1.00
 3858888590536,Zdenka,Sir Sport,kg,0.6
-083800047840,7th Heaven,7th Heaven Maska za lice Panda,kom,1
+83800047840,7th Heaven,7th Heaven Maska za lice Panda,kom,1
 4016369541975,Lacalut,Lacalut Vodica Micel Multi-Ef,L,0.50
 3850105179623,Lahor,Sapun Lahor Olive,g,80
 8000070042377,Lavazza,Lavazza Kapsule Cremoso,kg,0.128
@@ -19113,7 +19090,7 @@ barcode,brand,name,unit,quantity
 3859889562546,Poljo Posavec,Ulje bučino djevičansko,L,0.25
 8436581946130,Reebok,Deo sprej Reebok Inspire Women,L,0.15
 680275066835,English Tea Shop,Čaj Advent Kalendar Tea Book,g,70
-0680275029137,English Tea Shop,Čaj Citrus & Ginger,kg,0.03
+680275029137,English Tea Shop,Čaj Citrus & Ginger,kg,0.03
 680275062974,English Tea Shop,Čaj crni Bio Božićni,kg,0.04
 5060033820681,The Pink Stuff,The Pink Stuff Gel za čišćenje WC-a,L,0.75
 5060033821527,Pink Stuff,Pink Stuff Za Pod,L,1.00
@@ -19135,8 +19112,6 @@ barcode,brand,name,unit,quantity
 9001376751030,Alufix,Alufix Vrećica Termo Hot&Cool,kom,1
 3245421124172,Soke,Gumene rukavice Economic M,kom,1
 3850116039824,Ledo,Sladoled Macho Pina Colada,ml,75
-0613008753320,Arizona,Ledeni čaj Arizona zeleni s medom,L,0.45
-0613008753290,Arizona,Ledeni čaj Arizona Breskva,L,0.45
 8720181415678,Axe,Deo Stick Africa,L,0.05
 8720181555596,Axe,Deo Axe Kenobi Aqua Bergamot,L,0.15
 8710447285428,Axe,Dezodorans Axe Leather & Cookies,L,0.15
@@ -19200,9 +19175,8 @@ barcode,brand,name,unit,quantity
 5060194791820,Saitaku,Saitaku Shiro Miso Pasta,kg,0.30
 3859893064326,Moje Malo Zlato,Tapioka Kruh Gau./Vlasac Sir,kg,0.57
 8717545623077,Old Amsterdam,Sir tvrdi Old Amsterdam,kg,0.15
-0613008753351,Arizona,Ledeni čaj Arizona Nar,L,0.45
-0613008753412,Arizona,Ledeni čaj Arizona zeleni s medom i šljivom,L,0.45
-0613008753382,Arizona,Ledeni čaj Arizona Borovnica,L,0.45
+613008753351,Arizona,Ledeni čaj Arizona Nar,L,0.45
+613008753412,Arizona,Ledeni čaj Arizona zeleni s medom i šljivom,L,0.45
 8717438743233,Barkleys,Bomboni Spearmint,g,50
 3858884998251,Pivac,Kulen Premium Narezak,g,80
 9005800369174,Nivea,Nivea Baby Kupka Bed Time,L,0.200
@@ -19545,8 +19519,7 @@ barcode,brand,name,unit,quantity
 3859888154827,Blato 1902,Vino Pošip Težak Vrh,L,0.75
 3858881774575,Anamaria,Kava Instant 3u1 Strong,g,18
 8594023925607,Surprise,Voda izvorska Surprise,L,0.3
-0011210007253,Tabasco,Tabasco Umak Češnjak,l,0.06
-0011210607040,Tabasco,Umak Tabasco Chipotle,l,0.06
+11210607040,Tabasco,Umak Tabasco Chipotle,l,0.06
 3858893750185,Volim Ljuto,Volim Ljuto Vrabasco Mild Ljuti Umak,L,0.100
 3858893750208,Volim Ljuto,Volim Ljuto Vrabasco Dimljeni Ljuti Umak,L,0.100
 9001400005009,Yo,Sirup Jagoda,L,0.7
@@ -19647,7 +19620,6 @@ barcode,brand,name,unit,quantity
 9005800380544,Nivea,Nivea Krema Repair & Care,L,0.400
 5201314909040,Fino,Vrećice za namirnice 3L,kom,50.00
 4035800407007,Dickmanns,Super Dickmanns Desert pjena čokolada,kg,0.250
-070177173159,Twinings,Čaj zeleni s limunom,g,40
 3600551164199,Mixa,Mixa Intenzivno Hranjivo Mlijeko za Tijelo,L,0.4
 8711327621015,Algida,Carte D'Or Sladoled Stracciatella,L,0.825
 5201314913115,Fino,Vlažne krpe Fino Super Strong,kom,2.00
@@ -20577,7 +20549,7 @@ barcode,brand,name,unit,quantity
 9000101800913,Silan,Silan Rose,L,1.1
 9000101599176,Persil,Persil Gel Color,L,2.475
 3608580007203,Bonne Maman,Džem Jagoda Malina,kg,0.370
-0680275029243,English Tea Shop,Čaj Peppermint,kg,0.03
+680275029243,English Tea Shop,Čaj Peppermint,kg,0.03
 4008455437217,Dr. Beckmann,Bjelilo u vrećicama,kom,2
 8003650026545,Smac,Smac Express Odmašćivač Lavanda,L,0.65
 5908260250126,Oshee,Oshee Izotonic Naranča,L,0.75
@@ -20598,7 +20570,6 @@ barcode,brand,name,unit,quantity
 8700216690874,Ariel,Ariel Deterdžent za rublje Amethyst,L,2.25
 8700216764735,Ariel,Ariel Black Kapsule,kom,38
 8700216691475,Ariel,Deterdžent za rublje Ariel Color,L,2.25
-054881000024,Ahmad,Čaj menta i limun,kg,0.030
 9000101808834,Somat,Somat Gold tablete za perilicu posuđa,kom,70
 9001378720201,Spontex,Mrežica za ribanje od inoxa,kom,2.00
 3600523525621,L'Oréal,L'Oréal Preference Boja za kosu 10.21 Stockholm,kom,1
@@ -20647,8 +20618,8 @@ barcode,brand,name,unit,quantity
 8003650014719,WC Net,WC Net Gel Crystal Citrus Fresh,L,0.75
 3850145462242,Dominol,Dominol Sredstvo za čišćenje laminata,L,0.75
 9000101689976,Syoss,Maska za kosu Syoss Keratin,L,0.5
-0810020935578,Jack Daniel's,Umak Original BBQ,kg,0.280
-0810020935530,Jack Daniel's,Jack Daniel's Umak Med BBQ,kg,0.28
+810020935578,Jack Daniel's,Umak Original BBQ,kg,0.280
+810020935530,Jack Daniel's,Jack Daniel's Umak Med BBQ,kg,0.28
 8008343221320,Rummo,Rummo Tjestenina Gliatelle s Jajima,kg,0.25
 8001250121264,De Cecco,Conchiglioni Rigati Tjestenina,kg,0.5
 3859889106238,Delicia,Keksi Chocolix Pir Bez Šećera,kg,0.200
@@ -20662,8 +20633,8 @@ barcode,brand,name,unit,quantity
 3859890446132,Orgula,Orgula Ulje Ekstra Djevičansko Aroma Maslinovo Ulje sa Začinskim Biljem s Hvara,L,0.25
 3859890446088,Orgula,Orgula Ulje Ekstra Djevičansko Aromatično s Češnjakom,L,0.25
 5010651001214,Billingtons,Šećer smeđi Muscovado Light,kg,0.5
-0022796976116,OGX,Šampon OGX Argan,L,0.385
-0022796976123,OGX,Arganovo ulje,L,0.385
+22796976116,OGX,Šampon OGX Argan,L,0.385
+22796976123,OGX,Arganovo ulje,L,0.385
 3859889179225,Zigante,Tartufata,g,180
 8711327622210,Magnum,Sladoled Magnum Euphoria Multipack,L,0.330
 5201314911081,Fino,Žica za teflonske površine,kom,1
@@ -20932,8 +20903,8 @@ barcode,brand,name,unit,quantity
 8600101567581,Pavlović,Pavlovićeva Mast Originalna,L,0.100
 5941021005139,Heidi,Čokolada mliječna s bademom,g,100
 6927749810636,Wanpy,Wanpy Dog Pil i Bakalar,g,100
-0022796977526,OGX,OGX Keratin,L,0.385
-0022796977519,OGX,Šampon OGX Keratin,L,0.385
+22796977526,OGX,OGX Keratin,L,0.385
+22796977519,OGX,Šampon OGX Keratin,L,0.385
 3574661563336,OGX,Ulje za kosu Argan,L,0.100
 3858881100398,Lola Baby,Krpe pamučne,kom,6.00
 3831070660569,Afrodita,Afrodita Gel za tuširanje Sicilian Lemon,L,0.25
@@ -21060,7 +21031,7 @@ barcode,brand,name,unit,quantity
 3858891971476,Nutrigold,Agavin sirup,kg,0.35
 3800233091151,B.Yond,Čips riža sol papar limeta,g,60
 3858891971544,Nutrigold,Nutrigold Psyllium Ljuskice,kg,0.300
-083800018291,7th Heaven,7th Heaven Flasteri za nos s ugljenom,kom,3
+83800018291,7th Heaven,7th Heaven Flasteri za nos s ugljenom,kom,3
 5201044011266,Lov,"Zobena pločica s medom, kikirikijem i karamelom",g,50
 5201044011235,Lov Bites,Zobeni snack banana badem čokolada,g,70
 5201044011273,Lov Bites,Lov Bites - Snack Tahi Med Nar Kak,g,50
@@ -21106,7 +21077,7 @@ barcode,brand,name,unit,quantity
 3859894057648,Meštar,Meštar Bangulina Roll On,ml,50
 3859894057006,Meštar,Krema Meštar Picigin Hidro Revit,L,0.05
 3859894057044,Meštar,Losion poslije brijanja Meštar Bagulina,L,0.05
-0022796976710,OGX,OGX Biotin & Collagen Regenerator,L,0.385
+22796976710,OGX,OGX Biotin & Collagen Regenerator,L,0.385
 3574661685144,OGX,Maska za kosu Argan,L,0.300
 3574661563350,OGX,Ulje za kosu Argan,L,0.118
 3017800252543,D'Aucy,Quinoa,kg,0.14
@@ -21194,11 +21165,11 @@ barcode,brand,name,unit,quantity
 4005900978387,Labello,Balzam za usne Labello Vanilla,g,4.8
 3850291049557,Franck,Smeđi šećer,kg,2.40
 3850291049489,Franck,Šećer ugostiteljski,g,2400.0
-0071164333068,Hask,Hask Argan Regenerator,l,0.05
-0071164333075,Hask,Hask Keratin Regenerator,kom,1
-0071164029855,Hask,Ulje za kosu Hask Argan,L,0.018
-039047001404,Walkers,Walkers Keksi s maslacem,kg,0.15
-039047050730,Walkers,Keksi s komadićima belgijske čokolade,kg,0.15
+71164333068,Hask,Hask Argan Regenerator,l,0.05
+71164333075,Hask,Hask Keratin Regenerator,kom,1
+71164029855,Hask,Ulje za kosu Hask Argan,L,0.018
+39047001404,Walkers,Walkers Keksi s maslacem,kg,0.15
+39047050730,Walkers,Keksi s komadićima belgijske čokolade,kg,0.15
 3859892560478,Vegetariana,Vegetariana Eko Namaz sa Sjemenkama Konoplje,kg,0.100
 3859892560492,Vegetariana,Vegetariana Eko Namaz Sjemenki Konoplje i Čilija,kg,0.100
 3859888345942,Olival,Regenerativna krema s uljem smilja,L,0.05
@@ -21279,7 +21250,7 @@ barcode,brand,name,unit,quantity
 3574661529219,Neutrogena,Neutrogena Clear tonik,L,0.125
 3856020911874,Biobaza,Biobaza After Sun,L,0.25
 3856020909710,Biobaza,Biobaza Deep White Extra Strong pasta za zube,kom,1
-0041500011622,Frank's RedHot,Umak Jalapeno,kg,0.145
+41500011622,Frank's RedHot,Umak Jalapeno,kg,0.145
 9000403953317,Julius Meinl,Kava u zrnu Melange,kg,1.0
 9000403895334,Julius Meinl,Julius Meinl Premium Caffe Crema Kava u Zrnu,kg,1.0
 7612412429510,Curaprox,Curaprox Be You Jabuka,L,0.06
@@ -21329,8 +21300,8 @@ barcode,brand,name,unit,quantity
 42420088,Nivea,Nivea Naturally Good Aloe Vera krema,L,0.200
 42419877,Nivea,Intimne maramice,kom,15
 7322541351414,Zewa,Zewa Natural Soft,kom,80
-0071164343166,Hask,Šampon Hask Argan,L,0.355
-0071164343173,Hask,Šampon Hask Keratin,L,0.355
+71164343166,Hask,Šampon Hask Argan,L,0.355
+71164343173,Hask,Šampon Hask Keratin,L,0.355
 3859891496853,Madig,Grah Crveni Kuhani,kg,0.35
 5900191011463,Luksusowa,Vodka Luksusowa,L,0.7
 3858886500360,Agristar,Čaj Muški Mješavina,kg,0.05
@@ -21353,7 +21324,7 @@ barcode,brand,name,unit,quantity
 9001414343487,Kotanyi,Origano Bio,g,8
 3858882216289,Zvijezda,Kečap Blagi Gastro,kg,5.00
 3830001298468,Afrodita,Šampon Kamilica za Kosu,L,1.00
-070177229634,Twinings,Čaj Defence Superblends,g,36
+70177229634,Twinings,Čaj Defence Superblends,g,36
 9001414611791,Kotanyi,Vanilin šećer,g,70
 9001414206881,Kotanyi,Začin za batat,g,80
 3859889426039,Paška Sirana,Sir Primorac,kg,1.00
@@ -21886,7 +21857,7 @@ barcode,brand,name,unit,quantity
 4008496676545,Varta,Baterije Varta Energy AAA,kom,6
 3850116058511,Ledo,Sladoled Tropic Time,kom,12
 5412087002559,Vitakraft,Posuda za kućne ljubimce,L,0.660
-0046000283272,Dupin,Umak Salsa Chunky,g,312.000
+46000283272,Dupin,Umak Salsa Chunky,g,312.000
 3850105159915,Faks,Faks Aquamarine,kg,2.6
 5000204358247,Raid,Raid Tablete za električni aparat,kom,10
 8006540579374,Jar,Jar Lemon Deterdžent za suđe,L,1.5
@@ -22179,7 +22150,6 @@ barcode,brand,name,unit,quantity
 5900238582291,Baron,Bombonjera Sweet Obsession,g,250
 3856020216832,Podravka,Kobasica Grill,kg,0.320
 4027800004201,Wilkinson,Wilkinson Extra 3 Sensitive,kom,4
-0080686000389,Jim Beam,Whiskey Jim Beam Bourbon,L,0.7
 3850158202323,Maraska,Medica,L,0.7
 9000101372878,Persil,Persil Regular Discs,kom,22
 9062300134084,Hipp,Kašica žitna s bananom,g,190
@@ -22216,7 +22186,6 @@ barcode,brand,name,unit,quantity
 3850105155658,Bioaktiv,Bioaktiv Marine Compact deterdžent,kg,1.4
 3850139443448,PIK Vrbovec,Miješano mljeveno meso (svinjetina + junetina),kg,0.850
 3858886175216,Ekozona,Cous Cous,kg,0.500
-0897076002010,Bulldog,Gin Bulldog,L,0.7
 3830069173202,Proteini.si,Proteinski napitak Natural BCAA Maracuja,kg,0.200
 8001090790606,Ariel,Tekući deterdžent Ariel Mountain Spring,L,1.1
 3859891367238,Opti Line,Vrećice za zamrzavanje 5L,kom,25
@@ -22696,7 +22665,6 @@ barcode,brand,name,unit,quantity
 3850108072969,Fis,Napitak gazirani naranča,L,1.5
 8718800004358,Dupin,Čokoladni novčići Jednorog,g,30
 3856021304682,Chio,Tip Top 3 Pack,kg,0.145
-0011210006508,Tabasco,Umak Tabasco Habanero,ml,60
 3858881583177,Nadalina,Sezam,g,50
 4000512016243,Trolli,Gumeni bomboni Trolli Red Fruits,g,350.0
 3858894140374,Super Pawer,Hrana za pse govedina,kg,10.00
@@ -22849,7 +22817,7 @@ barcode,brand,name,unit,quantity
 4008496676583,Varta,Baterije Varta Energy AA,kom,6
 7891024137895,Colgate,Pasta za zube LPP Whitening,L,0.100
 5310002251962,Simphony,Bombonijera Simphony Mix,g,200
-0070330600065,BIC,BIC Maxi upaljač,kom,1
+70330600065,BIC,BIC Maxi upaljač,kom,1
 5900951250316,Kit Kat,Kit Kat Mix Obroci Losos/Piletina,kg,0.400
 3850161031101,IstraVino,Bakarska Vodica Special,L,0.75
 5000204647006,Autan,Gel poslije uboda,L,0.025
@@ -23432,7 +23400,6 @@ barcode,brand,name,unit,quantity
 3875000057258,Swisslion,Eurovafel Kockica,g,200.00
 7322540973174,Zewa,Zewa Ručnici Extra Long,kom,2.000
 3600542518420,Ambre Solaire,Mlijeko za sunčanje ZF30,L,0.2
-42242055,Nivea,Nivea Men Sensitive Protect Roll-On,L,0.050
 3831070650652,Afrodita,Afrodita Hyaluron Hidratantni Losion,L,0.250
 8718699630645,Philips,Žarulja Philips LED A55 11W E27,kom,1
 4005808767014,Labello,Labello Sun SPF 30,g,4.8
@@ -24425,7 +24392,6 @@ barcode,brand,name,unit,quantity
 3850158403102,Maraska,Liker Kruškovac Čutura,L,0.7
 3600541343764,Garnier,Boja za kosu Color Naturals 3.6,kom,1
 8600114001737,Tak,Kreker Tak Classic,g,200.0
-0089686170108,Indomie,Juha instant rezanci s okusom piletine,g,70
 3850354017707,Dukat,Sensia Fibers Mood Food Mix,g,125
 9005800372631,Nivea,Nivea Men Sensitive Care Poklon Paket,kom,1
 9000101641073,Fa,Gel za tuširanje Fa Red Cedarwood,L,0.400
@@ -24565,7 +24531,7 @@ barcode,brand,name,unit,quantity
 3858882924269,Advent,Namaz od kikirikija hrskavi,kg,0.340
 3859889562058,Poljo Posavec,Zemlja za cvijeće Biokomposit,L,50.0
 3859893220425,Roko,Sir kozji Roko,kg,0.250
-0745760129362,Rakić,Jaja slobodni uzgoj M,kom,10
+745760129362,Rakić,Jaja slobodni uzgoj M,kom,10
 3850108023275,Vindija,Čokoladno mlijeko bez laktoze,L,0.2
 3014260293222,Oral-B,Četkica za zube Oral-B Classic 40 Medium,kom,1
 3859890650706,Badel 1862,Vino Debit bijelo,L,0.187
@@ -25275,7 +25241,7 @@ barcode,brand,name,unit,quantity
 3858881791824,HOD,Pistacije,g,100.000
 3852103685205,Stop,Muholovka,kom,4
 9000101726510,Fa,Fa Gel za tuširanje Passion Fruit,L,0.25
-0089686122169,Indomie,Indomie Juha Povrće,g,60
+89686122169,Indomie,Indomie Juha Povrće,g,60
 8002734100928,C.A.K. D.O.O.,Panettone krema grožđice i vanilija,kg,0.750
 8422424500270,Mexifoods,Začin Burrito,g,30
 3600542310482,Garnier,Dezodorans Garnier Invisible Clean Cotton,L,0.150
@@ -26008,8 +25974,7 @@ barcode,brand,name,unit,quantity
 3859890332589,Veralda,Vino Muškat,L,0.5
 3830055523851,Dana,Sok Naranča 100%,L,0.2
 8690146124436,Bebeto,Bebeto bomboni gumeni lubenica,g,80
-011210000155,Tabasco,Tabasco umak crveni 150 ml,L,0.150
-011210607040,Tabasco,Umak Tabasco Okus Dima Chipotle,L,0.060
+11210000155,Tabasco,Tabasco umak crveni 150 ml,L,0.150
 3830001292695,Afrodita,Afrodita Hydra depilacijska krema,L,0.100
 5997381358774,Dr. Oetker,Gustin brzi za umake,g,150
 8714789703398,Palmolive,Palmolive Gel za tuširanje Men Revitalizing Sport,L,0.250
@@ -26095,10 +26060,6 @@ barcode,brand,name,unit,quantity
 3858881736269,Derma,Umjetna crijeva faser bak 75/50,kom,1
 8017331055427,Blanx,Blanx tretman za izbjeljivanje zubi,kom,1
 5901761912289,Eveline,Eveline Krema Nature Zelena Maslina,L,0.05
-070177077693,Twinings,Čaj English Breakfast,g,50
-070177077563,Twinings,Čaj Earl Grey,kg,0.050
-054881005555,Ahmad,Ahmad Čaj English Breakfast,kg,0.040
-054881000031,Ahmad,Ahmad Čaj šipak i višnja,kg,0.040
 8000320010095,Cirio,Pasirana rajčica,kg,0.700
 3830001291049,Afrodita,Gel za kosu Up Down Energy,L,0.150
 3859889283823,Delta,Sladoled lješnjak pistacija stracciatella,L,2.0
@@ -26579,7 +26540,6 @@ barcode,brand,name,unit,quantity
 4740056098595,Vici,Panirani riblji štapići Smart Choice,kg,0.250
 3859891577118,Ledeno Doba,Konzumne kocke leda,kg,2.5
 5836,Babić Pekara,Pecivo Kajzerica,kom,1
-011210000018,Tabasco,Tabasco Crveni Umak,L,0.060
 3563490110125,Reine Dijon,Senf L'Ancienne,kg,0.190
 3859892291662,Zigante,Zigante pikantni umak od rajčice,kg,0.400
 3263280104975,Grand Sud,Vino Cabernet,L,1
@@ -26589,10 +26549,7 @@ barcode,brand,name,unit,quantity
 3859888852525,Feravino,Graševina i Frankovka poklon paket,L,1.5
 4002391183207,Römer Krönung,Römer Krönung pjenušavo vino rose,L,0.75
 4002391003000,Römer Krönung,Römer Krönung pjenušavo poluslatko vino,L,0.75
-089540453705,Canadian Special,Canadian Special Old Whisky,L,0.7
-080432402931,Chivas,Chivas Regal Škotski Whisky 12 YO,L,0.7
-087000652286,Captain Morgan,Rum Captain Morgan Black Label,L,0.7
-080432400432,Chivas Regal,Chivas Regal 12 YO Whisky,L,1.0
+87000652286,Captain Morgan,Rum Captain Morgan Black Label,L,0.7
 5010093259006,Teacher's,Whisky Teacher's,L,0.7
 8000440112389,Keglevich,Vodka Keglevich Breskva,L,0.7
 8000440112440,Keglevich,Vodka Keglevich jagoda,L,0.7
@@ -26672,7 +26629,7 @@ barcode,brand,name,unit,quantity
 7702018465767,Gillette,Britvice Gillette Simply Venus 3,kom,8
 8700216014717,Ambi Pur,Ambi Pur Difuzor mirisnog ulja Cotton Flower,L,0.0075
 4025500132477,Müller,Müllermilch Mliječni napitak čokolada,L,0.4
-024000012313,Del Monte,Kompot ananas kolut u sirupu,kg,0.570
+24000012313,Del Monte,Kompot ananas kolut u sirupu,kg,0.570
 5011417554630,Airwick,Airwick Štapići Summer Delight,L,0.03
 5011417547885,Airwick,Airwick Štapići Linen in the Air,L,0.03
 80001218,Loacker,Loacker Napolitaner,g,45
@@ -26689,7 +26646,6 @@ barcode,brand,name,unit,quantity
 8004735114591,Zaini,Zaini Praline Lješnjak,kg,0.154
 8001090870216,Lenor,Lenor Perlice mirisne Cotton Fresh,kg,0.210
 5099872013282,Guinness,Guinness Mliječna Čokolada,g,90
-680275029137,English Tea Shop,Čaj Engleski Limun i Đumbir,g,30
 8717163340455,Rexona,Rexona Deo u spreju Aloe Vera,ml,200
 680275029106,English Tea Shop,Čaj rooibos bio,g,40
 5000204334487,Glade,Glade Refil Aromatherapy Naranča,ml,20
@@ -26711,10 +26667,7 @@ barcode,brand,name,unit,quantity
 8700216058100,Pantene,Pantene Infinite Serum Za Kosu,L,0.200
 4023103240261,Vileda,Ručnik za kućne ljubimce XL Pet Pro,kom,1
 9000101705119,Schauma,Schauma Regenerator Moisture Shine,L,0.250
-680275029144,English Tea Shop,Čaj English Tea Shop Earl Grey,g,45
-680275029236,English Tea Shop,Čaj English Tea Shop Super Berries,g,45
 680275057888,English Tea Shop,Čaj Engleski Jasmin Zeleni,g,40
-680275029243,English Tea Shop,Čaj English Peppermint,g,30
 9000101582574,Silan,Silan Omekšivač Maldives,L,1.364
 9000101583069,Silan,Silan Omekšivač Jungle,L,1.364
 9000101577013,Somat,Somat Gold Tablete XXL,kom,44
@@ -27014,7 +26967,7 @@ barcode,brand,name,unit,quantity
 3830056442960,Čupavac,Čupavac kokos kocke,kg,0.480
 3858892724279,Gavrilović,Gavrilović Jeli Chilli Kobasica,kg,0.440
 4001071200043,Baby Nova,Duda varalica silikonska anatomska vel. 1,kom,2
-071409543221,Mane 'n Tail,Mane 'n Tail regenerator za kosu,L,0.355
+71409543221,Mane 'n Tail,Mane 'n Tail regenerator za kosu,L,0.355
 3850108076035,Vindija,Vindi cocktail mandarina naranča,L,4.00
 5903416033660,Eveline,Sjajilo za usne Diamond Glow Lip Lum. 02,kom,1
 4008239595706,Vitakraft,Štapići za mačke piletina,kg,0.020
@@ -27087,7 +27040,6 @@ barcode,brand,name,unit,quantity
 3858888574345,Zvečevo,Zvečevo Liker Medica,L,0.10
 3858888574741,Zvečevo,Orahovac,L,0.10
 3859889770477,Euro-Milk,Dragec sušeni sir,kg,0.225
-613008753351,Arizona,Arizona ledeni čaj nar,L,0.45
 8056736060360,J. Gasco,Tonic J. Gasco,L,0.2
 4023103196506,Vileda,Krpa za pod Microfibre Colors,kom,1
 3859892818067,Genoll,Genoll Eko Deterdžent s pjenom za kućanstvo,L,0.500
@@ -27157,7 +27109,7 @@ barcode,brand,name,unit,quantity
 9000101671261,Syoss,Syoss Color 5-72 Crvena Lava,kom,1
 3838945016216,Fructal,Fruc Višnja,L,0.5
 8056736060049,J. Gasco,J. Gasco Indian Tonic,L,0.20
-096749021345,Evan Williams,Evan Williams Kentucky Bourbon,L,0.7
+96749021345,Evan Williams,Evan Williams Kentucky Bourbon,L,0.7
 3858894171811,Zvečevo,Barun gorki biljni liker,L,0.1
 4014400925319,Werther's Original,Kokice Caramel Original,kg,0.140
 5010196065061,Whyte & Mackay,Whyte & Mackay Triple Matured 40%,L,0.7
@@ -27253,7 +27205,7 @@ barcode,brand,name,unit,quantity
 4012400502363,Dash,Deterdžent za rublje Alpen Frische,kg,6.0
 3831070660774,Afrodita,Afrodita Men Poklon Paket Gentleman,kom,1
 9120131560011,Volim,Volim Tea Breskva,L,0.75
-085246342978,Maker's Mark,Whiskey Maker's Mark 45%,L,0.7
+85246342978,Maker's Mark,Whiskey Maker's Mark 45%,L,0.7
 3859888280809,Marex Gel,Njoki sa špinatom,kg,0.500
 3859889711524,Žito,Jaja M razred podni uzgoj,kom,15
 8710522665091,Domestos,WC Osvježivač Unicorn Duo,kg,0.110
@@ -27299,7 +27251,6 @@ barcode,brand,name,unit,quantity
 9000101619645,Taft,Taft balzam za kosu Curl,L,0.150
 8717644331903,Rexona,Rexona Cobalt Muški Dezodorans,L,0.250
 7702018610389,Gillette,Gillette Fusion Patrone 8/1 + gel 200ml,kom,1
-071409543214,Mane'n Tail,Mane'n Tail šampon za kosu,L,0.355
 5902841473058,Vigo,Krpa od mikrofibre,kom,5
 9000101561258,Persil,Persil Regular Deterdžent za rublje,kg,2.1
 5000204363050,Glade,Mirisna svijeća Jabuka i Cimet,kg,0.112
@@ -27422,7 +27373,7 @@ barcode,brand,name,unit,quantity
 3858892724095,Gavrilović,Panonica Croatica s chili paprikom,kg,0.330
 4018852010296,Bebivita,Sok od mrkve i voća Bebivita,L,0.5
 8410223875231,Almendro,Almendro Pločice Thins Čokolada Kokos,g,144.0
-083800041480,7th Heaven,7th Heaven Peel Off Crna Maska,ml,10
+83800041480,7th Heaven,7th Heaven Peel Off Crna Maska,ml,10
 9000101611397,Got2b,Got2b Krema za kosu waves m,L,0.100
 9000101627220,Fa,Fa Men Pure Hemp Roll On,ml,50
 3858881791886,Hod,Kikiriki ljuti prženi slani,g,150.000
@@ -27433,7 +27384,6 @@ barcode,brand,name,unit,quantity
 87340648,Rexona,Rexona Roll-On Antibacterial + Invisible,L,0.050
 3859890211945,Freixenet,Freixenet Cordon Negro 0.75 L + Ferrero Rocher 200 g,kom,1
 3830029294886,Parodontax,Parodontax zubna četkica extra soft,kom,1
-070177173203,Twinings,Čaj zeleni s mentom,kg,0.038
 3059943021709,Airwick,Airwick sprej spring delight,ml,250
 9005800319476,Nivea,Nivea micelarni regenerator Pure Color 2u1,L,0.2
 7622210713384,Milka,Milka Čokoladice u čarapici,kg,0.196
@@ -27603,7 +27553,6 @@ barcode,brand,name,unit,quantity
 3859888116047,Postira,Maslinovo ulje djevičansko,L,0.25
 3831001801122,Mlinotest,Kukuruzna krupica,kg,1.0
 3831001801177,Mlinotest,Ječam,kg,1.0
-011210009530,Tabasco,Tabasco Zeleni Umak,L,0.060
 8012566404149,Sfiziosa,Salata Sfiziosa,kg,0.200
 3859890587026,Natura,Slanutak,kg,0.5
 3613078000109,Bez marke,Kukuruz Šećerac,kom,2.0
@@ -27873,8 +27822,6 @@ barcode,brand,name,unit,quantity
 5411188106661,Alpro,Puding tamna čokolada,kg,0.250
 4001499159510,Frosch,Frosch Aloe Vera Tekući Deterdžent,L,1.5
 8003510018451,Intesa,Pjena za kosu Intesa,L,0.200
-0089686170313,Indomie,Indomie Instant Juha Povrće,g,75
-0089686170047,Indomie,Indomie Instant Juha Piletina,g,75
 80298342,Zuegg,Džem Jagoda,kg,0.320
 4008239141736,Vitakraft,Ogrlica za pse 30-45 cm,kom,1
 3859888595101,Solana Nin,Sol Krupna,kg,1.0
@@ -27904,7 +27851,6 @@ barcode,brand,name,unit,quantity
 8410095001967,Helios,Džem Borovnica,kg,0.340
 4005808709236,Nivea,Nivea Baby šampon i kupka,L,0.500
 4770190351126,Ledo,Panirani surimi račići,kg,1.00
-637793001053,Mackays,Namaz od limuna,kg,0.340
 7630040405423,Martini,Prosecco Rose,L,0.75
 3859888437333,Zlatan Otok,Vino Cuvee Bijeli,L,0.75
 3859890934172,Kiflić,Kruh miješani buća,kg,0.400
@@ -27975,7 +27921,6 @@ barcode,brand,name,unit,quantity
 3859892918347,Sliško,Med s orasima crni,kg,0.380
 3859893186554,Olival,Tuširanac Olival Gel,L,0.200
 3859893186561,Olival,Olival Šampon i Regenerator Kupanac,L,0.200
-070177177669,Twinings,Čaj Limun Đumbir,g,30
 3858888737924,Ekozona,Ulje kokos bez mirisa,L,0.300
 8710103787402,Philips,OneBlade zamjenska oštrica QP210/50,kom,1
 3858881504189,Karla,Pšenični griz,kg,1.0
@@ -27998,7 +27943,6 @@ barcode,brand,name,unit,quantity
 3859893289118,Touch,Vino Cabernet Sauvignon,L,0.75
 3859893289101,Touch,Vino Merlot,L,0.75
 4018852034841,Bebivita,Kašica jabuka/kivi/banana,g,120
-637793001015,Mackays,Džem Jagoda sa Šampanjcem,kg,0.340
 3859888295735,PZ Marina,Džem Smokva/Aronija,kg,0.240
 8411640000435,MG,Gin MG Masters London Dry,L,0.7
 3831051013964,Zelene Doline,Kajmak Pikant,kg,0.150
@@ -28025,7 +27969,6 @@ barcode,brand,name,unit,quantity
 4018852029342,Bebivita,Kašica Griz Banana Jabuka Laku Noć,g,190
 8002885007541,Fiorentini,Bio Kreker Chia,g,120
 8002885005097,Fiorentini,Bio Kreker Quinoa,g,120
-046000283272,Old El Paso,Umak Salsa,kg,0.312
 5010338101176,Blue Dragon,Umak Pad Thai,kg,0.120
 3859892827007,Medo-Flor,Apimix Classic,kg,0.216
 3859892827021,Medo-Flor,Apimix Sport,kg,0.216
@@ -28089,7 +28032,6 @@ barcode,brand,name,unit,quantity
 8718951392472,Palmolive,Sapun Palmolive Eucalyptus,kg,0.090
 3859893662713,Meduza,Lignja Patagonika očišćena,kg,0.500
 3830055525817,Dana,Sok limunada grejp,L,1
-011210697003,Tabasco,Tabasco Sriracha Ljuti Umak,kg,0.300
 3856007908415,Asepsoleta,Asepsoleta Sensitive,kom,5
 3830078701984,Jeruzalem Ormož,Vino Slatki Muškat,L,0.75
 3858881064652,Zvečevo,Čokolada Premium Krokant,g,120
@@ -28114,7 +28056,7 @@ barcode,brand,name,unit,quantity
 3263280117289,D'Argent,Gin Rose D'Argent,L,0.7
 3263280110280,D'Argent,Gin Bleu D'Argent,L,0.7
 3858890831573,Darvitalis,Čaj Urosan,kg,0.050
-081128028183,Pepe Lopez,Tequila Pepe Lopez Silver,L,1.0
+81128028183,Pepe Lopez,Tequila Pepe Lopez Silver,L,1.0
 3858891971353,Nutrigold,Bulgur,kg,1.00
 3858891971414,Nutrigold,Kus kus integralni,kg,1.00
 3858891972398,Nutrigold,Cimet Ceylon Organski,kg,0.100
@@ -28278,7 +28220,7 @@ barcode,brand,name,unit,quantity
 3600551136028,Mixa,Mixa Ceramide Losion za suhu kožu,L,0.400
 3600542497961,Garnier,Garnier Pure Active Crni Serum za Lice,L,0.030
 3600542500517,Garnier,Garnier Skin Naturals Maska za oči Cryo Jelly,kom,1
-011210694002,Tabasco,Tabasco Sweet & Spicy Umak,g,315
+11210694002,Tabasco,Tabasco Sweet & Spicy Umak,g,315
 3600542510219,Garnier,Garnier Botanic Therapy Dječji Šampon Zob,L,0.250
 5900658107906,Lambertz,Medenjaci sa punjenom šljivom,kg,0.200
 5900658716801,Lambertz,Medenjaci punjeni jabukom i trešnjom,kg,0.200
@@ -28401,7 +28343,7 @@ barcode,brand,name,unit,quantity
 3859893029745,Concettino,Čokoladna kocka,kg,0.220
 3859893029660,Concettino,Cannoli 2/1,kg,0.180
 8501110086042,Havana Club,Rum Pacto Navio,L,0.7
-0080432402825,Glenlivet,Whisky Glenlivet 12 YO,L,0.7
+80432402825,Glenlivet,Whisky Glenlivet 12 YO,L,0.7
 3831070655213,Afrodita,Afrodita Uljni Odstranjivač Laka Kokos,L,0.100
 3850151243897,Radnik Opatija,Pinca,kg,0.400
 3859888495319,Čupko,Krema za izbjeljivanje 50+50 ml,L,0.100
@@ -28454,7 +28396,7 @@ barcode,brand,name,unit,quantity
 8700216131421,Old Spice,Old Spice Deep Sea Poklon Paket (Stick+Gel+Losion),kom,1
 3850102008681,Dorina,Čokolada za kuhanje,kg,0.400
 3856016906877,Klara,Pletenica Mak,kg,0.102
-0089686120714,Indomie,Instant Juha s Rezancima Mi Goreng,g,80
+89686120714,Indomie,Instant Juha s Rezancima Mi Goreng,g,80
 8001841671567,Old Spice,Gel za tuširanje Old Spice Captain,L,0.8
 4062300297036,Hipp,Kašica jabuka za dojenčad,g,125
 3859893223518,Kabola,Vino Kabola Malvazija,L,0.75
@@ -28932,7 +28874,7 @@ barcode,brand,name,unit,quantity
 8006540750353,Jar,Tablete za perilicu posuđa Jar All in One,kom,120
 3858890979671,Juicy,Sok Juicy 100% Brusnica,L,0.195
 3858894171835,Zvečevo,Barun liker + 2 čaše,L,0.7
-024000104391,Del Monte,Kompot Breskve Komadići u Soku,kg,0.227
+24000104391,Del Monte,Kompot Breskve Komadići u Soku,kg,0.227
 3850108052985,Vindija,Sir Caprodur tvrdi,kg,0.200
 3859893093371,Bio,Salatica Baby Leaf,g,100
 8600599000133,Mivela,Mivela voda,L,0.5
@@ -29011,7 +28953,7 @@ barcode,brand,name,unit,quantity
 8717163983119,Domestos,Domestos Izbjeljivač Rublje Zeleni,L,0.750
 8000500446416,Ferrero,Kinder Pingui Mango Marakuja,g,30
 3859889195508,MIP,Makovnjača,kg,0.300
-024000107101,Del Monte,Kompot Breskve,kg,0.340
+24000107101,Del Monte,Kompot Breskve,kg,0.340
 3859893177378,Đanić,Rakija Dunja,L,0.5
 9001376901008,Alufix,Alufix Vrećice za pečenje 25x38cm,kom,8
 4067700032720,Jägermeister,Jägermeister,L,0.700
@@ -29145,7 +29087,7 @@ barcode,brand,name,unit,quantity
 3858894873128,Trenton,Masline zelene otkoštene,kg,0.520
 4823077633317,Lovita,Keksi s komadićima čokolade Lovita,kg,0.150
 4023103143593,Vileda,Brisač poda od mikrovlakana s teleskopskom drškom,kom,1
-0769503273105,Bogowski,Gin Bogowski,L,0.70
+769503273105,Bogowski,Gin Bogowski,L,0.70
 8006540918968,Mr. Proper,Mr. Proper Ocean,L,1.0
 5997347540021,Mogyi,Studentski Mix,g,150
 5021692550104,La Chica,Tequila La Chica Silver,L,0.7
@@ -29638,7 +29580,7 @@ barcode,brand,name,unit,quantity
 5900951286186,Mars,Snickers Super,g,112.5
 4820048618519,Maggi,Maggi instant tjestenina gljive,g,60.0
 8710449001873,Aviko,Krumpir Kriške Wedges,kg,2.5
-077330346764,Kelsen,Danski keksi Festive Moments,g,454.000
+77330346764,Kelsen,Danski keksi Festive Moments,g,454.000
 3858886804222,Arabesca,Arabesca 2u1 Latte,g,10.00
 5400265042794,Dupin,Čokoladna lizalica Teddy,g,35.000
 5904637004934,Dupin,Praline Choco Flower Cherry,g,96.0

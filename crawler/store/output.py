@@ -6,6 +6,8 @@ from os import makedirs
 from pathlib import Path
 from zipfile import ZipFile, ZIP_DEFLATED
 
+from common.barcodes import normalize_barcode
+
 from .cities import normalize_city
 from .models import Store
 
@@ -76,7 +78,7 @@ def transform_products(
             key = f"{store.chain}:{product.product_id}"
             if key not in product_map:
                 product_map[key] = {
-                    "barcode": product.barcode or key,
+                    "barcode": normalize_barcode(product.barcode) or key,
                     "product_id": product.product_id,
                     "name": product.product,
                     "brand": product.brand,

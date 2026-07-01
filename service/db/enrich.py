@@ -8,6 +8,7 @@ from pathlib import Path
 from time import time
 from typing import Dict, List
 
+from common.barcodes import normalize_barcode
 from service.config import settings
 from service.db.models import Product
 
@@ -88,6 +89,13 @@ async def enrich_products(csv_path: Path) -> None:
     csv_columns = set(data[0].keys())
     if csv_columns != {"barcode", "brand", "name", "unit", "quantity"}:
         raise ValueError("CSV file headers do not match expected columns")
+
+    # Canonicalize barcodes (strip leading zeros) so they match the normalized
+    # product rows. Without this, a padded enrichment barcode would miss the
+    # canonical row and hit the add_ean fallback below, re-creating the very
+    # zero-padded duplicate that import/migration removed.
+    for row in data:
+        row["barcode"] = normalize_barcode(row["barcode"]) or row["barcode"]
 
     logger.info(
         f"Starting product enrichment from {csv_path} with {len(data)} products"
