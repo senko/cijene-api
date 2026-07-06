@@ -1,5 +1,7 @@
 import datetime
 import logging
+import re
+import urllib.parse
 from collections import defaultdict
 
 from bs4 import BeautifulSoup
@@ -35,10 +37,13 @@ class ZabacCrawler(BaseCrawler):
         "category": ("Naziv grupe artikala", False),
     }
 
-    # Location pages on the Žabac website, mapped to store metadata.
-    # The website uses a ?lokacija= query parameter to switch between stores.
+    # Store pages on the Žabac website, keyed by the ?store= query parameter
+    # value the site uses to switch between stores, mapped to store metadata.
+    # The store_id values are stable identifiers and must not change, so that
+    # price history stays connected to the same store across site redesigns
+    # (the June 2026 redesign replaced the old ?lokacija= parameter).
     LOCATIONS = {
-        "dubrava-256l": {
+        "Dubec, Dubrava": {
             "store_id": "PJ-7",
             "name": "Žabac PJ-7",
             "store_type": "Supermarket",
@@ -46,7 +51,7 @@ class ZabacCrawler(BaseCrawler):
             "city": "Zagreb",
             "zipcode": "10000",
         },
-        "velika-gorica": {
+        "Velika Gorica": {
             "store_id": "PJ-VG",
             "name": "Žabac PJ-VG",
             "store_type": "Supermarket",
@@ -56,24 +61,60 @@ class ZabacCrawler(BaseCrawler):
         },
     }
 
-    def parse_index(self, content: str) -> list[str]:
+    # Matches a dd.mm.yyyy date embedded in a price list row title, e.g.
+    # "Supermarket,Dubrava 256L, Zagreb 10000, 02.07.2026, 7.00h - C302".
+    DATE_RE = re.compile(r"(\d{1,2})\.(\d{1,2})\.(\d{4})")
+
+    def parse_index(self, content: str) -> list[tuple[str, str]]:
         """
-        Parse the Žabac index page to extract CSV links.
+        Parse a Žabac store page to extract CSV links and their titles.
+
+        Every CSV link on the page — both the "Aktualno izdanje" featured
+        entry (which carries the most recent, current-day price list) and the
+        archive rows below it — is preceded by an <h3> heading whose text
+        carries the store address and the price list date, e.g.:
+
+            Supermarket,Dubrava 256L, Zagreb 10000, 02.07.2026, 7.00h - C302
 
         Args:
-            content: HTML content of the index page
+            content: HTML content of the store page
 
         Returns:
-            List of absolute CSV URLs on the page
+            List of unique (title, csv_url) tuples found on the page.
         """
         soup = BeautifulSoup(content, "html.parser")
-        urls = []
+        # Deduplicate by URL while keeping each link's heading text.
+        titles_by_url: dict[str, str] = {}
 
         for link_tag in soup.select('a[href$=".csv"]'):
             href = str(link_tag.get("href"))
-            urls.append(href)
+            heading = link_tag.find_previous("h3")
+            title = heading.get_text(strip=True) if heading else ""
+            titles_by_url.setdefault(href, title)
 
-        return list(set(urls))  # Return unique URLs
+        return [(title, href) for href, title in titles_by_url.items()]
+
+    def log_unknown_locations(self, content: str) -> None:
+        """
+        Warn about store tabs on the page we have no metadata for.
+
+        The page exposes a filter tab per store via ?store=<name> links. If
+        Žabac adds a new store we won't have it in LOCATIONS and would
+        silently skip it, so surface it in the logs.
+
+        Args:
+            content: HTML content of the store page
+        """
+        soup = BeautifulSoup(content, "html.parser")
+        for tab in soup.select('a[href*="?store="]'):
+            href = str(tab.get("href"))
+            query = urllib.parse.urlparse(href).query
+            for value in urllib.parse.parse_qs(query).get("store", []):
+                if value not in self.LOCATIONS:
+                    logger.warning(
+                        f"Žabac page lists unknown store {value!r} "
+                        f"(link {href}) with no crawler metadata"
+                    )
 
     def get_store_prices(self, csv_url: str) -> list[Product]:
         """
@@ -86,7 +127,9 @@ class ZabacCrawler(BaseCrawler):
             List of Product objects
         """
         try:
-            content = self.fetch_text(csv_url)
+            # The CSVs are UTF-8 with a BOM; decode with utf-8-sig so the BOM
+            # doesn't get glued onto the first ("Šifra artikla") header name.
+            content = self.fetch_text(csv_url, encodings=["utf-8-sig"])
             return self.parse_csv(content)
         except Exception as e:
             logger.error(
@@ -97,7 +140,11 @@ class ZabacCrawler(BaseCrawler):
 
     def get_index(self, date: datetime.date) -> list[tuple[str, str]]:
         """
-        Fetch and parse all Žabac location pages to get CSV URLs for given date.
+        Fetch and parse all Žabac store pages to get CSV URLs for given date.
+
+        The CSV URLs no longer contain the date (they are opaque hashed
+        names), so we parse the date and store address out of each link's
+        <h3> title instead of filtering the URL by a date substring.
 
         Args:
             date: The date parameter
@@ -106,18 +153,39 @@ class ZabacCrawler(BaseCrawler):
             List of (csv_url, location_key) tuples for the given date.
         """
         results = []
-        url_date = f"{date.day}.{date.month}.{date.year}"
-        url_date_padded = f"{date.day:02d}.{date.month:02d}.{date.year}"
 
-        for location_key in self.LOCATIONS:
-            page_url = f"{self.BASE_URL}?lokacija={location_key}"
+        for location_key, loc in self.LOCATIONS.items():
+            page_url = f"{self.BASE_URL}?store={urllib.parse.quote(location_key)}"
             content = self.fetch_text(page_url)
             if not content:
                 logger.warning(f"No content at {page_url}")
                 continue
-            for url in self.parse_index(content):
-                if url_date in url or url_date_padded in url:
-                    results.append((url, location_key))
+
+            self.log_unknown_locations(content)
+
+            for title, url in self.parse_index(content):
+                match = self.DATE_RE.search(title)
+                if not match:
+                    continue
+                day, month, year = (int(g) for g in match.groups())
+                try:
+                    title_date = datetime.date(year, month, day)
+                except ValueError:
+                    logger.warning(f"Invalid date in Žabac title: {title!r}")
+                    continue
+                if title_date != date:
+                    continue
+                # Guard against the server silently serving the default store
+                # page when it doesn't recognise the ?store= value: only accept
+                # rows whose title matches this store's address.
+                if loc["street_address"] not in title:
+                    logger.warning(
+                        f"Žabac CSV for {date} at {page_url} has title "
+                        f"{title!r} not matching expected address "
+                        f"{loc['street_address']!r}, skipping"
+                    )
+                    continue
+                results.append((url, location_key))
 
         return results
 
