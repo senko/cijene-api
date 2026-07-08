@@ -138,7 +138,8 @@ def crawl(
     root: Path,
     date: datetime.date | None = None,
     chains: list[str] | None = None,
-    createzip: bool = True,
+    create_zip: bool = True,
+    skip_existing: bool = False,
 ) -> None:
     """
     Crawl multiple retail chains for product/pricing data and save it.
@@ -166,8 +167,19 @@ def crawl(
 
     t0 = time()
     for chain in chains:
+        chain_path = path / chain
+        if (
+            skip_existing
+            and chain_path.exists()
+            and len(list(chain_path.iterdir())) == 3
+        ):
+            logger.info(
+                f"Skipping {chain} on {date:%Y-%m-%d}, folder already exists with 3 files"
+            )
+            continue
+
         logger.info(f"Starting crawl for {chain} on {date:%Y-%m-%d}")
-        r = crawl_chain(chain, date, path / chain)
+        r = crawl_chain(chain, date, chain_path)
         results[chain] = r
     t1 = time()
 
@@ -177,7 +189,7 @@ def crawl(
             f"  * {chain}: {r.n_stores} stores, {r.n_products} products, {r.n_prices} prices in {r.elapsed_time:.2f}s"
         )
 
-    if createzip is False:
+    if create_zip is False:
         return
 
     copy_archive_info(path)
