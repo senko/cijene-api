@@ -463,7 +463,8 @@ async def search_products(
     Returns a list of products that match the search query. Matching is
     case- and diacritic-insensitive. If chains are specified, only products
     matching within those chains are searched, and the limit applies to the
-    filtered result set.
+    filtered result set. Only products that have price data for the
+    requested date (defaulting to today) are returned.
     """
     if not q.strip():
         return ProductSearchResponse(products=[])
@@ -478,14 +479,18 @@ async def search_products(
             if chain.code in filtered_chains
         ]
 
+    # Resolve the effective date once so the search and the price lookup in
+    # prepare_product_response() use the same date even across midnight.
+    effective_date = date or datetime.date.today()
+
     if fuzzy:
-        products = await db.fuzzy_search_products(q, limit, chain_ids)
+        products = await db.fuzzy_search_products(q, limit, chain_ids, effective_date)
     else:
-        products = await db.search_products(q, limit, chain_ids)
+        products = await db.search_products(q, limit, chain_ids, effective_date)
 
     product_responses = await prepare_product_response(
         products=products,
-        date=date,
+        date=effective_date,
         filtered_chains=filtered_chains,
     )
 

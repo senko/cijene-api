@@ -455,6 +455,7 @@ class PostgresDatabase(Database):
         query: str,
         limit: int = 20,
         chain_ids: list[int] | None = None,
+        date: date | None = None,
     ) -> list[ProductWithId]:
         # Strip LIKE wildcards so user input can't inject match-anything patterns
         words = [
@@ -484,17 +485,37 @@ class PostgresDatabase(Database):
             where_conditions.append(f"cp.chain_id = ANY(${len(params)})")
 
         where_clause = " AND ".join(where_conditions)
+        params.append(date)
+        date_param_idx = len(params)
         params.append(limit)
 
+        # Only match chain products that have a price on their chain's
+        # effective date (latest load on or before the requested date) —
+        # the same criterion get_product_prices() uses — so discontinued
+        # products don't consume result slots and cause the response to
+        # contain fewer than `limit` products even when more matches exist.
+        #
         # ean is unique per product, so grouping by product_id is equivalent
         # to grouping by ean but lets us join products after the limit,
         # for the returned rows only.
         query_sql = f"""
+            WITH chains_dates AS (
+                SELECT DISTINCT ON (chain_id) chain_id, price_date AS last_price_date
+                FROM chain_stats
+                WHERE price_date <= COALESCE(${date_param_idx}::date, CURRENT_DATE)
+                ORDER BY chain_id, price_date DESC
+            )
             SELECT p.id, p.ean, p.brand, p.name, p.quantity, p.unit
             FROM (
                 SELECT cp.product_id, COUNT(*) AS match_count
                 FROM chain_products cp
+                JOIN chains_dates cd ON cd.chain_id = cp.chain_id
                 WHERE cp.product_id IS NOT NULL AND {where_clause}
+                  AND EXISTS (
+                    SELECT 1 FROM chain_prices cpr
+                    WHERE cpr.chain_product_id = cp.id
+                      AND cpr.price_date = cd.last_price_date
+                  )
                 GROUP BY cp.product_id
                 ORDER BY match_count DESC
                 LIMIT ${len(params)}
@@ -511,6 +532,7 @@ class PostgresDatabase(Database):
         query: str,
         limit: int = 20,
         chain_ids: list[int] | None = None,
+        date: date | None = None,
     ) -> list[ProductWithId]:
         if not query.strip():
             return []
@@ -523,6 +545,8 @@ class PostgresDatabase(Database):
         if chain_ids is not None:
             params.append(chain_ids)
             chain_filter = f"AND cp.chain_id = ANY(${len(params)})"
+        params.append(date)
+        date_param_idx = len(params)
         params.append(limit)
 
         # Trigram fuzzy search using PostgreSQL pg_trgm extension:
@@ -531,7 +555,15 @@ class PostgresDatabase(Database):
         # - immutable_unaccent(): strips diacritics ("čaša" -> "casa") in index-compatible way
         # - 1 - distance = similarity score for ranking (1=perfect match, 0=no similarity)
         # Requires matching index and function (see idx_chain_products_name_trgm and immutable_unaccent in psql.sql)
+        # The EXISTS clause excludes discontinued products (no price on the
+        # chain's effective date); see the comment in search_products().
         query_sql = f"""
+            WITH chains_dates AS (
+                SELECT DISTINCT ON (chain_id) chain_id, price_date AS last_price_date
+                FROM chain_stats
+                WHERE price_date <= COALESCE(${date_param_idx}::date, CURRENT_DATE)
+                ORDER BY chain_id, price_date DESC
+            )
             SELECT p.id, p.ean, p.brand, p.name, p.quantity, p.unit
             FROM (
                 SELECT
@@ -539,9 +571,15 @@ class PostgresDatabase(Database):
                     MAX(1 - (lower(immutable_unaccent(cp.name || ' ' || COALESCE(cp.brand, ''))) <-> immutable_unaccent($1)))
                     AS similarity_score
                 FROM chain_products cp
+                JOIN chains_dates cd ON cd.chain_id = cp.chain_id
                 WHERE lower(immutable_unaccent(cp.name || ' ' || COALESCE(cp.brand, ''))) % immutable_unaccent($1)
                   AND cp.product_id IS NOT NULL
                   {chain_filter}
+                  AND EXISTS (
+                    SELECT 1 FROM chain_prices cpr
+                    WHERE cpr.chain_product_id = cp.id
+                      AND cpr.price_date = cd.last_price_date
+                  )
                 GROUP BY cp.product_id
                 ORDER BY similarity_score DESC
                 LIMIT ${len(params)}

@@ -242,17 +242,22 @@ class Database(ABC):
         query: str,
         limit: int = 20,
         chain_ids: list[int] | None = None,
+        date: date | None = None,
     ) -> list[ProductWithId]:
         """
         Search for products by substring match on name and brand.
 
-        Matching is case- and diacritic-insensitive.
+        Matching is case- and diacritic-insensitive. Only products with
+        price data on the effective date (each chain's latest data on or
+        before the requested date) are matched, so discontinued products
+        don't take up result slots.
 
         Args:
             query: The search query string.
             limit: Maximum number of results to return.
             chain_ids: Optional list of chain IDs to filter by; the filter
                 is applied before the limit.
+            date: Date for price availability, defaults to today.
 
         Returns:
             A list of products matching the search query,
@@ -266,15 +271,20 @@ class Database(ABC):
         query: str,
         limit: int = 20,
         chain_ids: list[int] | None = None,
+        date: date | None = None,
     ) -> list[ProductWithId]:
         """
         Search for products by name using fuzzy matching (trigrams).
+
+        Only products with price data on the effective date are matched,
+        same as in search_products().
 
         Args:
             query: The search query string.
             limit: Maximum number of results to return.
             chain_ids: Optional list of chain IDs to filter by; the filter
                 is applied before the limit.
+            date: Date for price availability, defaults to today.
 
         Returns:
             A list of products matching the search query,
