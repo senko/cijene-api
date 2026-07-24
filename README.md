@@ -194,14 +194,22 @@ Stats servis može se koristiti za:
 - **Batch procesiranje** statistika za više datuma
 - **Nezavisan rad** od import procesa za bolje performanse
 
-## Dodatni podaci o proizvodima
+## Dodatni podaci o proizvodima i trgovinama
 
 Dodatni pročišćeni podaci o proizvodima (naziv, marka, količina, jedinica mjere)
 za najčeših ~30 tisuća proizvoda dostupni su u `enrichment/products.csv` datoteci
 a mogu se uvesti u bazu koristeći sljedeću komandu:
 
 ```bash
-uv run -m service.db.enrich enrichment/products.csv
+uv run -m service.db.enrich -p enrichment/products.csv
+```
+
+Dodatni podaci o trgovinama (adresa, geolokacija, telefon) dostupni su u
+`enrichment/stores.csv` datoteci a mogu se uvesti u bazu koristeći sljedeću
+komandu:
+
+```bash
+uv run -m service.db.enrich -s enrichment/stores.csv
 ```
 
 #### Kreiranje korisnika
