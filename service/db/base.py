@@ -237,13 +237,22 @@ class Database(ABC):
         pass
 
     @abstractmethod
-    async def search_products(self, query: str, limit: int = 20) -> list[ProductWithId]:
+    async def search_products(
+        self,
+        query: str,
+        limit: int = 20,
+        chain_ids: list[int] | None = None,
+    ) -> list[ProductWithId]:
         """
-        Search for products by name using full text search.
+        Search for products by substring match on name and brand.
+
+        Matching is case- and diacritic-insensitive.
 
         Args:
             query: The search query string.
             limit: Maximum number of results to return.
+            chain_ids: Optional list of chain IDs to filter by; the filter
+                is applied before the limit.
 
         Returns:
             A list of products matching the search query,
@@ -253,7 +262,10 @@ class Database(ABC):
 
     @abstractmethod
     async def fuzzy_search_products(
-        self, query: str, limit: int = 20
+        self,
+        query: str,
+        limit: int = 20,
+        chain_ids: list[int] | None = None,
     ) -> list[ProductWithId]:
         """
         Search for products by name using fuzzy matching (trigrams).
@@ -261,6 +273,8 @@ class Database(ABC):
         Args:
             query: The search query string.
             limit: Maximum number of results to return.
+            chain_ids: Optional list of chain IDs to filter by; the filter
+                is applied before the limit.
 
         Returns:
             A list of products matching the search query,
