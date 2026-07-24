@@ -441,7 +441,10 @@ async def search_products(
     ),
     chains: str = Query(
         None,
-        description="Comma-separated list of chain codes to include",
+        description=(
+            "Comma-separated list of chain codes to include "
+            "(applied before the result limit)"
+        ),
     ),
     fuzzy: bool = Query(
         False,
@@ -455,24 +458,35 @@ async def search_products(
     ),
 ) -> ProductSearchResponse:
     """
-    Search for products by name.
+    Search for products by name and brand.
 
-    Returns a list of products that match the search query.
+    Returns a list of products that match the search query. Matching is
+    case- and diacritic-insensitive. If chains are specified, only products
+    matching within those chains are searched, and the limit applies to the
+    filtered result set.
     """
     if not q.strip():
         return ProductSearchResponse(products=[])
 
+    filtered_chains = [c.lower().strip() for c in chains.split(",")] if chains else None
+
+    chain_ids = None
+    if filtered_chains is not None:
+        chain_ids = [
+            chain.id
+            for chain in await db.list_chains()
+            if chain.code in filtered_chains
+        ]
+
     if fuzzy:
-        products = await db.fuzzy_search_products(q, limit)
+        products = await db.fuzzy_search_products(q, limit, chain_ids)
     else:
-        products = await db.search_products(q, limit)
+        products = await db.search_products(q, limit, chain_ids)
 
     product_responses = await prepare_product_response(
         products=products,
         date=date,
-        filtered_chains=(
-            [c.lower().strip() for c in chains.split(",")] if chains else None
-        ),
+        filtered_chains=filtered_chains,
     )
 
     return ProductSearchResponse(products=product_responses)

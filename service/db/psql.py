@@ -450,46 +450,67 @@ class PostgresDatabase(Database):
                 rows = await conn.fetch(query, product_ids)
             return [ChainProductWithId(**row) for row in rows]  # type: ignore
 
-    async def search_products(self, query: str, limit: int = 20) -> list[ProductWithId]:
-        if not query.strip():
-            return []
-
-        # TODO: Implement full-text search using PostgreSQL's
-        # text search capabilities
-        words = [word.strip() for word in query.split() if word.strip()]
+    async def search_products(
+        self,
+        query: str,
+        limit: int = 20,
+        chain_ids: list[int] | None = None,
+    ) -> list[ProductWithId]:
+        # Strip LIKE wildcards so user input can't inject match-anything patterns
+        words = [
+            word.strip().lower().replace("%", "").replace("_", "")
+            for word in query.split()
+        ]
+        words = [word for word in words if word]
         if not words:
             return []
 
         where_conditions = []
-        params = []
+        params: list[Any] = []
 
-        for idx, word in enumerate(words, start=1):
-            word = word.lower().replace("%", "")
-            where_conditions.append(f"cp.name ILIKE ${idx}")
-            params.append(f"%{word}%")
+        # Match against the same lower+unaccent expression that
+        # idx_chain_products_name_trgm indexes (see psql.sql), so the GIN
+        # trigram index is used instead of a sequential scan. Words shorter
+        # than 3 characters yield no trigrams and fall back to a scan.
+        for word in words:
+            params.append(word)
+            where_conditions.append(
+                "lower(immutable_unaccent(cp.name || ' ' || COALESCE(cp.brand, '')))"
+                f" LIKE '%' || immutable_unaccent(${len(params)}) || '%'"
+            )
+
+        if chain_ids is not None:
+            params.append(chain_ids)
+            where_conditions.append(f"cp.chain_id = ANY(${len(params)})")
 
         where_clause = " AND ".join(where_conditions)
         params.append(limit)
-        limit_param_idx = len(params)
+
+        # ean is unique per product, so grouping by product_id is equivalent
+        # to grouping by ean but lets us join products after the limit,
+        # for the returned rows only.
         query_sql = f"""
-            SELECT
-                p.ean,
-                COUNT(cp) AS product_count
-            FROM chain_products cp
-            JOIN products p ON cp.product_id = p.id
-            WHERE {where_clause}
-            GROUP BY p.ean
-            ORDER BY product_count DESC
-            LIMIT ${limit_param_idx}
+            SELECT p.id, p.ean, p.brand, p.name, p.quantity, p.unit
+            FROM (
+                SELECT cp.product_id, COUNT(*) AS match_count
+                FROM chain_products cp
+                WHERE cp.product_id IS NOT NULL AND {where_clause}
+                GROUP BY cp.product_id
+                ORDER BY match_count DESC
+                LIMIT ${len(params)}
+            ) matches
+            JOIN products p ON p.id = matches.product_id
+            ORDER BY matches.match_count DESC
         """
         async with self._get_conn() as conn:
             rows = await conn.fetch(query_sql, *params)
-            eans = [row["ean"] for row in rows]
-
-        return await self.get_products_by_ean(eans)
+            return [ProductWithId(**row) for row in rows]  # type: ignore
 
     async def fuzzy_search_products(
-        self, query: str, limit: int = 20
+        self,
+        query: str,
+        limit: int = 20,
+        chain_ids: list[int] | None = None,
     ) -> list[ProductWithId]:
         if not query.strip():
             return []
@@ -497,29 +518,40 @@ class PostgresDatabase(Database):
         # Normalize query: strip diacritics and convert to lowercase
         normalized_query = query.strip().lower()
 
+        params: list[Any] = [normalized_query]
+        chain_filter = ""
+        if chain_ids is not None:
+            params.append(chain_ids)
+            chain_filter = f"AND cp.chain_id = ANY(${len(params)})"
+        params.append(limit)
+
         # Trigram fuzzy search using PostgreSQL pg_trgm extension:
         # - % operator: checks similarity > 0.3 threshold, uses GIN trigram index for fast filtering
         # - <-> operator: trigram distance (0=identical, 1=completely different), also index-accelerated
         # - immutable_unaccent(): strips diacritics ("čaša" -> "casa") in index-compatible way
         # - 1 - distance = similarity score for ranking (1=perfect match, 0=no similarity)
         # Requires matching index and function (see idx_chain_products_name_trgm and immutable_unaccent in psql.sql)
-        query_sql = """
-            SELECT
-                p.ean,
-                MAX(1 - (lower(immutable_unaccent(cp.name || ' ' || COALESCE(cp.brand, ''))) <-> immutable_unaccent($1)))
-                AS similarity_score
-            FROM chain_products cp
-            JOIN products p ON cp.product_id = p.id
-            WHERE lower(immutable_unaccent(cp.name || ' ' || COALESCE(cp.brand, ''))) % immutable_unaccent($1)
-            GROUP BY p.ean
-            ORDER BY similarity_score DESC
-            LIMIT $2
+        query_sql = f"""
+            SELECT p.id, p.ean, p.brand, p.name, p.quantity, p.unit
+            FROM (
+                SELECT
+                    cp.product_id,
+                    MAX(1 - (lower(immutable_unaccent(cp.name || ' ' || COALESCE(cp.brand, ''))) <-> immutable_unaccent($1)))
+                    AS similarity_score
+                FROM chain_products cp
+                WHERE lower(immutable_unaccent(cp.name || ' ' || COALESCE(cp.brand, ''))) % immutable_unaccent($1)
+                  AND cp.product_id IS NOT NULL
+                  {chain_filter}
+                GROUP BY cp.product_id
+                ORDER BY similarity_score DESC
+                LIMIT ${len(params)}
+            ) matches
+            JOIN products p ON p.id = matches.product_id
+            ORDER BY matches.similarity_score DESC
         """
         async with self._get_conn() as conn:
-            rows = await conn.fetch(query_sql, normalized_query, limit)
-            eans = [row["ean"] for row in rows]
-
-        return await self.get_products_by_ean(eans)
+            rows = await conn.fetch(query_sql, *params)
+            return [ProductWithId(**row) for row in rows]  # type: ignore
 
     async def get_product_prices(
         self, product_ids: list[int], date: date
