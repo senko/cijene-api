@@ -82,6 +82,13 @@ def main():
         help="Create ZIP file after crawl (default: true)",
     )
     parser.add_argument(
+        "-s",
+        "--skip-existing",
+        choices=["true", "false"],
+        default="false",
+        help="Skip chain if data already exists (default: false)",
+    )
+    parser.add_argument(
         "-v",
         "--verbose",
         choices=["debug", "info", "warning", "error", "critical"],
@@ -111,6 +118,7 @@ def main():
         print(f"Created directory: {args.output_path}")
 
     create_zip = args.create_zip == "true"
+    skip_existing = args.skip_existing == "true"
 
     chains_to_crawl = None
     if args.chain:
@@ -133,7 +141,7 @@ def main():
         date_txt = args.date.strftime("%Y-%m-%d") if args.date else "today"
         print(f"Fetching price data from {chains_txt} for {date_txt} ...", flush=True)
 
-        crawl(args.output_path, crawl_date, chains_to_crawl, create_zip)
+        crawl(args.output_path, crawl_date, chains_to_crawl, create_zip, skip_existing)
         return 0
     except Exception as e:
         print(f"Error during crawling: {e}")
