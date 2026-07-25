@@ -82,8 +82,14 @@ docker-compose up -d
 **Pokreni samo crawler unutar Docker-a**
 
 ```bash
-docker build -f crawler.Dockerfile -t crawler .
+docker build -f crawler.Dockerfile -t cijene-api-dev-crawler .
 docker run -v $(pwd)/output:/app/output crawler -c "dm, eurospin, kaufland, konzum, lidl, metro, plodine, spar, studenac, zabac" -z false -v info ./output
+```
+
+**Scheduled crawler**
+```bash
+docker build -f crawler.Dockerfile -t cijene-api-dev-crawler .
+docker compose -f crawler-scheduled-compose.yaml up -d
 ```
 
 ## Korištenje
