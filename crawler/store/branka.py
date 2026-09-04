@@ -54,7 +54,6 @@ class BrankaCrawler(BaseCrawler):
 
     PRICE_MAP = {
         "price": ("MPC", True),
-        "unit_price": ("MPC", True),
         "anchor_price": ("SIDRENA_CIJENA_NA_02_05_25", False),
     }
 

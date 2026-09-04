@@ -22,7 +22,6 @@ class ZabacCrawler(BaseCrawler):
     PRICE_MAP = {
         # field: (column_name, is_required)
         "price": ("MPC", False),
-        "unit_price": ("MPC", False),  # Use same as price
         "best_price_30": ("Najniža cijena u posljednjih 30 dana", False),
         "anchor_price": ("Sidrena cijena na 2.5.2025", False),
     }
