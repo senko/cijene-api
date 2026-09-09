@@ -30,7 +30,7 @@ class StudenacCrawler(BaseCrawler):
 
     PRICE_MAP = {
         "price": ("MaloprodajnaCijena", False),
-        "unit_price": ("CijenaPoJedinici", False),
+        "unit_price": ("CijenaZaJedinicuMjere", False),
         "special_price": ("MaloprodajnaCijenaAkcija", False),
         "best_price_30": ("NajnizaCijena", False),
         "anchor_price": ("SidrenaCijena", False),
