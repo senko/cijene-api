@@ -237,23 +237,17 @@ class BaseCrawler:
 
         if "special_price" not in data:
             data["special_price"] = None
+        data.setdefault("unit_price", None)
 
         if data["price"] is None or data["price"] == 0:
             if data.get("special_price") is None:
-                if data.get("unit_price") is not None:
-                    data["price"] = data["unit_price"]
-                else:
-                    raise ValueError(
-                        "Price, special price, and unit price are all missing"
-                    )
-            else:
-                data["price"] = data["special_price"]
+                # Never fall back to unit_price: it is per kg/l, so using it as the
+                # shelf price stored e.g. ARIEL 0,85 l at 8223.53 instead of 12.66.
+                raise ValueError("Neither price nor special price was published")
+            data["price"] = data["special_price"]
 
         if data.get("anchor_price") is not None and not data.get("anchor_price_date"):
             data["anchor_price_date"] = datetime.date(2025, 5, 2).isoformat()
-
-        if data["unit_price"] is None:
-            data["unit_price"] = data["price"]
 
         return data
 

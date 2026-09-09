@@ -31,6 +31,8 @@ class BosoCrawler(BaseCrawler):
         "price": ("MPC", False),
         "unit_price": ("cijena za jedinicu mjere", False),
         "special_price": ("MPC za vrijeme posebnog oblika prodaje", False),
+        # Boso abbreviates "posljednih" — the column was missed until 2026-09-04.
+        "best_price_30": ("Najniža cijena u poslj. 30 dana", False),
         "anchor_price": ("sidrena cijena na 2.5.2025", False),
     }
 

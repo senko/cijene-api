@@ -16,7 +16,7 @@ class Product(BaseModel):
     quantity: str  # Amount (e.g., "500g", "1L")
     unit: str  # Unit of measure (e.g., "kg", "kom")
     price: Decimal  # Current retail price
-    unit_price: Decimal  # Price per unit of measure
+    unit_price: Optional[Decimal] = None  # Price per unit of measure, as published
     barcode: str  # EAN/barcode
     category: str  # Product category
 

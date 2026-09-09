@@ -1,7 +1,7 @@
 import datetime
 import logging
 import re
-import subprocess
+import zipfile
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Generator, Optional, Tuple
@@ -30,7 +30,7 @@ class StudenacCrawler(BaseCrawler):
 
     PRICE_MAP = {
         "price": ("MaloprodajnaCijena", False),
-        "unit_price": ("CijenaPoJedinici", False),
+        "unit_price": ("CijenaZaJedinicuMjere", False),
         "special_price": ("MaloprodajnaCijenaAkcija", False),
         "best_price_30": ("NajnizaCijena", False),
         "anchor_price": ("SidrenaCijena", False),
@@ -168,23 +168,19 @@ class StudenacCrawler(BaseCrawler):
             with open(temp_zip, "wb") as fp:
                 self.fetch_binary(url, fp)
 
-            result = subprocess.run(
-                ["unzip", "-x", temp_zip],
-                cwd=temp_dir,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-            )
+            with zipfile.ZipFile(temp_zip, "r") as zf:
+                for info in zf.infolist():
+                    # Decode filenames encoded as CP437 by some ZIP writers
+                    try:
+                        name = info.filename.encode("cp437").decode("utf-8")
+                    except (UnicodeDecodeError, UnicodeEncodeError):
+                        name = info.filename
 
-            if result.returncode != 0:
-                print(result.stdout.decode())
-                print(result.stderr.decode())
+                    if not name.endswith(suffix):
+                        continue
 
-            for file in temp_path.iterdir():
-                if file.suffix != suffix:
-                    continue
-
-                xml_content = open(file, "rb").read()
-                yield file.name, xml_content
+                    xml_content = zf.read(info)
+                    yield name, xml_content
 
 
 if __name__ == "__main__":
