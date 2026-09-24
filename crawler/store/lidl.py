@@ -1,9 +1,11 @@
 import datetime
 import logging
 import re
+import time
 from typing import Optional
 from urllib.parse import quote, unquote, urljoin
 
+import httpx
 from bs4 import BeautifulSoup
 
 from crawler.store.models import Product, Store
@@ -176,10 +178,24 @@ class LidlCrawler(BaseCrawler):
             logger.warning(f"Skipping CSV {filename} due to store parsing failure")
             return None
 
-        try:
-            text = self.fetch_text(url, encodings=["utf-8-sig", "windows-1250"])
-        except Exception as e:
-            logger.error(f"Failed to download {url}: {e}", exc_info=True)
+        text = None
+        for attempt in range(1, self.MAX_RETRIES + 1):
+            try:
+                text = self.fetch_text(url, encodings=["utf-8-sig", "windows-1250"])
+                break
+            except httpx.HTTPError as e:
+                # The server occasionally drops connections mid-crawl
+                logger.warning(
+                    f"Download attempt {attempt}/{self.MAX_RETRIES} of {url} failed: {e}"
+                )
+                if attempt < self.MAX_RETRIES:
+                    time.sleep(2**attempt)
+            except Exception as e:
+                logger.error(f"Failed to download {url}: {e}", exc_info=True)
+                return None
+
+        if text is None:
+            logger.error(f"Giving up on {url} after {self.MAX_RETRIES} attempts")
             return None
 
         headers = text.splitlines()[0] if text else ""
