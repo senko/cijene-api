@@ -47,6 +47,18 @@ class VrutakCrawler(BaseCrawler):
         "category": ("kategorija", False),
     }
 
+    REQUIRED_COLUMNS = [
+        "mpcijena",
+        "mpcijenamjera",
+        "naziv",
+        "sifra",
+        "marka",
+        "nettokolicina",
+        "mjera",
+        "barkod",
+        "kategorija",
+    ]
+
     def parse_index(self, content: str) -> dict[datetime.date, list[str]]:
         """
         Parse the Vrutak index page to extract XML file URLs grouped by date.
@@ -146,7 +158,10 @@ class VrutakCrawler(BaseCrawler):
             root = etree.fromstring(xml_content)
             products = []
 
-            for product_elem in root.xpath("//item"):
+            product_elems = root.xpath("//item")
+            self.check_xml_columns(product_elems)
+
+            for product_elem in product_elems:
                 try:
                     product = self.parse_xml_product(product_elem)
                     products.append(product)

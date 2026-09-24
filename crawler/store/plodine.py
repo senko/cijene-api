@@ -46,6 +46,21 @@ class PlodineCrawler(BaseCrawler):
         "category": ("Kategorija proizvoda", False),
     }
 
+    REQUIRED_COLUMNS = [
+        "Maloprodajna cijena",
+        "Cijena po JM",
+        "MPC za vrijeme posebnog oblika prodaje",
+        "Najniza cijena u poslj. 30 dana",
+        "Sidrena cijena na 2.5.2025",
+        "Naziv proizvoda",
+        "Sifra proizvoda",
+        "Marka proizvoda",
+        "Neto kolicina",
+        "Jedinica mjere",
+        "Barkod",
+        "Kategorija proizvoda",
+    ]
+
     def get_index(self, date: datetime.date) -> str:
         content = self.fetch_text(self.INDEX_URL)
         zip_urls_by_date = self.parse_index_for_zip(content)

@@ -28,6 +28,12 @@ class DmCrawler(BaseCrawler):
     STORE_ID = "all"
     STORE_NAME = "DM"
 
+    # Not used — parse_excel detects the header row and reads columns by its
+    # own normalized names, so the shared map-driven parser never runs here.
+    PRICE_MAP = {}
+    FIELD_MAP = {}
+    REQUIRED_COLUMNS = []
+
     def parse_date_from_title(self, title: str) -> datetime.date:
         """
         Extract date from the title the Excel link.

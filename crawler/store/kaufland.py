@@ -40,6 +40,32 @@ class KauflandCrawler(BaseCrawler):
         "category": ("kategorija proizvoda", False),
     }
 
+    BOOL_MAP = {
+        "available": ("Dostupan/Nedostupan", False),
+    }
+
+    REQUIRED_COLUMNS = [
+        "maloprod.cijena(EUR)",
+        "cijena jed.mj.(EUR)",
+        "Sidrena cijena",
+        "naziv proizvoda",
+        "šifra proizvoda",
+        "marka proizvoda",
+        "jedinica mjere",
+        "barkod",
+    ]
+
+    # Availability was added on 2026-09-24 for NN 101/2026. The chain's promo
+    # marker stays the pre-existing "akc.cijena, A=akcija" flag, which carries
+    # no name for the form of sale, so special_sale_type is left unmapped.
+    OPTIONAL_COLUMNS = [
+        "neto količina(KG)",
+        "kategorija proizvoda",
+        "MPC poseb.oblik prod",
+        "Najniža MPC u 30dana",
+        "Dostupan/Nedostupan",
+    ]
+
     CITIES = [
         "Zagreb Blato",
         "Zagreb",

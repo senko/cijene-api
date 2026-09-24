@@ -42,7 +42,33 @@ class BosoCrawler(BaseCrawler):
         "unit": ("jedinica mjere", False),
         "barcode": ("barkod", False),
         "category": ("kategorija proizvoda", False),
+        "special_sale_type": ("Naziv posebnog oblika prodaje", False),
     }
+
+    BOOL_MAP = {
+        "available": ("dostupno", False),
+    }
+
+    REQUIRED_COLUMNS = [
+        "MPC",
+        "cijena za jedinicu mjere",
+        "sidrena cijena na 2.5.2025",
+        "šifra",
+        "naziv",
+        "marka",
+        "jedinica mjere",
+        "barkod",
+    ]
+
+    # Both trailing columns were added on 2026-09-23 for NN 101/2026; the rest
+    # of the header was left alone. Availability is published as 1/0 here.
+    OPTIONAL_COLUMNS = [
+        "neto količina",
+        "kategorija proizvoda",
+        "MPC za vrijeme posebnog oblika prodaje",
+        "dostupno",
+        "Naziv posebnog oblika prodaje",
+    ]
 
     # Date pattern for parsing dates from CSV filenames and HTML
     DATE_PATTERN = re.compile(r"(\d{2})\.(\d{2})\.(\d{4})")

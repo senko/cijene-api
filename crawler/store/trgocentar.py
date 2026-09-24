@@ -67,6 +67,21 @@ class TrgocentarCrawler(BaseCrawler):
         "category": ("naz_kat", False),
     }
 
+    REQUIRED_COLUMNS = [
+        "mpc",
+        "c_jmj",
+        "mpc_pop",
+        "c_najniza_30",
+        "c_020525",
+        "naziv_art",
+        "sif_art",
+        "marka",
+        "net_kol",
+        "jmj",
+        "ean_kod",
+        "naz_kat",
+    ]
+
     def parse_index(self, content: str) -> list[str]:
         """
         Parse the Trgocentar index page to extract XML file URLs.
@@ -166,7 +181,10 @@ class TrgocentarCrawler(BaseCrawler):
             root = etree.fromstring(xml_content)
             products = []
 
-            for product_elem in root.xpath("//cjenik"):
+            product_elems = root.xpath("//cjenik")
+            self.check_xml_columns(product_elems)
+
+            for product_elem in product_elems:
                 try:
                     product = self.parse_xml_product(product_elem)
                     products.append(product)

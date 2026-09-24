@@ -6,7 +6,7 @@ from logging import getLogger
 from re import Pattern
 from tempfile import NamedTemporaryFile
 from time import time
-from typing import Any, BinaryIO, Generator
+from typing import Any, BinaryIO, Generator, Iterable
 from zipfile import ZipFile
 
 import httpx
@@ -15,6 +15,14 @@ from bs4 import BeautifulSoup
 from .models import Product, Store
 
 logger = getLogger(__name__)
+
+# A source column (or XML tag) may be known under several names, for example
+# while a chain migrates from one header to another. A spec is either a single
+# name or a list of accepted spellings; the first one present in the file wins.
+ColumnSpec = str | list[str]
+
+# field name -> (names as declared, names lowercased for lookup, is_required)
+CompiledSpec = tuple[str, list[str], list[str], bool]
 
 
 class BaseCrawler:
@@ -32,11 +40,41 @@ class BaseCrawler:
 
     ZIP_DATE_PATTERN: Pattern | None = None
 
-    PRICE_MAP: dict[str, tuple[str, bool]]
+    PRICE_MAP: dict[str, tuple[ColumnSpec, bool]]
     """Mapping from CSV column names to price fields and whether they are required."""
 
-    FIELD_MAP: dict[str, tuple[str, bool]]
+    FIELD_MAP: dict[str, tuple[ColumnSpec, bool]]
     """Mapping from CSV column names to non-price fields and whether they are required."""
+
+    BOOL_MAP: dict[str, tuple[ColumnSpec, bool]] = {}
+    """Mapping from CSV column names to boolean fields and whether they are required."""
+
+    REQUIRED_COLUMNS: list[ColumnSpec]
+    """
+    Columns the source file must contain. A missing one is a breaking format
+    change: the file is abandoned and an error is logged.
+
+    Every crawler declares this, like PRICE_MAP and FIELD_MAP above. The two
+    crawlers that parse by column position rather than by name declare it empty.
+
+    This deliberately repeats column names from the maps above, because it
+    answers a different question than the `is_required` flag there. That flag
+    says whether an individual *row* may leave the value empty. Fields like
+    `price` and `barcode` are row-optional in most crawlers because
+    `fix_product_data` invents a fallback, but losing their column entirely
+    would silently produce wrong prices and synthetic barcodes.
+    """
+
+    OPTIONAL_COLUMNS: list[ColumnSpec] = []
+    """
+    Columns we expect but can process without, such as the ones dropped by
+    NN 101/2026. A missing one is logged as a warning and parsing continues.
+    """
+
+    TRUE_VALUES = frozenset({"dostupno", "dostupan", "da", "d", "1", "true", "yes"})
+    FALSE_VALUES = frozenset(
+        {"nedostupno", "nedostupan", "ne", "n", "0", "false", "no"}
+    )
 
     def __init__(self):
         self.client = httpx.Client(
@@ -44,6 +82,116 @@ class BaseCrawler:
             follow_redirects=True,
             verify=self.VERIFY_TLS_CERT,
         )
+
+        # The maps and column lists are class attributes and nothing mutates
+        # them at runtime, so the lowercased lookup keys are computed once here
+        # rather than per row or per file.
+        self._price_specs = self._compile_map(self.PRICE_MAP)
+        self._field_specs = self._compile_map(self.FIELD_MAP)
+        self._bool_specs = self._compile_map(self.BOOL_MAP)
+
+        self._required_specs = [
+            self._names_and_keys(spec) for spec in self.REQUIRED_COLUMNS
+        ]
+        self._optional_specs = [
+            self._names_and_keys(spec) for spec in self.OPTIONAL_COLUMNS
+        ]
+
+        # Unrecognized boolean values are reported once each, so a single
+        # unknown token can't produce one log line per row.
+        self._unknown_bool_values: set[str] = set()
+
+    @staticmethod
+    def _names_and_keys(spec: ColumnSpec) -> tuple[list[str], list[str]]:
+        """
+        Split a column spec into its declared names and lowercased lookup keys.
+
+        A bare string is wrapped rather than iterated, since a string is itself
+        a sequence of characters. Empty names are dropped: a few crawlers
+        declare a field the source doesn't have, such as Vrutak's anchor price.
+        """
+        names = [spec] if isinstance(spec, str) else list(spec)
+        names = [name for name in names if name]
+        return names, [name.lower() for name in names]
+
+    @classmethod
+    def _compile_map(
+        cls, mapping: dict[str, tuple[ColumnSpec, bool]]
+    ) -> list[CompiledSpec]:
+        """Pre-compute lookup keys for a field mapping."""
+        compiled: list[CompiledSpec] = []
+        for field, (spec, is_required) in mapping.items():
+            names, keys = cls._names_and_keys(spec)
+            compiled.append((field, names, keys, is_required))
+        return compiled
+
+    def check_columns(self, available: Iterable[str], fold_case: bool = True) -> None:
+        """
+        Validate the columns (or XML tags) a source file provides.
+
+        Args:
+            available: Column or tag names found in the file.
+            fold_case: Compare case-insensitively. True for CSV, where lookups
+                are already case-insensitive; False for XML, where tag lookups
+                are case-sensitive and a lenient check here would pass for
+                structures the parser then can't read.
+
+        Raises:
+            ValueError: If a required column is missing.
+        """
+        present = {name.lower() if fold_case else name for name in available if name}
+
+        def missing(specs) -> list[str]:
+            return [
+                "/".join(names)
+                for names, keys in specs
+                if not any(name in present for name in (keys if fold_case else names))
+            ]
+
+        absent = missing(self._required_specs)
+        if absent:
+            found = ", ".join(name for name in available if name)
+            raise ValueError(
+                f"Missing required column(s): {', '.join(absent)}. Found: {found}"
+            )
+
+        absent = missing(self._optional_specs)
+        if absent:
+            logger.warning(
+                f"{self.CHAIN}: expected column(s) missing, "
+                f"continuing without them: {', '.join(absent)}"
+            )
+
+    def parse_bool(self, value: str | None) -> bool | None:
+        """
+        Parse a boolean-ish source value such as dostupno/nedostupno.
+
+        Unrecognized values return None and are logged once per distinct value,
+        so the vocabulary can be extended from the crawl logs without one odd
+        token producing a log line per row.
+
+        Args:
+            value: Raw value, or None if the column is absent.
+
+        Returns:
+            True, False, or None when the value is empty or unrecognized.
+        """
+        if value is None:
+            return None
+
+        text = str(value).strip().lower()
+        if not text:
+            return None
+
+        if text in self.TRUE_VALUES:
+            return True
+        if text in self.FALSE_VALUES:
+            return False
+
+        if text not in self._unknown_bool_values:
+            self._unknown_bool_values.add(text)
+            logger.warning(f"{self.CHAIN}: unknown boolean value {value!r}")
+        return None
 
     def fetch_text(
         self,
@@ -252,6 +400,10 @@ class BaseCrawler:
         if data.get("anchor_price") is not None and not data.get("anchor_price_date"):
             data["anchor_price_date"] = datetime.date(2025, 5, 2).isoformat()
 
+        # Distinguish "no promotion" from "chain publishes a name for it"
+        if data.get("special_sale_type") is not None:
+            data["special_sale_type"] = str(data["special_sale_type"]).strip() or None
+
         if data["unit_price"] is None:
             data["unit_price"] = data["price"]
 
@@ -262,52 +414,104 @@ class BaseCrawler:
         Parse a single row of CSV data into a Product object.
         """
         row = {k.lower(): v for k, v in row.items()}
-        data = {}
+        # Heterogeneous by design: prices, strings and flags all feed Product()
+        data: dict[str, Any] = {}
 
-        for field, (column, is_required) in self.PRICE_MAP.items():
-            value = row.get(column.lower())
+        # Candidate keys are tried in order and matched on presence, so an empty
+        # value in the first one doesn't fall through and read another column.
+        for field, names, keys, is_required in self._price_specs:
+            value = next((row[key] for key in keys if key in row), None)
             try:
                 data[field] = self.parse_price(value, is_required)
             except ValueError as err:
                 logger.warning(
-                    f"Failed to parse {field} from {column}: {err}",
+                    f"Failed to parse {field} from {'/'.join(names)}: {err}",
                     exc_info=True,
                 )
                 raise
 
-        for field, (column, is_required) in self.FIELD_MAP.items():
-            value = row.get(column.lower(), "").strip()
-            if not value and is_required:
+        for field, names, keys, is_required in self._field_specs:
+            text = (next((row[key] for key in keys if key in row), None) or "").strip()
+            if not text and is_required:
                 raise ValueError(f"Missing required field: {field}")
-            data[field] = value
+            data[field] = text
+
+        for field, _names, keys, is_required in self._bool_specs:
+            flag = self.parse_bool(next((row[key] for key in keys if key in row), None))
+            if flag is None and is_required:
+                raise ValueError(f"Missing required field: {field}")
+            data[field] = flag
 
         data = self.fix_product_data(data)
         return Product(**data)  # type: ignore
 
-    def parse_xml_product(self, elem: Any) -> Product:
-        def get_text(xpath: Any, default=""):
-            elements = elem.xpath(xpath)
-            return elements[0] if elements and elements[0] else default
+    @staticmethod
+    def _xml_text(elem: Any, names: list[str]) -> str:
+        """
+        Return the text of the first candidate child tag that is present.
 
-        data = {}
-        for field, (tagname, is_required) in self.PRICE_MAP.items():
-            value = get_text(f"{tagname}/text()")
+        A present but empty tag yields "" and stops the search, so an empty
+        value can't fall through and read an alternative tag instead.
+        """
+        for name in names:
+            texts = elem.xpath(f"{name}/text()")
+            if texts:
+                return texts[0] or ""
+            if elem.xpath(name):
+                return ""
+        return ""
+
+    def check_xml_columns(self, elements: list) -> None:
+        """
+        Validate the tag structure of an XML price list.
+
+        Only the first product element is inspected; the rest of the file is
+        assumed to share its structure. Call this once per file, before
+        iterating, so a breaking change abandons the file instead of raising
+        once per product.
+
+        Args:
+            elements: Product elements found in the file; empty is a no-op.
+
+        Raises:
+            ValueError: If a required tag is missing.
+        """
+        if not elements:
+            return
+
+        # Comments and processing instructions have a callable tag, not a name
+        tags = [child.tag for child in elements[0] if isinstance(child.tag, str)]
+        self.check_columns(tags, fold_case=False)
+
+    def parse_xml_product(self, elem: Any) -> Product:
+        # Heterogeneous by design: prices, strings and flags all feed Product()
+        data: dict[str, Any] = {}
+        for field, names, _keys, is_required in self._price_specs:
+            value = self._xml_text(elem, names)
             try:
                 data[field] = self.parse_price(value, is_required)
             except ValueError as err:
+                tagname = "/".join(names) or field
                 logger.warning(
                     f"Failed to parse {field} from {tagname}: {err}",
                     exc_info=True,
                 )
                 raise
 
-        for field, (tagname, is_required) in self.FIELD_MAP.items():
-            value = get_text(f"{tagname}/text()")
+        for field, names, _keys, is_required in self._field_specs:
+            value = self._xml_text(elem, names)
             if not value and is_required:
+                tagname = "/".join(names) or field
                 raise ValueError(
                     f"Missing required field: {field} (expected <{tagname}>)"
                 )
             data[field] = value
+
+        for field, names, _keys, is_required in self._bool_specs:
+            flag = self.parse_bool(self._xml_text(elem, names))
+            if flag is None and is_required:
+                raise ValueError(f"Missing required field: {field}")
+            data[field] = flag
 
         data = self.fix_product_data(data)
         return Product(**data)  # type: ignore
@@ -322,6 +526,10 @@ class BaseCrawler:
 
         Returns:
             List of Product objects
+
+        Raises:
+            ValueError: If the header row is missing or a required column is
+                absent, in which case the file should be abandoned.
         """
         logger.debug("Parsing CSV content")
 
@@ -329,17 +537,7 @@ class BaseCrawler:
         if not reader.fieldnames:
             raise ValueError("CSV file is missing the header row")
 
-        # Make sure all defined columns exist in the CSV
-        csv_columns = list(reader.fieldnames)
-        csv_columns_lower = [c.lower() for c in csv_columns]
-        price_columns = [column for column, _ in self.PRICE_MAP.values()]
-        field_columns = [column for column, _ in self.FIELD_MAP.values()]
-        for column in price_columns + field_columns:
-            if column.lower() not in csv_columns_lower:
-                available = ", ".join(f'"{c}"' for c in csv_columns)
-                raise ValueError(
-                    f'Column "{column}" not found in CSV file. CSV columns: {available}'
-                )
+        self.check_columns(reader.fieldnames)
 
         products = []
         for row in reader:

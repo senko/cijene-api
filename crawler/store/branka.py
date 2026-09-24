@@ -1,6 +1,7 @@
 import datetime
 import logging
 import re
+from urllib.parse import unquote
 
 from bs4 import BeautifulSoup
 
@@ -10,11 +11,28 @@ from .base import BaseCrawler
 
 logger = logging.getLogger(__name__)
 
-# Regex to extract store type and date from CSV filename
+# Legacy filename, used until 2026-09-22.
 # e.g., Hipermarket070426.csv -> ("Hipermarket", "07", "04", "26")
-CSV_FILENAME_PATTERN = re.compile(
+LEGACY_FILENAME_PATTERN = re.compile(
     r"(Hipermarket|Supermarket)(\d{2})(\d{2})(\d{2})\.csv"
 )
+
+# Since 2026-09-23 Branka uses the naming NN 101/2026 asks for, which carries
+# the store form, address, store code, storage number and a timestamp, e.g.
+# 2026266_Hipermarket_BRANKA_Optujska_70_P02_2392026_0735.csv
+# Note the store form is spelled "Super_market" there.
+STORE_TYPE_PATTERN = re.compile(r"(hiper|super)[_ ]?market", re.IGNORECASE)
+
+# Day and month in the new filenames are not zero-padded, so the split between
+# them depends on the length of the date segment. Only the 7-character case is
+# ambiguous, and both of its readings can be real dates ("1122026" is either
+# 11.2.2026 or 1.12.2026), which is why candidates are filtered by plausibility
+# and then matched against the requested date.
+DATE_SEGMENT_SPLITS = {
+    6: ((1, 1, 4),),
+    7: ((2, 1, 4), (1, 2, 4)),
+    8: ((2, 2, 4),),
+}
 
 # Hardcoded store info — Branka has exactly 2 locations, both in Varazdin
 STORES = {
@@ -52,6 +70,10 @@ class BrankaCrawler(BaseCrawler):
     BASE_URL = "https://www.branka.hr"
     INDEX_URL = "https://www.branka.hr/cjenik"
 
+    # How far back a new-style filename may plausibly be dated. Deliberately
+    # generous; it exists to reject misparses, not to bound the index.
+    MAX_FILE_AGE_DAYS = 40
+
     PRICE_MAP = {
         "price": ("MPC", True),
         "unit_price": ("MPC", True),
@@ -67,6 +89,21 @@ class BrankaCrawler(BaseCrawler):
         "barcode": ("BARKOD", False),
         "category": ("NAZIV_KATEGORIJE", False),
     }
+
+    REQUIRED_COLUMNS = [
+        "MPC",
+        "SIDRENA_CIJENA_NA_02_05_25",
+        "SIFRA",
+        "NAZIV",
+        "MARKA",
+        "JEDINICA_MJERE",
+        "BARKOD",
+    ]
+
+    OPTIONAL_COLUMNS = [
+        "NETO_KOLICINA",
+        "NAZIV_KATEGORIJE",
+    ]
 
     def parse_index(self, content: str) -> list[str]:
         """
@@ -93,6 +130,76 @@ class BrankaCrawler(BaseCrawler):
 
         return urls
 
+    @staticmethod
+    def parse_date_segment(segment: str) -> set[datetime.date]:
+        """
+        Read the unpadded date segment of a new-style filename.
+
+        Args:
+            segment: Digits between the store code and the time, e.g. "2392026"
+
+        Returns:
+            Every real calendar date the segment could denote, which is more
+            than one only for the ambiguous 7-character case.
+        """
+        dates = set()
+        for day_len, month_len, year_len in DATE_SEGMENT_SPLITS.get(len(segment), ()):
+            day = segment[:day_len]
+            month = segment[day_len : day_len + month_len]
+            year = segment[day_len + month_len : day_len + month_len + year_len]
+            try:
+                dates.add(datetime.date(int(year), int(month), int(day)))
+            except ValueError:
+                continue
+        return dates
+
+    def candidate_dates(self, url: str) -> set[datetime.date]:
+        """
+        Determine which dates a price list URL could be for.
+
+        Legacy filenames carry an unambiguous zero-padded date and are accepted
+        as-is, so historical backfills keep working. New-style filenames are
+        ambiguous, so their candidates are additionally restricted to a
+        generous recent window: anything outside it is a misparse rather than a
+        real date, which also guards against picking up the wrong segment.
+
+        Args:
+            url: CSV file URL
+
+        Returns:
+            Set of plausible dates, empty if the name isn't recognized.
+        """
+        name = unquote(url).rsplit("/", 1)[-1]
+
+        legacy = LEGACY_FILENAME_PATTERN.search(name)
+        if legacy:
+            day, month, year = (
+                int(legacy.group(2)),
+                int(legacy.group(3)),
+                int(legacy.group(4)),
+            )
+            try:
+                return {datetime.date(2000 + year, month, day)}
+            except ValueError:
+                return set()
+
+        stem = name[:-4] if name.lower().endswith(".csv") else name
+        segments = stem.split("_")
+        if len(segments) < 2:
+            return set()
+
+        # Take the date by position rather than scanning for digit runs: the
+        # name holds several other numeric segments, and the leading one parses
+        # as a valid date under two of the splits.
+        today = datetime.date.today()
+        earliest = today - datetime.timedelta(days=self.MAX_FILE_AGE_DAYS)
+        latest = today + datetime.timedelta(days=1)
+        return {
+            found
+            for found in self.parse_date_segment(segments[-2])
+            if earliest <= found <= latest
+        }
+
     def get_index(self, date: datetime.date) -> list[str]:
         """
         Fetch the index page and return CSV URLs matching the given date.
@@ -101,22 +208,12 @@ class BrankaCrawler(BaseCrawler):
             date: The date for which to find price list CSVs
 
         Returns:
-            List of CSV URLs (up to 2 — one per store) for the given date
+            List of CSV URLs (up to 2, one per store) for the given date
         """
         content = self.fetch_text(self.INDEX_URL)
         all_urls = self.parse_index(content)
 
-        matching = []
-        for url in all_urls:
-            m = CSV_FILENAME_PATTERN.search(url)
-            if not m:
-                continue
-
-            dd, mm, yy = int(m.group(2)), int(m.group(3)), int(m.group(4))
-            url_date = datetime.date(2000 + yy, mm, dd)
-
-            if url_date == date:
-                matching.append(url)
+        matching = [url for url in all_urls if date in self.candidate_dates(url)]
 
         logger.info(f"Found {len(matching)} CSV files for date {date}")
         return matching
@@ -134,11 +231,13 @@ class BrankaCrawler(BaseCrawler):
         Raises:
             ValueError: If the URL doesn't match a known store type
         """
-        m = CSV_FILENAME_PATTERN.search(url)
+        name = unquote(url).rsplit("/", 1)[-1]
+        m = STORE_TYPE_PATTERN.search(name)
         if not m:
             raise ValueError(f"Cannot parse store type from URL: {url}")
 
-        store_type = m.group(1)
+        # Normalize the new "Super_market" spelling onto the keys used here
+        store_type = "Hipermarket" if m.group(1).lower() == "hiper" else "Supermarket"
         if store_type not in STORES:
             raise ValueError(f"Unknown store type: {store_type}")
 

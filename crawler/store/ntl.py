@@ -45,6 +45,20 @@ class NtlCrawler(BaseCrawler):
         "category": ("Kategorija proizvoda", False),
     }
 
+    REQUIRED_COLUMNS = [
+        "Maloprodajna cijena",
+        "Cijena za jedinicu mjere",
+        "MPC za vrijeme posebnog oblika prodaje",
+        "Sidrena cijena na 2.5.2025",
+        "Šifra proizvoda",
+        "Barkod",
+        "Naziv proizvoda",
+        "Marka proizvoda",
+        "Neto količina",
+        "Jedinica mjere",
+        "Kategorija proizvoda",
+    ]
+
     def parse_index(self, content: str) -> list[str]:
         """
         Parse the NTL index page to extract CSV links.

@@ -30,7 +30,14 @@ class TrgovinaKrkCrawler(BaseCrawler):
         "unit_price": ("Cijena za jedinicu mjere", False),
         "special_price": ("MPC za vrijeme posebnog oblika prodaje", False),
         "best_price_30": ("Najniža cijena u poslj.30 dana", False),
-        "anchor_price": ("Sidrena cijena na 2.5.2025", False),
+        # Renamed on 2026-09-23 when the chain moved to the NN 101/2026 format.
+        # The values did not change with the header: on the switch day nearly
+        # every pre-existing product kept its 2.5.2025 value, so the column name
+        # says nothing reliable about which reference date a row refers to.
+        "anchor_price": (
+            ["Sidrena cijena na 2.5.2025", "Sidrena cijena na 10.09.2026"],
+            False,
+        ),
     }
 
     # Mapping for other fields
@@ -42,7 +49,35 @@ class TrgovinaKrkCrawler(BaseCrawler):
         "unit": ("Jedinica mjere", False),
         "barcode": ("Barkod", False),
         "category": ("Kategorija proizvoda", False),
+        "special_sale_type": ("Naziv posebnog oblika prodaje", False),
     }
+
+    BOOL_MAP = {
+        "available": ("Dostupnost", False),
+    }
+
+    REQUIRED_COLUMNS = [
+        "Maloprodajna cijena",
+        "Cijena za jedinicu mjere",
+        ["Sidrena cijena na 2.5.2025", "Sidrena cijena na 10.09.2026"],
+        "Naziv proizvoda",
+        "Šifra proizvoda",
+        "Marka proizvoda",
+        "Jedinica mjere",
+        "Barkod",
+    ]
+
+    # On 2026-09-24 the chain dropped the special price and 30-day low columns
+    # and added the sale name and availability ones. Files from either side of
+    # the switch must keep parsing.
+    OPTIONAL_COLUMNS = [
+        "Neto količina",
+        "Kategorija proizvoda",
+        "MPC za vrijeme posebnog oblika prodaje",
+        "Najniža cijena u poslj.30 dana",
+        "Naziv posebnog oblika prodaje",
+        "Dostupnost",
+    ]
 
     def get_all_products(self, date: datetime.date) -> List[Store]:
         """Get all products from all store locations."""
@@ -199,6 +234,16 @@ class TrgovinaKrkCrawler(BaseCrawler):
         # Collapse multiple spaces in product name
         if data.get("product"):
             data["product"] = re.sub(r"\s+", " ", data["product"].strip())
+
+        # Since 2026-09-24 the chain publishes one price column plus the name of
+        # the special form of sale, having dropped the separate special price
+        # column. When a sale name is present the published price is the
+        # promotional one, so mirror it into special_price to keep the "on sale"
+        # signal. Verified against the last file published in the old format:
+        # for every sampled promo row the new price equals the old special
+        # price. The regular pre-promo price is no longer published.
+        if data.get("special_sale_type") and data.get("special_price") is None:
+            data["special_price"] = data.get("price")
 
         return data
 

@@ -37,6 +37,18 @@ class ZabacCrawler(BaseCrawler):
         "category": ("Naziv grupe artikala", False),
     }
 
+    REQUIRED_COLUMNS = [
+        "MPC",
+        "Najniža cijena u posljednjih 30 dana",
+        "Sidrena cijena na 2.5.2025",
+        "Šifra artikla",
+        "Barcode",
+        "Naziv artikla",
+        "Marka",
+        "Gramaža",
+        "Naziv grupe artikala",
+    ]
+
     # Store pages on the Žabac website, keyed by the ?store= query parameter
     # value the site uses to switch between stores, mapped to store metadata.
     # The store_id values are stable identifiers and must not change, so that

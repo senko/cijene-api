@@ -74,6 +74,21 @@ class RibolaCrawler(BaseCrawler):
         "category": ("KategorijeProizvoda", False),
     }
 
+    REQUIRED_COLUMNS = [
+        "MaloprodajnaCijena",
+        "CijenaZaJedinicuMjere",
+        "MaloprodajnaCijenaAkcija",
+        "NajnizaCijena",
+        "SidrenaCijena",
+        "NazivProizvoda",
+        "SifraProizvoda",
+        "MarkaProizvoda",
+        "NetoKolicina",
+        "JedinicaMjere",
+        "Barkod",
+        "KategorijeProizvoda",
+    ]
+
     def parse_index(self, content: str) -> list[str]:
         """
         Parse the Ribola index page to extract XML file URLs.
@@ -191,8 +206,11 @@ class RibolaCrawler(BaseCrawler):
             store = self.parse_store_info_from_xml(root)
 
             # Parse products
+            product_elems = root.xpath("//Proizvod")
+            self.check_xml_columns(product_elems)
+
             products = []
-            for product_elem in root.xpath("//Proizvod"):
+            for product_elem in product_elems:
                 try:
                     product = self.parse_xml_product(product_elem)
                     products.append(product)

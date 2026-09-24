@@ -51,6 +51,7 @@ class DjeloVodiceCrawler(BaseCrawler):
     # Not used — XLSX is parsed by column position, not by CSV column names
     PRICE_MAP = {}
     FIELD_MAP = {}
+    REQUIRED_COLUMNS = []
 
     def get_index(self, date: datetime.date) -> str:
         """

@@ -41,6 +41,21 @@ class KonzumCrawler(BaseCrawler):
         "category": ("KATEGORIJA PROIZVODA", False),
     }
 
+    REQUIRED_COLUMNS = [
+        "MALOPRODAJNA CIJENA",
+        "CIJENA ZA JEDINICU MJERE",
+        "MPC ZA VRIJEME POSEBNOG OBLIKA PRODAJE",
+        "NAJNIŽA CIJENA U POSLJEDNIH 30 DANA",
+        "SIDRENA CIJENA NA 2.5.2025",
+        "NAZIV PROIZVODA",
+        "ŠIFRA PROIZVODA",
+        "MARKA PROIZVODA",
+        "NETO KOLIČINA",
+        "JEDINICA MJERE",
+        "BARKOD",
+        "KATEGORIJA PROIZVODA",
+    ]
+
     ADDRESS_PATTERN = re.compile(r"(.*) (\d{5}) (.*)")
 
     def parse_index(self, content: str) -> list[str]:

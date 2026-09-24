@@ -73,6 +73,21 @@ class BureCrawler(BaseCrawler):
         "category": ("KategorijeProizvoda", False),
     }
 
+    REQUIRED_COLUMNS = [
+        "MaloprodajnaCijena",
+        "CijenaZaJedinicuMjere",
+        "MaloprodajnaCijenaAkcija",
+        "NajnizaCijena",
+        "SidrenaCijena",
+        "NazivProizvoda",
+        "SifraProizvoda",
+        "MarkaProizvoda",
+        "NetoKolicina",
+        "JedinicaMjere",
+        "Barkod",
+        "KategorijeProizvoda",
+    ]
+
     def get_zip_url(self, date: datetime.date) -> str:
         """
         Find the bundled ZIP URL for the given date from the archive index.
@@ -221,8 +236,11 @@ class BureCrawler(BaseCrawler):
         root = etree.fromstring(xml_content)
         store = self.build_store(root)
 
+        product_elems = root.xpath("//Proizvod")
+        self.check_xml_columns(product_elems)
+
         products = []
-        for product_elem in root.xpath("//Proizvod"):
+        for product_elem in product_elems:
             try:
                 product = self.parse_xml_product(product_elem)
             except Exception as e:

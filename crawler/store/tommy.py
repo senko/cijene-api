@@ -43,6 +43,23 @@ class TommyCrawler(BaseCrawler):
         "date_added": ("DATUM_ULASKA_NOVOG_ARTIKLA", False),
     }
 
+    REQUIRED_COLUMNS = [
+        "MPC",
+        "CIJENA_PO_JM",
+        "MPC_POSEBNA_PRODAJA",
+        "MPC_NAJNIZA_30",
+        "MPC_020525",
+        "PRVA_CIJENA_NOVOG_ARTIKLA",
+        "NAZIV_ARTIKLA",
+        "SIFRA_ARTIKLA",
+        "BARKOD_ARTIKLA",
+        "BRAND",
+        "ROBNA_STRUKTURA",
+        "JEDINICA_MJERE",
+        "NETO_KOLICINA",
+        "DATUM_ULASKA_NOVOG_ARTIKLA",
+    ]
+
     def fetch_stores_list(self, date: datetime.date) -> dict[str, str]:
         """
         Fetch the list of store price tables for a specific date.

@@ -117,6 +117,21 @@ class StanicCrawler(BaseCrawler):
         "category": ("Kategorija proizvoda", False),
     }
 
+    REQUIRED_COLUMNS = [
+        "MP cijena",
+        "Cijena za jedinicu mjere",
+        "MPC u vrij. pos. obl. prodaje",
+        "Sidrena cijena na dan",
+        "Najniža cijena 30 dana",
+        "Naziv",
+        "Šifra",
+        "Barkod",
+        "Marka",
+        "Neto količina",
+        "Jedinica mjere",
+        "Kategorija proizvoda",
+    ]
+
     def _list_drive_folder(self, folder_id: str, api_key: str) -> list[dict]:
         """List immediate children of a Drive folder via the v3 REST API."""
         q = quote(f"'{folder_id}' in parents and trashed=false", safe="")
@@ -289,14 +304,7 @@ class StanicCrawler(BaseCrawler):
             raise ValueError("XLSX file is empty")
 
         columns = [cell_str(c) for c in header_row]
-        required = [c for c, _ in self.PRICE_MAP.values()] + [
-            c for c, _ in self.FIELD_MAP.values()
-        ]
-        missing = [c for c in required if c not in columns]
-        if missing:
-            raise ValueError(
-                f"Missing expected XLSX columns: {missing}. Got: {columns}"
-            )
+        self.check_columns(columns)
 
         products: list[Product] = []
         for row_idx, row in enumerate(rows, start=2):

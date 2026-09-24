@@ -44,6 +44,21 @@ class GavranovicCrawler(BaseCrawler):
         "category": ("Kategorija proizvoda", False),
     }
 
+    REQUIRED_COLUMNS = [
+        "Maloprodajna cijena",
+        "Cijena za jedinicu mjere",
+        "MPC za vrijeme posebnog oblika prodaje",
+        "Najniža cijena u poslj.30 dana",
+        "Sidrena cijena na 2.5.2025",
+        "Naziv proizvoda",
+        "Šifra proizvoda",
+        "Marka proizvoda",
+        "Neto količina",
+        "Jedinica mjere",
+        "Barkod",
+        "Kategorija proizvoda",
+    ]
+
     def get_csv_urls(
         self, html: str, date: datetime.date
     ) -> list[tuple[str, str, str]]:

@@ -62,6 +62,21 @@ class BrodokomercCrawler(BaseCrawler):
         "category": ("Kategorija proizvoda", False),
     }
 
+    REQUIRED_COLUMNS = [
+        "Maloprodajna cijena",
+        "Cijena za jedinicu mjere",
+        "MPC za vrijeme posebnog oblika prodaje",
+        "Najniža cijena u poslj.30 dana",
+        "Sidrena cijena na 2.5.2025",
+        "Naziv proizvoda",
+        "Šifra proizvoda",
+        "Marka proizvoda",
+        "Neto količina",
+        "Jedinica mjere",
+        "Barkod",
+        "Kategorija proizvoda",
+    ]
+
     def get_all_products(self, date: datetime.date) -> List[Store]:
         """
         Main method to fetch and parse all products from Brodokomerc's price lists.

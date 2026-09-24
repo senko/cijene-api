@@ -42,6 +42,21 @@ class DukatCrawler(BaseCrawler):
         "category": ("KATEGORIJA PROIZVODA", False),
     }
 
+    REQUIRED_COLUMNS = [
+        "MALOPRODAJNA CIJENA",
+        "CIJENA ZA JEDINICU MJERE",
+        "MPC ZA VRIJEME POSEBNOG OBLIKA PRODAJE",
+        "NAJNIžA CIJENA U POSLJEDNIH 30 DANA",
+        "SIDRENA CIJENA NA 2.5.2025",
+        "NAZIV PROIZVODA",
+        "ŠIFRA PROIZVODA",
+        "MARKA PROIZVODA",
+        "NETO KOLIčINA",
+        "JEDINICA MJERE",
+        "BARKOD",
+        "KATEGORIJA PROIZVODA",
+    ]
+
     LINK_PATTERN = re.compile(
         r"/media/\d+/trgovina-[^\"'<>\s]+\.csv",
         re.IGNORECASE,

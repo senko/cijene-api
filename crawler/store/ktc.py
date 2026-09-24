@@ -39,6 +39,20 @@ class KtcCrawler(BaseCrawler):
         "category": ("Kategorija", False),
     }
 
+    REQUIRED_COLUMNS = [
+        "Maloprodajna cijena",
+        "Cijena za jedinicu mjere",
+        "MPC za vrijeme posebnog oblika prodaje",
+        "Najniža cijena u posljednjih 30 dana",
+        "Naziv proizvoda",
+        "Šifra proizvoda",
+        "Marka proizvoda",
+        "Neto količina",
+        "Jedinica mjere",
+        "Barkod",
+        "Kategorija",
+    ]
+
     CITIES = [
         "KRIZEVCI",
         "VARAZDIN",

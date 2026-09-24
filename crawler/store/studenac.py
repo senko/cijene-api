@@ -30,7 +30,7 @@ class StudenacCrawler(BaseCrawler):
 
     PRICE_MAP = {
         "price": ("MaloprodajnaCijena", False),
-        "unit_price": ("CijenaPoJedinici", False),
+        "unit_price": ("CijenaZaJedinicuMjere", False),
         "special_price": ("MaloprodajnaCijenaAkcija", False),
         "best_price_30": ("NajnizaCijena", False),
         "anchor_price": ("SidrenaCijena", False),
@@ -45,6 +45,21 @@ class StudenacCrawler(BaseCrawler):
         "barcode": ("Barkod", False),
         "category": ("KategorijeProizvoda", False),
     }
+
+    REQUIRED_COLUMNS = [
+        "MaloprodajnaCijena",
+        "CijenaZaJedinicuMjere",
+        "MaloprodajnaCijenaAkcija",
+        "NajnizaCijena",
+        "SidrenaCijena",
+        "NazivProizvoda",
+        "SifraProizvoda",
+        "MarkaProizvoda",
+        "NetoKolicina",
+        "JedinicaMjere",
+        "Barkod",
+        "KategorijeProizvoda",
+    ]
 
     def parse_address(self, address: str) -> Tuple[str, str]:
         """
@@ -114,8 +129,11 @@ class StudenacCrawler(BaseCrawler):
             )
 
             # Extract product information
+            product_elems = root.xpath("//ProdajniObjekt/Proizvodi/Proizvod")
+            self.check_xml_columns(product_elems)
+
             products = []
-            for product_elem in root.xpath("//ProdajniObjekt/Proizvodi/Proizvod"):
+            for product_elem in product_elems:
                 try:
                     product = self.parse_xml_product(product_elem)
                     products.append(product)

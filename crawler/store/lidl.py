@@ -54,6 +54,21 @@ class LidlCrawler(BaseCrawler):
         "category": ("KATEGORIJA_PROIZVODA", False),
     }
 
+    REQUIRED_COLUMNS = [
+        "MALOPRODAJNA_CIJENA",
+        "CIJENA_ZA_JEDINICU_MJERE",
+        "MPC_ZA_VRIJEME_POSEBNOG_OBLIKA_PRODAJE",
+        "Sidrena_cijena_na_02.05.2025",
+        "NAJNIZA_CIJENA_U_POSLJ._30_DANA",
+        "NAZIV",
+        "ŠIFRA",
+        "MARKA",
+        "NETO_KOLIČINA",
+        "JEDINICA_MJERE",
+        "BARKOD",
+        "KATEGORIJA_PROIZVODA",
+    ]
+
     ADDRESS_PATTERN = re.compile(
         r"^(Supermarket)\s+"  # 'Supermarket'
         r"(\d+)_+"  # store number (digits)
