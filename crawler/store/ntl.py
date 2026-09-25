@@ -31,7 +31,12 @@ class NtlCrawler(BaseCrawler):
         "price": ("Maloprodajna cijena", False),
         "unit_price": ("Cijena za jedinicu mjere", False),
         "special_price": ("MPC za vrijeme posebnog oblika prodaje", False),
-        "anchor_price": ("Sidrena cijena na 2.5.2025", False),
+        # Renamed on 2026-09-25 when the chain moved to the NN 101/2026 format.
+        # NTL dropped the reference date from the header entirely, where
+        # Gavranović and Trgovina Krk spell it out; the values themselves are
+        # still mostly the 2.5.2025 anchor, so neither spelling tells us which
+        # reference date a given row refers to.
+        "anchor_price": (["Sidrena cijena na 2.5.2025", "Sidrena cijena"], False),
     }
 
     # Mapping for other product fields from CSV columns
@@ -43,20 +48,34 @@ class NtlCrawler(BaseCrawler):
         "quantity": ("Neto količina", False),
         "unit": ("Jedinica mjere", False),
         "category": ("Kategorija proizvoda", False),
+        "special_sale_type": ("Naziv posebnog oblika prodaje", False),
+    }
+
+    BOOL_MAP = {
+        "available": ("Dostupnost", False),
     }
 
     REQUIRED_COLUMNS = [
         "Maloprodajna cijena",
         "Cijena za jedinicu mjere",
-        "MPC za vrijeme posebnog oblika prodaje",
-        "Sidrena cijena na 2.5.2025",
+        ["Sidrena cijena na 2.5.2025", "Sidrena cijena"],
         "Šifra proizvoda",
         "Barkod",
         "Naziv proizvoda",
         "Marka proizvoda",
-        "Neto količina",
         "Jedinica mjere",
+    ]
+
+    # On 2026-09-25 the chain dropped the special price and 30-day low columns
+    # and added the sale name and availability ones. Files from either side of
+    # the switch must keep parsing, since get_historical_csv_for_date still
+    # reaches back into files published in the old format.
+    OPTIONAL_COLUMNS = [
+        "Neto količina",
         "Kategorija proizvoda",
+        "MPC za vrijeme posebnog oblika prodaje",
+        "Naziv posebnog oblika prodaje",
+        "Dostupnost",
     ]
 
     def parse_index(self, content: str) -> list[str]:
@@ -328,7 +347,21 @@ class NtlCrawler(BaseCrawler):
             data["product"] = data["product"].strip()
 
         # Call parent method for common fixups
-        return super().fix_product_data(data)
+        data = super().fix_product_data(data)
+
+        # Since 2026-09-25 the chain publishes one price column plus the name of
+        # the special form of sale, having dropped the separate special price
+        # column. When a sale name is present the published price is the
+        # promotional one, so mirror it into special_price to keep the "on sale"
+        # signal. Verified against the last file published in the old format:
+        # of 400 rows carrying a sale name (AKC, RAS or TNC), all 400 had a
+        # special price the previous day and 399 of them at exactly this price,
+        # and none of the 5094 rows without a name did. The regular pre-promo
+        # price is no longer published.
+        if data.get("special_sale_type") and data.get("special_price") is None:
+            data["special_price"] = data.get("price")
+
+        return data
 
 
 if __name__ == "__main__":
