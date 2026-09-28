@@ -70,16 +70,20 @@ class TrgocentarCrawler(BaseCrawler):
     REQUIRED_COLUMNS = [
         "mpc",
         "c_jmj",
-        "mpc_pop",
-        "c_najniza_30",
         "c_020525",
         "naziv_art",
         "sif_art",
         "marka",
-        "net_kol",
         "jmj",
         "ean_kod",
+    ]
+
+    # Not required by NN 101/2026, so the chain may drop them when it switches.
+    OPTIONAL_COLUMNS = [
+        "net_kol",
         "naz_kat",
+        "mpc_pop",
+        "c_najniza_30",
     ]
 
     def parse_index(self, content: str) -> list[str]:

@@ -39,14 +39,18 @@ class ZabacCrawler(BaseCrawler):
 
     REQUIRED_COLUMNS = [
         "MPC",
-        "Najniža cijena u posljednjih 30 dana",
         "Sidrena cijena na 2.5.2025",
         "Šifra artikla",
         "Barcode",
         "Naziv artikla",
         "Marka",
+    ]
+
+    # Not required by NN 101/2026, so the chain may drop them when it switches.
+    OPTIONAL_COLUMNS = [
         "Gramaža",
         "Naziv grupe artikala",
+        "Najniža cijena u posljednjih 30 dana",
     ]
 
     # Store pages on the Žabac website, keyed by the ?store= query parameter

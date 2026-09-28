@@ -53,9 +53,13 @@ class VrutakCrawler(BaseCrawler):
         "naziv",
         "sifra",
         "marka",
-        "nettokolicina",
         "mjera",
         "barkod",
+    ]
+
+    # Not required by NN 101/2026, so the chain may drop them when it switches.
+    OPTIONAL_COLUMNS = [
+        "nettokolicina",
         "kategorija",
     ]
 

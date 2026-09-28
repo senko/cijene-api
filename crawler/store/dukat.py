@@ -45,16 +45,20 @@ class DukatCrawler(BaseCrawler):
     REQUIRED_COLUMNS = [
         "MALOPRODAJNA CIJENA",
         "CIJENA ZA JEDINICU MJERE",
-        "MPC ZA VRIJEME POSEBNOG OBLIKA PRODAJE",
-        "NAJNIžA CIJENA U POSLJEDNIH 30 DANA",
         "SIDRENA CIJENA NA 2.5.2025",
         "NAZIV PROIZVODA",
         "ŠIFRA PROIZVODA",
         "MARKA PROIZVODA",
-        "NETO KOLIčINA",
         "JEDINICA MJERE",
         "BARKOD",
+    ]
+
+    # Not required by NN 101/2026, so the chain may drop them when it switches.
+    OPTIONAL_COLUMNS = [
+        "NETO KOLIčINA",
         "KATEGORIJA PROIZVODA",
+        "MPC ZA VRIJEME POSEBNOG OBLIKA PRODAJE",
+        "NAJNIžA CIJENA U POSLJEDNIH 30 DANA",
     ]
 
     LINK_PATTERN = re.compile(

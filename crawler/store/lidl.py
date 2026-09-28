@@ -57,16 +57,20 @@ class LidlCrawler(BaseCrawler):
     REQUIRED_COLUMNS = [
         "MALOPRODAJNA_CIJENA",
         "CIJENA_ZA_JEDINICU_MJERE",
-        "MPC_ZA_VRIJEME_POSEBNOG_OBLIKA_PRODAJE",
         "Sidrena_cijena_na_02.05.2025",
-        "NAJNIZA_CIJENA_U_POSLJ._30_DANA",
         "NAZIV",
         "ŠIFRA",
         "MARKA",
-        "NETO_KOLIČINA",
         "JEDINICA_MJERE",
         "BARKOD",
+    ]
+
+    # Not required by NN 101/2026, so the chain may drop them when it switches.
+    OPTIONAL_COLUMNS = [
+        "NETO_KOLIČINA",
         "KATEGORIJA_PROIZVODA",
+        "MPC_ZA_VRIJEME_POSEBNOG_OBLIKA_PRODAJE",
+        "NAJNIZA_CIJENA_U_POSLJ._30_DANA",
     ]
 
     ADDRESS_PATTERN = re.compile(

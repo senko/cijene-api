@@ -120,16 +120,20 @@ class StanicCrawler(BaseCrawler):
     REQUIRED_COLUMNS = [
         "MP cijena",
         "Cijena za jedinicu mjere",
-        "MPC u vrij. pos. obl. prodaje",
         "Sidrena cijena na dan",
-        "Najniža cijena 30 dana",
         "Naziv",
         "Šifra",
         "Barkod",
         "Marka",
-        "Neto količina",
         "Jedinica mjere",
+    ]
+
+    # Not required by NN 101/2026, so the chain may drop them when it switches.
+    OPTIONAL_COLUMNS = [
+        "Neto količina",
         "Kategorija proizvoda",
+        "MPC u vrij. pos. obl. prodaje",
+        "Najniža cijena 30 dana",
     ]
 
     def _list_drive_folder(self, folder_id: str, api_key: str) -> list[dict]:

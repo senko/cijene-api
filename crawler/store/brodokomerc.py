@@ -65,16 +65,20 @@ class BrodokomercCrawler(BaseCrawler):
     REQUIRED_COLUMNS = [
         "Maloprodajna cijena",
         "Cijena za jedinicu mjere",
-        "MPC za vrijeme posebnog oblika prodaje",
-        "Najniža cijena u poslj.30 dana",
         "Sidrena cijena na 2.5.2025",
         "Naziv proizvoda",
         "Šifra proizvoda",
         "Marka proizvoda",
-        "Neto količina",
         "Jedinica mjere",
         "Barkod",
+    ]
+
+    # Not required by NN 101/2026, so the chain may drop them when it switches.
+    OPTIONAL_COLUMNS = [
+        "Neto količina",
         "Kategorija proizvoda",
+        "MPC za vrijeme posebnog oblika prodaje",
+        "Najniža cijena u poslj.30 dana",
     ]
 
     def get_all_products(self, date: datetime.date) -> List[Store]:

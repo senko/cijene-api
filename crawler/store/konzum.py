@@ -44,16 +44,20 @@ class KonzumCrawler(BaseCrawler):
     REQUIRED_COLUMNS = [
         "MALOPRODAJNA CIJENA",
         "CIJENA ZA JEDINICU MJERE",
-        "MPC ZA VRIJEME POSEBNOG OBLIKA PRODAJE",
-        "NAJNIŽA CIJENA U POSLJEDNIH 30 DANA",
         "SIDRENA CIJENA NA 2.5.2025",
         "NAZIV PROIZVODA",
         "ŠIFRA PROIZVODA",
         "MARKA PROIZVODA",
-        "NETO KOLIČINA",
         "JEDINICA MJERE",
         "BARKOD",
+    ]
+
+    # Not required by NN 101/2026, so the chain may drop them when it switches.
+    OPTIONAL_COLUMNS = [
+        "NETO KOLIČINA",
         "KATEGORIJA PROIZVODA",
+        "MPC ZA VRIJEME POSEBNOG OBLIKA PRODAJE",
+        "NAJNIŽA CIJENA U POSLJEDNIH 30 DANA",
     ]
 
     ADDRESS_PATTERN = re.compile(r"(.*) (\d{5}) (.*)")

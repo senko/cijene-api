@@ -76,16 +76,20 @@ class BureCrawler(BaseCrawler):
     REQUIRED_COLUMNS = [
         "MaloprodajnaCijena",
         "CijenaZaJedinicuMjere",
-        "MaloprodajnaCijenaAkcija",
-        "NajnizaCijena",
         "SidrenaCijena",
         "NazivProizvoda",
         "SifraProizvoda",
         "MarkaProizvoda",
-        "NetoKolicina",
         "JedinicaMjere",
         "Barkod",
+    ]
+
+    # Not required by NN 101/2026, so the chain may drop them when it switches.
+    OPTIONAL_COLUMNS = [
+        "NetoKolicina",
         "KategorijeProizvoda",
+        "MaloprodajnaCijenaAkcija",
+        "NajnizaCijena",
     ]
 
     def get_zip_url(self, date: datetime.date) -> str:

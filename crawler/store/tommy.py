@@ -46,18 +46,22 @@ class TommyCrawler(BaseCrawler):
     REQUIRED_COLUMNS = [
         "MPC",
         "CIJENA_PO_JM",
-        "MPC_POSEBNA_PRODAJA",
-        "MPC_NAJNIZA_30",
         "MPC_020525",
         "PRVA_CIJENA_NOVOG_ARTIKLA",
         "NAZIV_ARTIKLA",
         "SIFRA_ARTIKLA",
         "BARKOD_ARTIKLA",
         "BRAND",
-        "ROBNA_STRUKTURA",
         "JEDINICA_MJERE",
-        "NETO_KOLICINA",
         "DATUM_ULASKA_NOVOG_ARTIKLA",
+    ]
+
+    # Not required by NN 101/2026, so the chain may drop them when it switches.
+    OPTIONAL_COLUMNS = [
+        "NETO_KOLICINA",
+        "ROBNA_STRUKTURA",
+        "MPC_POSEBNA_PRODAJA",
+        "MPC_NAJNIZA_30",
     ]
 
     def fetch_stores_list(self, date: datetime.date) -> dict[str, str]:

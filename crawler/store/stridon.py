@@ -39,16 +39,20 @@ class StridonCrawler(BaseCrawler):
     REQUIRED_COLUMNS = [
         "MALOPRODAJNA_CIJENA",
         "CIJENA_ZA_JEDINICU_MJERE",
-        "MPC_POSEBNI_OBLIK_PRODAJE",
-        "NAJNIZA_CIJENA_ZADNJI_30_DANA",
         "SIDRENA_CIJENA_02_05_25",
         "NAZIV_PROIZVODA",
         "SIFRA_PROIZVODA",
         "MARKA",
-        "NETO_KOLICINA",
         "JEDINICA_MJERE",
         "EAN",
+    ]
+
+    # Not required by NN 101/2026, so the chain may drop them when it switches.
+    OPTIONAL_COLUMNS = [
+        "NETO_KOLICINA",
         "KATEGORIJA",
+        "MPC_POSEBNI_OBLIK_PRODAJE",
+        "NAJNIZA_CIJENA_ZADNJI_30_DANA",
     ]
 
     def parse_index(self, content: str) -> list[str]:

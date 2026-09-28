@@ -60,16 +60,20 @@ class JadrankaTrgovinaCrawler(BaseCrawler):
     REQUIRED_COLUMNS = [
         "MALOPRODAJNA CIJENA",
         "CIJENA ZA JEDINICU MJERE",
-        "MPC ZA VRIJEME POSEBNOG OBLIKA PRODAJE",
-        "NAJNIŽA CIJENA U POSLJEDNIH 30 DANA",
         "SIDRENA CIJENA NA 2.5.2025",
         "ŠIFRA PROIZVODA",
         "NAZIV PROIZVODA",
         "MARKA PROIZVODA",
         "BARKOD",
-        "KATEGORIJA PROIZVODA",
-        "NETO KOLIČINA",
         "JEDINICA MJERE",
+    ]
+
+    # Not required by NN 101/2026, so the chain may drop them when it switches.
+    OPTIONAL_COLUMNS = [
+        "NETO KOLIČINA",
+        "KATEGORIJA PROIZVODA",
+        "MPC ZA VRIJEME POSEBNOG OBLIKA PRODAJE",
+        "NAJNIŽA CIJENA U POSLJEDNIH 30 DANA",
     ]
 
     def parse_index(self, content: str) -> list[str]:

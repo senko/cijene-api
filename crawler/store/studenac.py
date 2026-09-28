@@ -49,16 +49,20 @@ class StudenacCrawler(BaseCrawler):
     REQUIRED_COLUMNS = [
         "MaloprodajnaCijena",
         "CijenaZaJedinicuMjere",
-        "MaloprodajnaCijenaAkcija",
-        "NajnizaCijena",
         "SidrenaCijena",
         "NazivProizvoda",
         "SifraProizvoda",
         "MarkaProizvoda",
-        "NetoKolicina",
         "JedinicaMjere",
         "Barkod",
+    ]
+
+    # Not required by NN 101/2026, so the chain may drop them when it switches.
+    OPTIONAL_COLUMNS = [
+        "NetoKolicina",
         "KategorijeProizvoda",
+        "MaloprodajnaCijenaAkcija",
+        "NajnizaCijena",
     ]
 
     def parse_address(self, address: str) -> Tuple[str, str]:

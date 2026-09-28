@@ -49,16 +49,20 @@ class PlodineCrawler(BaseCrawler):
     REQUIRED_COLUMNS = [
         "Maloprodajna cijena",
         "Cijena po JM",
-        "MPC za vrijeme posebnog oblika prodaje",
-        "Najniza cijena u poslj. 30 dana",
         "Sidrena cijena na 2.5.2025",
         "Naziv proizvoda",
         "Sifra proizvoda",
         "Marka proizvoda",
-        "Neto kolicina",
         "Jedinica mjere",
         "Barkod",
+    ]
+
+    # Not required by NN 101/2026, so the chain may drop them when it switches.
+    OPTIONAL_COLUMNS = [
+        "Neto kolicina",
         "Kategorija proizvoda",
+        "MPC za vrijeme posebnog oblika prodaje",
+        "Najniza cijena u poslj. 30 dana",
     ]
 
     def get_index(self, date: datetime.date) -> str:

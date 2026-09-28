@@ -43,16 +43,20 @@ class EurospinCrawler(BaseCrawler):
     REQUIRED_COLUMNS = [
         "MALOPROD.CIJENA(EUR)",
         "CIJENA_ZA_JEDINICU_MJERE",
-        "MPC_POSEB.OBLIK_PROD",
-        "NAJNIŽA_MPC_U_30DANA",
         "SIDRENA_CIJENA",
         "NAZIV_PROIZVODA",
         "ŠIFRA_PROIZVODA",
         "MARKA_PROIZVODA",
-        "NETO_KOLIČINA",
         "JEDINICA_MJERE",
         "BARKOD",
+    ]
+
+    # Not required by NN 101/2026, so the chain may drop them when it switches.
+    OPTIONAL_COLUMNS = [
+        "NETO_KOLIČINA",
         "KATEGORIJA_PROIZVODA",
+        "MPC_POSEB.OBLIK_PROD",
+        "NAJNIŽA_MPC_U_30DANA",
     ]
 
     STORE_ID_MAP = {
