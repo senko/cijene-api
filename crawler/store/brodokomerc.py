@@ -155,8 +155,8 @@ class BrodokomercCrawler(BaseCrawler):
         date_pattern = self._format_date_for_filename(date)
 
         # Find all CSV links containing the date pattern
-        for link in soup.find_all("a", href=True):
-            full_path = link["href"]
+        for link in soup.select("a[href]"):
+            full_path = str(link["href"])
 
             # The actual filename is the part of the path before the UUID
             # e.g., /documents/.../filename.csv/uuid -> filename.csv

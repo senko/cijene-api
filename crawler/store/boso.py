@@ -5,7 +5,7 @@ import re
 import time
 from typing import Optional
 
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 
 from crawler.store.models import Store
 
@@ -116,7 +116,7 @@ class BosoCrawler(BaseCrawler):
         soup = BeautifulSoup(self.get_price_list_page(), "html.parser")
 
         # Find the script tag containing the AJAX configuration
-        script_tag = soup.find("script", id="marketshop-csv-js-js-extra")
+        script_tag = soup.select_one("script#marketshop-csv-js-js-extra")
         if not script_tag:
             raise ValueError("Could not find AJAX configuration script tag")
 
@@ -160,15 +160,15 @@ class BosoCrawler(BaseCrawler):
         soup = BeautifulSoup(self.get_price_list_page(), "html.parser")
 
         # Find the store dropdown
-        select = soup.find("select", id="marketshop-filter")
-        if not select:
+        dropdown = soup.select_one("select#marketshop-filter")
+        if not dropdown:
             raise ValueError("Could not find store dropdown")
 
         stores = {}
-        options = select.find_all("option")
+        options = dropdown.select("option")
 
         for option in options:
-            value = option.get("value", "").strip()
+            value = str(option.get("value", "")).strip()
             if not value:  # Skip empty option (placeholder)
                 continue
 
@@ -271,19 +271,19 @@ class BosoCrawler(BaseCrawler):
         csv_links = []
 
         # Find all download links
-        download_links = soup.find_all("a", class_="download-button")
+        download_links = soup.select("a.download-button")
 
         for link in download_links:
             href = link.get("href")
-            if not href or not href.endswith(".csv"):
+            if not isinstance(href, str) or not href.endswith(".csv"):
                 continue
 
             # Extract date from the table row
             row = link.find_parent("tr")
-            if not row:
+            if not isinstance(row, Tag):
                 continue
 
-            date_cell = row.find_all("td")[2]  # Third column contains the date
+            date_cell = row.select("td")[2]  # Third column contains the date
             if not date_cell:
                 continue
 

@@ -432,7 +432,7 @@ def test_fetch_binary_truncates_between_attempts(sleeps):
 
     with NamedTemporaryFile(mode="w+b") as fp:
         fp.write(b"stale-bytes-from-a-previous-attempt")
-        crawler.fetch_binary("https://example.test/a.zip", fp)  # type: ignore[arg-type]
+        crawler.fetch_binary("https://example.test/a.zip", fp)
         fp.seek(0)
         assert fp.read() == b"good-content"
 

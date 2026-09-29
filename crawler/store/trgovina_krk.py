@@ -3,7 +3,7 @@ import logging
 import re
 from typing import Any, Dict, List, Optional
 
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 
 from crawler.store.models import Store
 
@@ -139,7 +139,7 @@ class TrgovinaKrkCrawler(BaseCrawler):
         store_sections = []
 
         # Find all div elements containing store names
-        for div in soup.find_all("div"):
+        for div in soup.select("div"):
             # Check if this div contains only the store name
             if div.string and div.string.strip().startswith("Supermarket"):
                 store_name = div.string.strip()
@@ -149,8 +149,8 @@ class TrgovinaKrkCrawler(BaseCrawler):
 
                 # Find the next ul element with CSV links
                 next_ul = div.find_next("ul")
-                if next_ul:
-                    csv_links = next_ul.find_all("a", href=True)
+                if isinstance(next_ul, Tag):
+                    csv_links = next_ul.select("a[href]")
                     if csv_links:
                         # Get the first (most recent) CSV link
                         latest_link = csv_links[0]

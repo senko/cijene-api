@@ -8,7 +8,7 @@ from random import uniform
 from re import Pattern
 from tempfile import NamedTemporaryFile
 from time import monotonic, sleep, time
-from typing import Any, BinaryIO, Callable, Generator, Iterable, TypeVar
+from typing import IO, Any, Callable, Generator, Iterable, TypeVar
 from urllib.parse import urlsplit
 from zipfile import ZipFile
 
@@ -527,7 +527,7 @@ class BaseCrawler:
 
         return self._with_retry(url, send, attempts)
 
-    def fetch_binary(self, url: str, fp: BinaryIO, attempts: int | None = None):
+    def fetch_binary(self, url: str, fp: IO[bytes], attempts: int | None = None):
         """
         Download a binary file to a provided location.
 
@@ -568,13 +568,13 @@ class BaseCrawler:
         self._with_retry(url, send, attempts)
 
     def read_csv(self, text: str, delimiter: str = ",") -> DictReader:
-        return DictReader(text.splitlines(), delimiter=delimiter)  # type: ignore
+        return DictReader(text.splitlines(), delimiter=delimiter)
 
     def get_zip_contents(
         self, url: str, suffix: str
     ) -> Generator[tuple[str, bytes], None, None]:
         with NamedTemporaryFile(mode="w+b") as temp_zip:
-            self.fetch_binary(url, temp_zip)  # type: ignore
+            self.fetch_binary(url, temp_zip)
             temp_zip.seek(0)
 
             with ZipFile(temp_zip, "r") as zip_fp:
@@ -748,7 +748,7 @@ class BaseCrawler:
             data[field] = flag
 
         data = self.fix_product_data(data)
-        return Product(**data)  # type: ignore
+        return Product(**data)
 
     @staticmethod
     def _xml_text(elem: Any, names: list[str]) -> str:
@@ -819,7 +819,7 @@ class BaseCrawler:
             data[field] = flag
 
         data = self.fix_product_data(data)
-        return Product(**data)  # type: ignore
+        return Product(**data)
 
     def parse_csv(self, content: str, delimiter: str = ",") -> list[Product]:
         """

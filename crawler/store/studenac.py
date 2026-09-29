@@ -184,7 +184,7 @@ class StudenacCrawler(BaseCrawler):
     def get_zip_contents(
         self, url: str, suffix: str
     ) -> Generator[tuple[str, bytes], None, None]:
-        with TemporaryDirectory() as temp_dir:  # type: ignore
+        with TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
             temp_zip = temp_path / "archive.zip"
             with open(temp_zip, "wb") as fp:

@@ -22,7 +22,7 @@ dev = [
     "pyright>=1.1.400",
     "pytest>=8.0.0",
     "ruff>=0.11.10",
-    "ty>=0.0.1a3",
+    "ty>=0.0.83",
 ]
 
 [tool.pytest.ini_options]

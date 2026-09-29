@@ -235,7 +235,7 @@ class DmCrawler(BaseCrawler):
                     product_data = self.fix_product_data(product_data)
 
                     # Create Product object
-                    product = Product(**product_data)  # type: ignore
+                    product = Product(**product_data)
                     products.append(product)
                 except Exception as e:
                     row_txt = "; ".join([str(cell.value or "") for cell in row])

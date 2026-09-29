@@ -29,7 +29,7 @@ async def read_csv(file_path: Path) -> List[Dict[str, str]]:
     """
     try:
         with open(file_path, "r", encoding="utf-8") as f:
-            reader = DictReader(f)  # type: ignore
+            reader = DictReader(f)
             return [row for row in reader]
     except Exception as e:
         logger.error(f"Error reading {file_path}: {e}")
