@@ -1,16 +1,14 @@
 import datetime
 import logging
 import re
-import time
 from typing import Optional
 from urllib.parse import quote, unquote, urljoin
 
-import httpx
 from bs4 import BeautifulSoup
 
 from crawler.store.models import Product, Store
 
-from .base import BaseCrawler
+from .base import BaseCrawler, CrawlerBlocked
 
 logger = logging.getLogger(__name__)
 
@@ -188,8 +186,11 @@ class LidlCrawler(BaseCrawler):
         """
         Download and parse a single store's CSV price list.
 
-        Returns the store with its products, or None if the store info
-        can't be parsed from the filename or the download fails.
+        Returns the store with its products, or None if the store info can't be
+        parsed from the filename, the download fails, or the CSV can't be parsed.
+
+        Raises:
+            CrawlerBlocked: Upstream is refusing our requests.
         """
         filename = unquote(url).rsplit("/", 1)[-1]
         store = self.parse_store_from_filename(filename)
@@ -197,24 +198,12 @@ class LidlCrawler(BaseCrawler):
             logger.warning(f"Skipping CSV {filename} due to store parsing failure")
             return None
 
-        text = None
-        for attempt in range(1, self.MAX_RETRIES + 1):
-            try:
-                text = self.fetch_text(url, encodings=["utf-8-sig", "windows-1250"])
-                break
-            except httpx.HTTPError as e:
-                # The server occasionally drops connections mid-crawl
-                logger.warning(
-                    f"Download attempt {attempt}/{self.MAX_RETRIES} of {url} failed: {e}"
-                )
-                if attempt < self.MAX_RETRIES:
-                    time.sleep(2**attempt)
-            except Exception as e:
-                logger.error(f"Failed to download {url}: {e}", exc_info=True)
-                return None
-
-        if text is None:
-            logger.error(f"Giving up on {url} after {self.MAX_RETRIES} attempts")
+        try:
+            text = self.fetch_text(url, encodings=["utf-8-sig", "windows-1250"])
+        except CrawlerBlocked:
+            raise
+        except Exception as e:
+            logger.error(f"Failed to download {url}: {e}", exc_info=True)
             return None
 
         headers = text.splitlines()[0] if text else ""
@@ -228,7 +217,12 @@ class LidlCrawler(BaseCrawler):
             logger.warning(f"Unknown delimiter in CSV: {filename}; ignoring")
             return None
 
-        store.items = self.parse_csv(text, delimiter=delimiter)
+        try:
+            store.items = self.parse_csv(text, delimiter=delimiter)
+        except Exception as e:
+            logger.error(f"Failed to parse {url}: {e}", exc_info=True)
+            return None
+
         return store
 
     def get_all_products(self, date: datetime.date) -> list[Store]:
@@ -246,7 +240,11 @@ class LidlCrawler(BaseCrawler):
         """
         stores = []
         for url in self.get_index(date):
-            store = self.get_store_prices(url)
+            try:
+                store = self.get_store_prices(url)
+            except CrawlerBlocked as e:
+                logger.error(f"Stopping the Lidl crawl: {e}")
+                break
             if store:
                 stores.append(store)
 

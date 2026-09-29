@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 
 from crawler.store.models import Store
 
-from .base import BaseCrawler
+from .base import BaseCrawler, CrawlerBlocked
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +26,14 @@ class BosoCrawler(BaseCrawler):
     CHAIN = "boso"
     BASE_URL = "https://www.boso.hr"
     PRICE_LIST_URL = "https://www.boso.hr/cjenik/"
+
+    REQUEST_DELAY = 2.0
+    """
+    The wp-admin AJAX endpoint answers 429 at ~6 req/s, costing 11 of 14 stores.
+
+    Conservative on purpose: at 14 stores a full pass stays under a minute even
+    at 2s apart.
+    """
 
     PRICE_MAP = {
         "price": ("MPC", False),
@@ -76,6 +84,19 @@ class BosoCrawler(BaseCrawler):
     def __init__(self):
         super().__init__()
         self._ajax_config = None
+        self._price_list_page: str | None = None
+
+    def get_price_list_page(self) -> str:
+        """
+        Fetch the price list page once and reuse it.
+
+        Both the AJAX config and the store dropdown are read from this one page,
+        and each used to fetch it separately. At a 2s pacing delay that is a
+        whole request saved for nothing.
+        """
+        if self._price_list_page is None:
+            self._price_list_page = self.fetch_text(self.PRICE_LIST_URL)
+        return self._price_list_page
 
     def get_ajax_config(self) -> dict:
         """
@@ -92,8 +113,7 @@ class BosoCrawler(BaseCrawler):
 
         logger.debug("Fetching AJAX configuration from main page")
 
-        content = self.fetch_text(self.PRICE_LIST_URL)
-        soup = BeautifulSoup(content, "html.parser")
+        soup = BeautifulSoup(self.get_price_list_page(), "html.parser")
 
         # Find the script tag containing the AJAX configuration
         script_tag = soup.find("script", id="marketshop-csv-js-js-extra")
@@ -137,8 +157,7 @@ class BosoCrawler(BaseCrawler):
         """
         logger.debug("Fetching store list from main page")
 
-        content = self.fetch_text(self.PRICE_LIST_URL)
-        soup = BeautifulSoup(content, "html.parser")
+        soup = BeautifulSoup(self.get_price_list_page(), "html.parser")
 
         # Find the store dropdown
         select = soup.find("select", id="marketshop-filter")
@@ -228,8 +247,7 @@ class BosoCrawler(BaseCrawler):
             "Referer": self.PRICE_LIST_URL,
         }
 
-        response = self.client.post(ajax_url, data=data, headers=headers)
-        response.raise_for_status()
+        response = self.post_form(ajax_url, data=data, headers=headers)
 
         try:
             json_response = response.json()
@@ -309,16 +327,8 @@ class BosoCrawler(BaseCrawler):
 
         for store_value, store_info in stores_info.items():
             try:
-                # Get CSV links for this store and date
-                csv_links = self.get_csv_links_for_store(store_value, date)
-
-                if not csv_links:
-                    logger.debug(
-                        f"No CSV files found for {store_info['store_code']} on {date}"
-                    )
-                    continue
-
-                # Create store object
+                # Built before the first request, so the block handler below can
+                # still keep the CSVs this store had already parsed.
                 store = Store(
                     chain=self.CHAIN,
                     store_id=store_info["store_code"],
@@ -328,6 +338,15 @@ class BosoCrawler(BaseCrawler):
                     street_address=store_info["street_address"],
                     items=[],
                 )
+
+                # Get CSV links for this store and date
+                csv_links = self.get_csv_links_for_store(store_value, date)
+
+                if not csv_links:
+                    logger.debug(
+                        f"No CSV files found for {store_info['store_code']} on {date}"
+                    )
+                    continue
 
                 # Process each CSV file for this store
                 for csv_url in csv_links:
@@ -341,6 +360,8 @@ class BosoCrawler(BaseCrawler):
                         products = self.parse_csv(csv_content, ";")
                         store.items.extend(products)
 
+                    except CrawlerBlocked:
+                        raise
                     except Exception as e:
                         logger.error(
                             f"Error processing CSV from {csv_url}: {e}", exc_info=True
@@ -353,6 +374,11 @@ class BosoCrawler(BaseCrawler):
                         f"Added store {store.name} with {len(store.items)} products"
                     )
 
+            except CrawlerBlocked as e:
+                if store.items:
+                    stores.append(store)
+                logger.error(f"Stopping the Boso crawl: {e}")
+                break
             except Exception as e:
                 logger.error(
                     f"Error processing store {store_info['store_code']}: {e}",

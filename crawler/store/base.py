@@ -2,11 +2,14 @@ import datetime
 import unicodedata
 from csv import DictReader
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
+from email.utils import parsedate_to_datetime
 from logging import getLogger
+from random import uniform
 from re import Pattern
 from tempfile import NamedTemporaryFile
-from time import time
-from typing import Any, BinaryIO, Generator, Iterable
+from time import monotonic, sleep, time
+from typing import Any, BinaryIO, Callable, Generator, Iterable, TypeVar
+from urllib.parse import urlsplit
 from zipfile import ZipFile
 
 import httpx
@@ -15,6 +18,23 @@ from bs4 import BeautifulSoup
 from .models import Product, Store
 
 logger = getLogger(__name__)
+
+T = TypeVar("T")
+
+
+class CrawlerBlocked(Exception):
+    """
+    Upstream is refusing our requests as a policy, not failing at random.
+
+    Raised on a BLOCKED_STATUS, and on a 429 asking for longer than
+    RETRY_AFTER_MAX. Neither is retried: further requests would only extend the
+    block.
+
+    A crawler should end the chain on this rather than swallow it per store, and
+    return whatever it had already collected. `blocked` then tells crawl_chain
+    the chain is incomplete.
+    """
+
 
 # A source column (or XML tag) may be known under several names, for example
 # while a chain migrates from one header to another. A spec is either a single
@@ -36,7 +56,50 @@ class BaseCrawler:
     TIMEOUT = 30.0
     USER_AGENT = None
     VERIFY_TLS_CERT = True
-    MAX_RETRIES = 3
+
+    MAX_RETRIES = 6
+    """Total attempts per request, not retries after the first; 3 recovers ~96%."""
+
+    REQUEST_DELAY = 0.0
+    """
+    Minimum seconds between two requests to the same host.
+
+    Zero so chains that work today are unaffected; chains that throttle or ban
+    us override it. See KonzumCrawler and BosoCrawler.
+    """
+
+    RETRY_BACKOFF_BASE = 1.0
+    """Wait before the 2nd attempt, doubling per attempt, jittered +/-50%."""
+
+    RETRY_BACKOFF_MAX = 30.0
+    """Ceiling on that doubling; only engages if MAX_RETRIES or the base grows."""
+
+    RETRY_AFTER_MAX = 120.0
+    """Longest Retry-After we wait out; past this we treat it as being blocked."""
+
+    RETRY_STATUS = frozenset({408, 425, 429})
+    """
+    Non-5xx statuses worth another attempt. Every 5xx is retried as well.
+
+    404 is not in here. For most chains it means the file is not published yet,
+    so retrying costs the full backoff ladder per URL and recovers nothing.
+    Chains that serve a 404 for a file they are concurrently advertising add it
+    themselves; see KonzumCrawler.
+    """
+
+    BLOCKED_STATUS = frozenset({403})
+    """Statuses that mean we are banned; see CrawlerBlocked."""
+
+    PERMANENT_ERRORS: tuple[type[httpx.HTTPError], ...] = (
+        httpx.UnsupportedProtocol,
+        httpx.LocalProtocolError,
+        httpx.TooManyRedirects,
+    )
+    """
+    Transport failures an identical request cannot get past: a scheme httpx will
+    not speak, a request we built wrong, a redirect loop. Every other transport
+    error is treated as transient.
+    """
 
     ZIP_DATE_PATTERN: Pattern | None = None
 
@@ -100,6 +163,21 @@ class BaseCrawler:
         # Unrecognized boolean values are reported once each, so a single
         # unknown token can't produce one log line per row.
         self._unknown_bool_values: set[str] = set()
+
+        self._last_request: dict[str, float] = {}
+        self._cooldown: dict[str, float] = {}
+
+        self.blocked = False
+        """
+        Set once upstream returns a BLOCKED_STATUS, and never cleared.
+
+        Checked before every request so a ban costs exactly one 403 no matter
+        how many per-store `except Exception` handlers swallow the error, and
+        checked again by crawl_chain so the chain is reported as failed.
+        """
+
+        self.requests_made = 0
+        """Attempts sent for this chain, retries included. Konzum caps on it."""
 
     @staticmethod
     def _names_and_keys(spec: ColumnSpec) -> tuple[list[str], list[str]]:
@@ -193,21 +271,218 @@ class BaseCrawler:
             logger.warning(f"{self.CHAIN}: unknown boolean value {value!r}")
         return None
 
+    def _throttle(self, url: str) -> None:
+        """
+        Wait until this host may be requested again.
+
+        Two clocks, whichever is later: REQUEST_DELAY since the last request,
+        and any cooldown a 429 asked for. Keyed per host, because several
+        crawlers read their index from one host and the price lists from another
+        and would otherwise pay for both.
+
+        Backoff and pacing do not stack: the wait before a retry is
+        max(REQUEST_DELAY, backoff), since the backoff sleep already counts
+        towards the interval measured here.
+        """
+        host = urlsplit(url).netloc
+        now = monotonic()
+        ready = now
+
+        last = self._last_request.get(host)
+        if last is not None and self.REQUEST_DELAY > 0:
+            ready = max(ready, last + self.REQUEST_DELAY)
+
+        cooldown = self._cooldown.get(host)
+        if cooldown is not None:
+            ready = max(ready, cooldown)
+
+        if ready > now:
+            logger.debug(f"Pacing {host}: sleeping {ready - now:.2f}s")
+            sleep(ready - now)
+            now = monotonic()
+
+        self._last_request[host] = now
+
+    def is_retryable(self, err: httpx.HTTPError) -> bool:
+        """
+        Whether another attempt at a failed request could plausibly succeed.
+
+        Callers that retry in passes of their own (see KonzumCrawler) ask this
+        before queueing a URL again, so a failure this class refuses to retry is
+        not retried behind its back.
+        """
+        if isinstance(err, self.PERMANENT_ERRORS):
+            return False
+
+        if not isinstance(err, httpx.HTTPStatusError):
+            return True  # timeouts, resets and dropped connections
+
+        status = err.response.status_code
+        return status >= 500 or status in self.RETRY_STATUS
+
+    @staticmethod
+    def _retry_after(response: httpx.Response) -> float | None:
+        """
+        Parse a Retry-After header into seconds, honouring both formats.
+
+        Returns None when the header is absent or unparseable, which the caller
+        treats as "fall back to ordinary backoff". Capping is the caller's job.
+        """
+        header = response.headers.get("retry-after")
+        if not header:
+            return None
+
+        # str() keeps the type concrete: httpx types Headers.get as Any, and
+        # parsedate_to_datetime is overloaded on None.
+        value = str(header).strip()
+
+        try:
+            return max(0.0, float(value))
+        except ValueError:
+            pass
+
+        try:
+            target = parsedate_to_datetime(value)
+            now = datetime.datetime.now(tz=target.tzinfo)
+            return max(0.0, (target - now).total_seconds())
+        except (TypeError, ValueError):
+            logger.warning(f"Unparseable Retry-After: {value!r}")
+            return None
+
+    def _with_retry(
+        self,
+        url: str,
+        send: Callable[[], T],
+        attempts: int | None = None,
+    ) -> T:
+        """
+        Run a single request with pacing, retries and block detection.
+
+        Every network access in the crawler goes through here, so a chain cannot
+        opt out of pacing by looping over URLs itself.
+
+        Args:
+            url: URL being requested, for pacing and log messages.
+            send: Performs the request and raises httpx errors on failure.
+            attempts: Total attempts, defaulting to MAX_RETRIES.
+
+        Raises:
+            CrawlerBlocked: Upstream is refusing us; no further request is made
+                for the rest of this crawler's life.
+            httpx.HTTPError: The last attempt failed, or the failure is not
+                worth retrying.
+        """
+        if self.blocked:
+            raise CrawlerBlocked(
+                f"{self.CHAIN}: refusing to request {url}, already blocked"
+            )
+
+        total = self.MAX_RETRIES if attempts is None else attempts
+
+        for attempt in range(1, total + 1):
+            self._throttle(url)
+            self.requests_made += 1
+            try:
+                return send()
+            except httpx.HTTPError as err:
+                wait = self._handle_request_error(url, err, attempt, total)
+                if wait is None:
+                    raise
+                logger.debug(
+                    f"Attempt {attempt}/{total} of {url} failed: {err}; "
+                    f"retrying in {wait:.1f}s"
+                )
+                sleep(wait)
+
+        raise ValueError(f"Invalid attempt count for {url}: {total}")
+
+    def _handle_request_error(
+        self,
+        url: str,
+        err: httpx.HTTPError,
+        attempt: int,
+        total: int,
+    ) -> float | None:
+        """
+        Classify a failed request and return the wait before retrying it.
+
+        Returns None when the caller should stop and re-raise. Sets a 429
+        cooldown as a side effect.
+
+        Raises:
+            CrawlerBlocked: The status says we are banned.
+        """
+        retry_after = None
+
+        if isinstance(err, httpx.HTTPStatusError):
+            status = err.response.status_code
+
+            if status in self.BLOCKED_STATUS:
+                server = err.response.headers.get("server", "unknown")
+                self.blocked = True
+                raise CrawlerBlocked(
+                    f"{self.CHAIN}: blocked with HTTP {status} by "
+                    f"{urlsplit(url).netloc} (server: {server}) on {url}"
+                ) from err
+
+            if status == 429:
+                retry_after = self._retry_after(err.response)
+
+                if retry_after is not None and retry_after > self.RETRY_AFTER_MAX:
+                    self.blocked = True
+                    raise CrawlerBlocked(
+                        f"{self.CHAIN}: {urlsplit(url).netloc} asks us to wait "
+                        f"{retry_after:.0f}s, over the "
+                        f"{self.RETRY_AFTER_MAX:.0f}s cap; abandoning the chain"
+                    ) from err
+
+                if retry_after is not None:
+                    host = urlsplit(url).netloc
+                    self._cooldown[host] = monotonic() + retry_after
+                    logger.info(
+                        f"{self.CHAIN}: holding off {host} for {retry_after:.0f}s"
+                    )
+
+        if not self.is_retryable(err):
+            return None
+
+        if attempt >= total:
+            return None
+
+        delay = min(
+            self.RETRY_BACKOFF_MAX,
+            self.RETRY_BACKOFF_BASE * 2 ** (attempt - 1),
+        ) * uniform(0.5, 1.5)
+
+        if retry_after is not None:
+            delay = max(delay, retry_after)
+
+        return delay
+
     def fetch_text(
         self,
         url: str,
         encodings: list[str] | None = None,
         prefix: str | None = None,
+        attempts: int | None = None,
     ) -> str:
         """
         Download a text file (web page or CSV) from the given URL.
 
         Args:
             url: URL to download from
-            encoding: Optional encoding to decode the content. If None, uses default.
+            encodings: Optional encodings to decode the content. If None, uses default.
+            prefix: Optional text the decoded content must start with, used to
+                pick between candidate encodings.
+            attempts: Total attempts, defaulting to MAX_RETRIES.
 
         Returns:
-            The content of the file as a string, or an empty string if the download fails.
+            The content of the file as a string.
+
+        Raises:
+            CrawlerBlocked: Upstream is refusing our requests.
+            httpx.HTTPError: The download failed and is not worth retrying.
+            ValueError: The content could not be decoded.
         """
 
         def try_decode(content: bytes) -> str:
@@ -220,19 +495,39 @@ class BaseCrawler:
                     continue
             raise ValueError(f"Error decoding {url} - tried: {encodings}")
 
-        logger.debug(f"Fetching {url}")
-        try:
+        def send() -> str:
+            logger.debug(f"Fetching {url}")
             response = self.client.get(url)
             response.raise_for_status()
             if encodings:
                 return try_decode(response.content)
-            else:
-                return response.text
-        except httpx.RequestError as e:
-            logger.error(f"Download from {url} failed: {e}", exc_info=True)
-            raise
+            return response.text
 
-    def fetch_binary(self, url: str, fp: BinaryIO):
+        return self._with_retry(url, send, attempts)
+
+    def post_form(
+        self,
+        url: str,
+        data: dict[str, Any],
+        headers: dict[str, str] | None = None,
+        attempts: int | None = None,
+    ) -> httpx.Response:
+        """
+        POST a form and return the response, paced and retried like a download.
+
+        Exists so the one crawler that talks to an AJAX endpoint (Boso) does not
+        have to bypass the pacing by calling self.client directly.
+        """
+
+        def send() -> httpx.Response:
+            logger.debug(f"Posting to {url}")
+            response = self.client.post(url, data=data, headers=headers)
+            response.raise_for_status()
+            return response
+
+        return self._with_retry(url, send, attempts)
+
+    def fetch_binary(self, url: str, fp: BinaryIO, attempts: int | None = None):
         """
         Download a binary file to a provided location.
 
@@ -240,27 +535,37 @@ class BaseCrawler:
 
         Args:
             url: URL of the ZIP file to download
+            fp: Open file to write to. Truncated before each attempt.
+            attempts: Total attempts, defaulting to MAX_RETRIES.
 
-        Returns:
-            Path to the downloaded ZIP file
+        Raises:
+            CrawlerBlocked: Upstream is refusing our requests.
+            httpx.HTTPError: The download failed and is not worth retrying.
         """
 
         logger.info(f"Downloading binary file from {url}")
 
         MB = 1024 * 1024
 
-        t0 = time()
-        with self.client.stream("GET", url) as response:
-            response.raise_for_status()
-            total_mb = int(response.headers.get("content-length", 0)) // MB
-            logger.debug(f"File size: {total_mb} MB")
+        def send() -> None:
+            # A dropped connection leaves partial bytes; a retry would append
+            # to them and yield a corrupt ZIP.
+            fp.seek(0)
+            fp.truncate()
 
-            for chunk in response.iter_bytes(chunk_size=1 * MB):
-                fp.write(chunk)
+            t0 = time()
+            with self.client.stream("GET", url) as response:
+                response.raise_for_status()
+                total_mb = int(response.headers.get("content-length", 0)) // MB
+                logger.debug(f"File size: {total_mb} MB")
 
-        t1 = time()
-        dt = int(t1 - t0)
-        logger.debug(f"Downloaded {total_mb} MB in {dt}s")
+                for chunk in response.iter_bytes(chunk_size=1 * MB):
+                    fp.write(chunk)
+
+            dt = int(time() - t0)
+            logger.debug(f"Downloaded {total_mb} MB in {dt}s")
+
+        self._with_retry(url, send, attempts)
 
     def read_csv(self, text: str, delimiter: str = ",") -> DictReader:
         return DictReader(text.splitlines(), delimiter=delimiter)  # type: ignore

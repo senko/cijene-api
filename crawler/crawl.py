@@ -6,6 +6,7 @@ from pathlib import Path
 from time import time
 from typing import List
 
+from crawler.store.base import CrawlerBlocked
 from crawler.store.boso import BosoCrawler
 from crawler.store.branka import BrankaCrawler
 from crawler.store.brodokomerc import BrodokomercCrawler
@@ -108,11 +109,24 @@ def crawl_chain(chain: str, date: datetime.date, path: Path) -> CrawlResult:
     t0 = time()
     try:
         stores = crawler.get_all_products(date)
+    except CrawlerBlocked as err:
+        logger.error(
+            f"Blocked while crawling {chain} for {date:%Y-%m-%d}, "
+            f"discarding the run: {err}"
+        )
+        return CrawlResult()
     except Exception as err:
         logger.error(
             f"Error crawling {chain} for {date:%Y-%m-%d}: {err}", exc_info=True
         )
         return CrawlResult()
+
+    if crawler.blocked:
+        logger.error(
+            f"{chain} was blocked part-way through {date:%Y-%m-%d}: "
+            f"keeping the {len(stores)} store(s) collected before the block, "
+            f"this chain is incomplete"
+        )
 
     if not stores:
         logger.error(f"No stores imported for {chain} on {date}")
