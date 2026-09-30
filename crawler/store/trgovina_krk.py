@@ -30,12 +30,17 @@ class TrgovinaKrkCrawler(BaseCrawler):
         "unit_price": ("Cijena za jedinicu mjere", False),
         "special_price": ("MPC za vrijeme posebnog oblika prodaje", False),
         "best_price_30": ("Najniža cijena u poslj.30 dana", False),
-        # Renamed on 2026-09-23 when the chain moved to the NN 101/2026 format.
+        # Renamed on 2026-09-23 when the chain moved to the NN 101/2026 format,
+        # and again by 2026-09-30 to plain "Sidrena cijena" (as NTL did).
         # The values did not change with the header: on the switch day nearly
         # every pre-existing product kept its 2.5.2025 value, so the column name
         # says nothing reliable about which reference date a row refers to.
         "anchor_price": (
-            ["Sidrena cijena na 2.5.2025", "Sidrena cijena na 10.09.2026"],
+            [
+                "Sidrena cijena na 2.5.2025",
+                "Sidrena cijena na 10.09.2026",
+                "Sidrena cijena",
+            ],
             False,
         ),
     }
@@ -59,7 +64,11 @@ class TrgovinaKrkCrawler(BaseCrawler):
     REQUIRED_COLUMNS = [
         "Maloprodajna cijena",
         "Cijena za jedinicu mjere",
-        ["Sidrena cijena na 2.5.2025", "Sidrena cijena na 10.09.2026"],
+        [
+            "Sidrena cijena na 2.5.2025",
+            "Sidrena cijena na 10.09.2026",
+            "Sidrena cijena",
+        ],
         "Naziv proizvoda",
         "Šifra proizvoda",
         "Marka proizvoda",
