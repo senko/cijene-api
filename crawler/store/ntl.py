@@ -21,8 +21,11 @@ class NtlCrawler(BaseCrawler):
 
     # Regex to parse store information from the filename
     # Format: Supermarket_Ljudevita Gaja 1_DUGA RESA_10103_263_25052025_07_22_36.csv
+    # The street address can itself contain underscores (e.g. "Calinec 179_b",
+    # where the source has a slash), so the pattern is anchored on the
+    # fixed-format tail and the address takes whatever is left.
     STORE_FILENAME_PATTERN = re.compile(
-        r"(?P<store_type>[^_]+)_(?P<street_address>[^_]+)_(?P<city>[^_]+)_(?P<store_id>\d+)_.*\.csv$"
+        r"(?P<store_type>[^_]+)_(?P<street_address>.+)_(?P<city>[^_]+)_(?P<store_id>\d+)_\d+_\d{8}_\d{2}_\d{2}_\d{2}\.csv$"
     )
 
     # Publication date (DDMMYYYY) and time from the same filename. Used to check
