@@ -42,6 +42,10 @@ class DukatCrawler(BaseCrawler):
         "category": ("KATEGORIJA PROIZVODA", False),
     }
 
+    BOOL_MAP = {
+        "available": ("RASPOLOŽIVOST", False),
+    }
+
     REQUIRED_COLUMNS = [
         "MALOPRODAJNA CIJENA",
         "CIJENA ZA JEDINICU MJERE",
@@ -59,6 +63,7 @@ class DukatCrawler(BaseCrawler):
         "KATEGORIJA PROIZVODA",
         "MPC ZA VRIJEME POSEBNOG OBLIKA PRODAJE",
         "NAJNIžA CIJENA U POSLJEDNIH 30 DANA",
+        "RASPOLOŽIVOST",
     ]
 
     LINK_PATTERN = re.compile(

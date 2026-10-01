@@ -26,16 +26,17 @@ class PlodineCrawler(BaseCrawler):
     VERIFY_TLS_CERT = False  # Plodine uses a root CA unsupported by httpx on Debian 12
 
     PRICE_MAP = {
-        "price": ("Maloprodajna cijena", False),
+        "price": (["Maloprodajna cijena", "MPC"], False),
         "unit_price": ("Cijena po JM", False),
         "special_price": (
             "MPC za vrijeme posebnog oblika prodaje",
             False,
         ),
         "best_price_30": ("Najniza cijena u poslj. 30 dana", False),
-        "anchor_price": ("Sidrena cijena na 2.5.2025", False),
+        "anchor_price": (["Sidrena cijena na 2.5.2025", "Sidrena cijena"], False),
     }
 
+    # The new "Poseban oblik prodaje" column is a DA/NE flag, not a special price column.
     FIELD_MAP = {
         "product": ("Naziv proizvoda", True),
         "product_id": ("Sifra proizvoda", True),
@@ -44,12 +45,17 @@ class PlodineCrawler(BaseCrawler):
         "unit": ("Jedinica mjere", False),
         "barcode": ("Barkod", False),
         "category": ("Kategorija proizvoda", False),
+        "special_sale_type": ("Naziv posebnog oblika prodaje", False),
+    }
+
+    BOOL_MAP = {
+        "available": ("Dostupno nedostupno", False),
     }
 
     REQUIRED_COLUMNS = [
-        "Maloprodajna cijena",
+        ["Maloprodajna cijena", "MPC"],
         "Cijena po JM",
-        "Sidrena cijena na 2.5.2025",
+        ["Sidrena cijena na 2.5.2025", "Sidrena cijena"],
         "Naziv proizvoda",
         "Sifra proizvoda",
         "Marka proizvoda",
@@ -57,12 +63,13 @@ class PlodineCrawler(BaseCrawler):
         "Barkod",
     ]
 
-    # Not required by NN 101/2026, so the chain may drop them when it switches.
     OPTIONAL_COLUMNS = [
         "Neto kolicina",
         "Kategorija proizvoda",
         "MPC za vrijeme posebnog oblika prodaje",
         "Najniza cijena u poslj. 30 dana",
+        "Naziv posebnog oblika prodaje",
+        "Dostupno nedostupno",
     ]
 
     def get_index(self, date: datetime.date) -> str:
@@ -149,11 +156,25 @@ class PlodineCrawler(BaseCrawler):
                 continue
 
             # Parse CSV and add products to the store
-            products = self.parse_csv(content.decode("utf-8"), delimiter=";")
+            try:
+                products = self.parse_csv(content.decode("utf-8"), delimiter=";")
+            except Exception as e:
+                logger.error(f"Error processing CSV {filename}: {e}", exc_info=True)
+                continue
+
             store.items = products
             stores.append(store)
 
         return stores
+
+    def fix_product_data(self, data: dict) -> dict:
+        """Mirror the promotional price for the NN 101/2026 format."""
+        data = super().fix_product_data(data)
+
+        if data.get("special_sale_type") and data.get("special_price") is None:
+            data["special_price"] = data.get("price")
+
+        return data
 
 
 if __name__ == "__main__":
