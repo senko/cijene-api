@@ -3,7 +3,10 @@ import logging
 import re
 import urllib.parse
 from collections import defaultdict
+from io import BytesIO
+from tempfile import TemporaryFile
 
+import openpyxl
 from bs4 import BeautifulSoup
 from crawler.store.models import Product, Store
 
@@ -39,18 +42,20 @@ class ZabacCrawler(BaseCrawler):
 
     REQUIRED_COLUMNS = [
         "MPC",
-        "Sidrena cijena na 2.5.2025",
         "Šifra artikla",
         "Barcode",
         "Naziv artikla",
-        "Marka",
     ]
 
     # Not required by NN 101/2026, so the chain may drop them when it switches.
+    # The XLSX price lists published since 2026-10-01 also drop the anchor
+    # price and brand columns.
     OPTIONAL_COLUMNS = [
         "Gramaža",
         "Naziv grupe artikala",
         "Najniža cijena u posljednjih 30 dana",
+        "Sidrena cijena na 2.5.2025",
+        "Marka",
     ]
 
     # Store pages on the Žabac website, keyed by the ?store= query parameter
@@ -83,26 +88,28 @@ class ZabacCrawler(BaseCrawler):
 
     def parse_index(self, content: str) -> list[tuple[str, str]]:
         """
-        Parse a Žabac store page to extract CSV links and their titles.
+        Parse a Žabac store page to extract price list links and their titles.
 
-        Every CSV link on the page — both the "Aktualno izdanje" featured
-        entry (which carries the most recent, current-day price list) and the
-        archive rows below it — is preceded by an <h3> heading whose text
-        carries the store address and the price list date, e.g.:
+        Every price list link on the page — both the "Aktualno izdanje"
+        featured entry (which carries the most recent, current-day price list)
+        and the archive rows below it — is preceded by an <h3> heading whose
+        text carries the store address and the price list date, e.g.:
 
             Supermarket,Dubrava 256L, Zagreb 10000, 02.07.2026, 7.00h - C302
+
+        Price lists up to 2026-09-30 are CSV, later ones are XLSX.
 
         Args:
             content: HTML content of the store page
 
         Returns:
-            List of unique (title, csv_url) tuples found on the page.
+            List of unique (title, url) tuples found on the page.
         """
         soup = BeautifulSoup(content, "html.parser")
         # Deduplicate by URL while keeping each link's heading text.
         titles_by_url: dict[str, str] = {}
 
-        for link_tag in soup.select('a[href$=".csv"]'):
+        for link_tag in soup.select('a[href$=".csv"], a[href$=".xlsx"]'):
             href = str(link_tag.get("href"))
             heading = link_tag.find_previous("h3")
             title = heading.get_text(strip=True) if heading else ""
@@ -132,41 +139,91 @@ class ZabacCrawler(BaseCrawler):
                         f"(link {href}) with no crawler metadata"
                     )
 
-    def get_store_prices(self, csv_url: str) -> list[Product]:
+    def parse_excel(self, excel_data: bytes) -> list[Product]:
         """
-        Fetch and parse store prices from a Žabac CSV URL.
+        Parse a Žabac XLSX price list into Product objects.
+
+        The sheet has a single header row with the same column names as the
+        older CSV files. Each row is converted to a `{header: value}` dict and
+        handed to `BaseCrawler.parse_csv_row`, which applies the maps.
 
         Args:
-            csv_url: URL to the CSV file containing prices
+            excel_data: Raw XLSX file content
+
+        Returns:
+            List of Product objects
+        """
+        wb = openpyxl.load_workbook(BytesIO(excel_data), data_only=True)
+        ws = wb.active
+        if ws is None:
+            raise ValueError("No active worksheet found in the Excel file")
+
+        rows = ws.iter_rows(values_only=True)
+        try:
+            header_row = next(rows)
+        except StopIteration:
+            raise ValueError("XLSX file is empty")
+
+        columns = ["" if c is None else str(c).strip() for c in header_row]
+        self.check_columns(columns)
+
+        products: list[Product] = []
+        for row_idx, row in enumerate(rows, start=2):
+            if all(c is None for c in row):
+                continue
+            cells = ["" if c is None else str(c).strip() for c in row]
+            try:
+                products.append(self.parse_csv_row(dict(zip(columns, cells))))
+            except Exception as e:
+                logger.warning(
+                    f"Failed to parse row {row_idx}: `{'; '.join(cells)}`: {e}"
+                )
+                continue
+
+        logger.debug(f"Parsed {len(products)} products from XLSX")
+        return products
+
+    def get_store_prices(self, url: str) -> list[Product]:
+        """
+        Fetch and parse store prices from a Žabac CSV or XLSX URL.
+
+        Args:
+            url: URL to the CSV or XLSX file containing prices
 
         Returns:
             List of Product objects
         """
         try:
+            if url.lower().endswith(".xlsx"):
+                with TemporaryFile(mode="w+b") as fp:
+                    self.fetch_binary(url, fp)
+                    fp.seek(0)
+                    return self.parse_excel(fp.read())
+
             # The CSVs are UTF-8 with a BOM; decode with utf-8-sig so the BOM
             # doesn't get glued onto the first ("Šifra artikla") header name.
-            content = self.fetch_text(csv_url, encodings=["utf-8-sig"])
+            content = self.fetch_text(url, encodings=["utf-8-sig"])
             return self.parse_csv(content)
         except Exception as e:
             logger.error(
-                f"Failed to get Žabac store prices from {csv_url}: {e}",
+                f"Failed to get Žabac store prices from {url}: {e}",
                 exc_info=True,
             )
             return []
 
     def get_index(self, date: datetime.date) -> list[tuple[str, str]]:
         """
-        Fetch and parse all Žabac store pages to get CSV URLs for given date.
+        Fetch and parse all Žabac store pages to get price list URLs for given date.
 
-        The CSV URLs no longer contain the date (they are opaque hashed
-        names), so we parse the date and store address out of each link's
-        <h3> title instead of filtering the URL by a date substring.
+        The URLs no longer contain the date (they are opaque hashed names), so
+        we parse the date and store address out of each link's <h3> title
+        instead of filtering the URL by a date substring.
 
         Args:
             date: The date parameter
 
         Returns:
-            List of (csv_url, location_key) tuples for the given date.
+            List of (url, location_key) tuples for the given date.
         """
         results = []
 
@@ -196,7 +253,7 @@ class ZabacCrawler(BaseCrawler):
                 # rows whose title matches this store's address.
                 if loc["street_address"] not in title:
                     logger.warning(
-                        f"Žabac CSV for {date} at {page_url} has title "
+                        f"Žabac price list for {date} at {page_url} has title "
                         f"{title!r} not matching expected address "
                         f"{loc['street_address']!r}, skipping"
                     )
@@ -218,7 +275,7 @@ class ZabacCrawler(BaseCrawler):
         csv_links = self.get_index(date)
 
         if not csv_links:
-            logger.warning("No Žabac CSV links found")
+            logger.warning("No Žabac price list links found")
             return []
 
         # Group URLs by location to create one Store per location
@@ -265,7 +322,7 @@ class ZabacCrawler(BaseCrawler):
         if "product" in data and data["product"]:
             data["product"] = data["product"].strip()
 
-        # Unit is not available in the CSV
+        # Unit is not available in the price list
         data["unit"] = ""
 
         return super().fix_product_data(data)
