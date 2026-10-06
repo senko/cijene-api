@@ -1,6 +1,7 @@
 import datetime
 import logging
 import re
+from urllib.parse import unquote
 
 from bs4 import BeautifulSoup
 
@@ -10,7 +11,7 @@ from .base import BaseCrawler
 
 logger = logging.getLogger(__name__)
 
-CSV_PATTERN = re.compile(r"^(Supermarket_.+)_(\d+)_\d+_(\d{8})_\d{2}_\d{2}_\d{2}\.csv$")
+CSV_PATTERN = re.compile(r"^([A-Za-z]+_.+)_(\d+)_\d+_(\d{8})_\d{2}_\d{2}_\d{2}\.csv$")
 
 
 class GavranovicCrawler(BaseCrawler):
@@ -107,7 +108,8 @@ class GavranovicCrawler(BaseCrawler):
             name_part, store_id, file_date = m.groups()
             if file_date == date_str:
                 url = f"{self.INDEX_URL}{href}"
-                results.append((url, name_part, store_id))
+                # Some addresses carry a percent-encoded comma (%2C)
+                results.append((url, unquote(name_part), store_id))
 
         return results
 
@@ -115,7 +117,7 @@ class GavranovicCrawler(BaseCrawler):
         """
         Extract store information from the filename name part.
 
-        The name part has the format: Supermarket_{Address}_{CITY}
+        The name part has the format: {Type}_{Address}_{CITY}
         where underscores replace spaces in the address.
 
         Args:
@@ -126,18 +128,25 @@ class GavranovicCrawler(BaseCrawler):
         Returns:
             A Store object with parsed location info and no items.
         """
-        parts = name_part.split("_")
-        # Store type is the first token (e.g. "Supermarket")
+        # Drop empty tokens from doubled underscores ("Kraljevec__na_Sutli")
+        parts = [p for p in name_part.split("_") if p]
+        # Store type is the first token (e.g. "Supermarket", "Minimarket")
         store_type = parts[0]
 
         # City tokens are the trailing all-uppercase tokens (e.g. KARLOVAC,
         # or SV_KRIZ_ZACRETJE for multi-word cities). Address is in between.
+        # A single uppercase letter is a house number suffix, not part of the
+        # city ("Stubicka_349_A_DONJA_BISTRA"), and a lone "-" joins two city
+        # tokens ("SESVETE_-_KRALJEVEC").
         city_start = len(parts)
         for i in range(len(parts) - 1, 0, -1):
-            if parts[i].isupper():
+            token = parts[i]
+            if (token.isupper() and len(token) > 1) or token == "-":
                 city_start = i
             else:
                 break
+        while city_start < len(parts) and parts[city_start] == "-":
+            city_start += 1
 
         city = " ".join(parts[city_start:]).title()
         address = " ".join(parts[1:city_start])
