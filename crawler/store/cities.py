@@ -87,7 +87,7 @@ def _city_map() -> dict[str, str]:
         logger.warning("cities.csv not found at %s; using heuristics only", _CITIES_CSV)
         return mapping
     with open(_CITIES_CSV, encoding="utf-8") as f:
-        for row in csv.DictReader(f):  # type: ignore
+        for row in csv.DictReader(f):
             key = row.get("key", "").strip()
             if key:
                 mapping[key] = row.get("canonical", "").strip()

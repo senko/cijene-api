@@ -97,6 +97,25 @@ class SparCrawler(BaseCrawler):
         "category": ("kategorija proizvoda", False),
     }
 
+    REQUIRED_COLUMNS = [
+        "MPC (EUR)",
+        "cijena za jedinicu mjere (EUR)",
+        "sidrena cijena na 2.5.2025. (EUR)",
+        "barkod",
+        "naziv",
+        "šifra",
+        "marka",
+        "jedinica mjere",
+    ]
+
+    # Not required by NN 101/2026, so the chain may drop them when it switches.
+    OPTIONAL_COLUMNS = [
+        "neto količina",
+        "kategorija proizvoda",
+        "MPC za vrijeme posebnog oblika prodaje (EUR)",
+        "Najniža cijena u posljednjih 30 dana (EUR)",
+    ]
+
     # Required to detect text encoding
     CSV_PREFIX = "naziv;šifra;marka;neto količina;jedinica mjere;"
 

@@ -124,7 +124,7 @@ class PostgresDatabase(Database):
     async def list_chains(self) -> list[ChainWithId]:
         async with self._get_conn() as conn:
             rows = await conn.fetch("SELECT id, code FROM chains")
-            return [ChainWithId(**row) for row in rows]  # type: ignore
+            return [ChainWithId(**row) for row in rows]
 
     async def list_latest_chain_stats(self) -> list[ChainStats]:
         async with self._get_conn() as conn:
@@ -144,7 +144,7 @@ class PostgresDatabase(Database):
                     LIMIT 1
                 ) cs ON true;
             """)
-            return [ChainStats(**row) for row in rows]  # type: ignore
+            return [ChainStats(**row) for row in rows]
 
     async def add_store(self, store: Store) -> int:
         return await self._fetchval(
@@ -221,7 +221,7 @@ class PostgresDatabase(Database):
                 chain_code,
             )
 
-            return [StoreWithId(**row) for row in rows]  # type: ignore
+            return [StoreWithId(**row) for row in rows]
 
     async def filter_stores(
         self,
@@ -287,7 +287,7 @@ class PostgresDatabase(Database):
 
             query += " ORDER BY c.code, s.code"
             rows = await conn.fetch(query, *params)
-            return [StoreWithId(**row) for row in rows]  # type: ignore
+            return [StoreWithId(**row) for row in rows]
 
     async def add_ean(self, ean: str) -> int:
         """
@@ -313,7 +313,7 @@ class PostgresDatabase(Database):
                 """,
                 ean,
             )
-            return [ProductWithId(**row) for row in rows]  # type: ignore
+            return [ProductWithId(**row) for row in rows]
 
     async def get_product_store_prices(
         self,
@@ -448,7 +448,7 @@ class PostgresDatabase(Database):
                     WHERE product_id = ANY($1)
                 """
                 rows = await conn.fetch(query, product_ids)
-            return [ChainProductWithId(**row) for row in rows]  # type: ignore
+            return [ChainProductWithId(**row) for row in rows]
 
     async def search_products(
         self,
@@ -525,7 +525,7 @@ class PostgresDatabase(Database):
         """
         async with self._get_conn() as conn:
             rows = await conn.fetch(query_sql, *params)
-            return [ProductWithId(**row) for row in rows]  # type: ignore
+            return [ProductWithId(**row) for row in rows]
 
     async def fuzzy_search_products(
         self,
@@ -589,7 +589,7 @@ class PostgresDatabase(Database):
         """
         async with self._get_conn() as conn:
             rows = await conn.fetch(query_sql, *params)
-            return [ProductWithId(**row) for row in rows]  # type: ignore
+            return [ProductWithId(**row) for row in rows]
 
     async def get_product_prices(
         self, product_ids: list[int], date: date
@@ -828,5 +828,5 @@ class PostgresDatabase(Database):
             )
 
             if row:
-                return User(**row)  # type: ignore
+                return User(**row)
             return None

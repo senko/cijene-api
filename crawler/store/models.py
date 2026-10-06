@@ -23,6 +23,12 @@ class Product(BaseModel):
     # Optional fields that appear in some stores
     best_price_30: Optional[Decimal] = None  # Lowest price in last 30 days
     special_price: Optional[Decimal] = None  # Promotional/discounted price
+    # Availability flag required by NN 101/2026. None means the chain doesn't
+    # publish it, so absence must not be read as "unavailable".
+    available: Optional[bool] = None
+    # Name of the special form of sale (akcija, rasprodaja, ...) required by
+    # NN 101/2026. None means no promotion, or the chain doesn't publish it.
+    special_sale_type: Optional[str] = None
     anchor_price: Optional[Decimal] = None  # Reference price (often May 2, 2025)
     anchor_price_date: Optional[str] = None  # Date of reference price
     packaging: Optional[str] = None  # Packaging information

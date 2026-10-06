@@ -40,6 +40,25 @@ class EurospinCrawler(BaseCrawler):
         "category": ("KATEGORIJA_PROIZVODA", False),
     }
 
+    REQUIRED_COLUMNS = [
+        "MALOPROD.CIJENA(EUR)",
+        "CIJENA_ZA_JEDINICU_MJERE",
+        "SIDRENA_CIJENA",
+        "NAZIV_PROIZVODA",
+        "ŠIFRA_PROIZVODA",
+        "MARKA_PROIZVODA",
+        "JEDINICA_MJERE",
+        "BARKOD",
+    ]
+
+    # Not required by NN 101/2026, so the chain may drop them when it switches.
+    OPTIONAL_COLUMNS = [
+        "NETO_KOLIČINA",
+        "KATEGORIJA_PROIZVODA",
+        "MPC_POSEB.OBLIK_PROD",
+        "NAJNIŽA_MPC_U_30DANA",
+    ]
+
     STORE_ID_MAP = {
         "Ulica hrvatskog preporoda 70 Dugo Selo": "310032",
         "Ulica Rimske centurijacije 100": "310013",

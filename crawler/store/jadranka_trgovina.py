@@ -57,6 +57,25 @@ class JadrankaTrgovinaCrawler(BaseCrawler):
         "unit": ("JEDINICA MJERE", False),
     }
 
+    REQUIRED_COLUMNS = [
+        "MALOPRODAJNA CIJENA",
+        "CIJENA ZA JEDINICU MJERE",
+        "SIDRENA CIJENA NA 2.5.2025",
+        "ŠIFRA PROIZVODA",
+        "NAZIV PROIZVODA",
+        "MARKA PROIZVODA",
+        "BARKOD",
+        "JEDINICA MJERE",
+    ]
+
+    # Not required by NN 101/2026, so the chain may drop them when it switches.
+    OPTIONAL_COLUMNS = [
+        "NETO KOLIČINA",
+        "KATEGORIJA PROIZVODA",
+        "MPC ZA VRIJEME POSEBNOG OBLIKA PRODAJE",
+        "NAJNIŽA CIJENA U POSLJEDNIH 30 DANA",
+    ]
+
     def parse_index(self, content: str) -> list[str]:
         """
         Parse the Jadranka Trgovina index page to extract CSV links.

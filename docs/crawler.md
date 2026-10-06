@@ -186,9 +186,9 @@ The `get_zip_contents()` method handles downloading the ZIP to a temporary file 
 
 **Note**: `StudenacCrawler` (`studenac.py`) overrides this method to use the `unzip` command-line tool, which can be more robust for certain archives. Studenac's ZIP contains XML files rather than CSVs.
 
-See `LidlCrawler.get_all_products()` for typical usage.
+See `PlodineCrawler.get_all_products()` for typical usage.
 
-**Examples**: Lidl, Plodine, Eurospin, Studenac
+**Examples**: Plodine, Eurospin, Studenac
 
 ### 3. API-Based Crawlers
 
@@ -382,7 +382,7 @@ Many crawlers use the `ZIP_DATE_PATTERN` class attribute to find files for a spe
 ZIP_DATE_PATTERN = re.compile(r".*_(\d{2})_(\d{2})_(\d{4})\.zip")
 ```
 
-The `BaseCrawler` class provides a helper method, `parse_index_for_zip()`, which uses this pattern to return a dictionary of dates to URLs. For an example of how this is used, see the `get_index()` method in `LidlCrawler` (`lidl.py`) and `PlodineCrawler` (`plodine.py`).
+The `BaseCrawler` class provides a helper method, `parse_index_for_zip()`, which uses this pattern to return a dictionary of dates to URLs. For an example of how this is used, see the `get_index()` method in `PlodineCrawler` (`plodine.py`).
 
 ### 5. Error Handling and Logging
 

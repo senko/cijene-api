@@ -36,6 +36,25 @@ class StridonCrawler(BaseCrawler):
         "category": ("KATEGORIJA", False),
     }
 
+    REQUIRED_COLUMNS = [
+        "MALOPRODAJNA_CIJENA",
+        "CIJENA_ZA_JEDINICU_MJERE",
+        "SIDRENA_CIJENA_02_05_25",
+        "NAZIV_PROIZVODA",
+        "SIFRA_PROIZVODA",
+        "MARKA",
+        "JEDINICA_MJERE",
+        "EAN",
+    ]
+
+    # Not required by NN 101/2026, so the chain may drop them when it switches.
+    OPTIONAL_COLUMNS = [
+        "NETO_KOLICINA",
+        "KATEGORIJA",
+        "MPC_POSEBNI_OBLIK_PRODAJE",
+        "NAJNIZA_CIJENA_ZADNJI_30_DANA",
+    ]
+
     def parse_index(self, content: str) -> list[str]:
         """Extract CSV URLs from a Stridon index or archive page."""
         soup = BeautifulSoup(content, "html.parser")

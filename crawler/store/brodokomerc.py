@@ -62,6 +62,25 @@ class BrodokomercCrawler(BaseCrawler):
         "category": ("Kategorija proizvoda", False),
     }
 
+    REQUIRED_COLUMNS = [
+        "Maloprodajna cijena",
+        "Cijena za jedinicu mjere",
+        "Sidrena cijena na 2.5.2025",
+        "Naziv proizvoda",
+        "Šifra proizvoda",
+        "Marka proizvoda",
+        "Jedinica mjere",
+        "Barkod",
+    ]
+
+    # Not required by NN 101/2026, so the chain may drop them when it switches.
+    OPTIONAL_COLUMNS = [
+        "Neto količina",
+        "Kategorija proizvoda",
+        "MPC za vrijeme posebnog oblika prodaje",
+        "Najniža cijena u poslj.30 dana",
+    ]
+
     def get_all_products(self, date: datetime.date) -> List[Store]:
         """
         Main method to fetch and parse all products from Brodokomerc's price lists.
@@ -136,8 +155,8 @@ class BrodokomercCrawler(BaseCrawler):
         date_pattern = self._format_date_for_filename(date)
 
         # Find all CSV links containing the date pattern
-        for link in soup.find_all("a", href=True):
-            full_path = link["href"]
+        for link in soup.select("a[href]"):
+            full_path = str(link["href"])
 
             # The actual filename is the part of the path before the UUID
             # e.g., /documents/.../filename.csv/uuid -> filename.csv

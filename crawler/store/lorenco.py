@@ -41,6 +41,15 @@ class LorencoCrawler(BaseCrawler):
         "unit": ("JMjere", False),
     }
 
+    REQUIRED_COLUMNS = [
+        "MpcJmj",
+        "MPC",
+        "CijenaSid",
+        "Naziv",
+        "Barkod",
+        "JMjere",
+    ]
+
     def get_csv_url(self, soup: BeautifulSoup, date: datetime.date) -> str | None:
         """Find the CSV URL for the given date from the index page."""
         hr_date = date.strftime("%d.%m.%Y")

@@ -17,25 +17,32 @@ class PlodineCrawler(BaseCrawler):
     This class handles downloading and parsing price data from Plodine's website.
     It fetches the price list index page, finds the ZIP for the specified date,
     downloads and extracts it, and parses the CSV files inside.
+
+    Since 2026-10-02 the daily ZIP also carries the previous day's CSVs,
+    including intra-day updates, so a store can have several files in one ZIP.
+    Only files published on the requested date are used, latest one per store.
     """
 
     CHAIN = "plodine"
     BASE_URL = "https://www.plodine.hr"
     INDEX_URL = f"{BASE_URL}/info-o-cijenama"
     ZIP_DATE_PATTERN = re.compile(r".*/cjenici/cjenici_(\d{2})_(\d{2})_(\d{4})_.*\.zip")
+    # Publication timestamp (ddmmyyyyHHMMSS) at the end of a CSV filename
+    FILE_TIMESTAMP_PATTERN = re.compile(r"_(\d{14})\.csv$")
     VERIFY_TLS_CERT = False  # Plodine uses a root CA unsupported by httpx on Debian 12
 
     PRICE_MAP = {
-        "price": ("Maloprodajna cijena", False),
+        "price": (["Maloprodajna cijena", "MPC"], False),
         "unit_price": ("Cijena po JM", False),
         "special_price": (
             "MPC za vrijeme posebnog oblika prodaje",
             False,
         ),
         "best_price_30": ("Najniza cijena u poslj. 30 dana", False),
-        "anchor_price": ("Sidrena cijena na 2.5.2025", False),
+        "anchor_price": (["Sidrena cijena na 2.5.2025", "Sidrena cijena"], False),
     }
 
+    # The new "Poseban oblik prodaje" column is a DA/NE flag, not a special price column.
     FIELD_MAP = {
         "product": ("Naziv proizvoda", True),
         "product_id": ("Sifra proizvoda", True),
@@ -44,7 +51,32 @@ class PlodineCrawler(BaseCrawler):
         "unit": ("Jedinica mjere", False),
         "barcode": ("Barkod", False),
         "category": ("Kategorija proizvoda", False),
+        "special_sale_type": ("Naziv posebnog oblika prodaje", False),
     }
+
+    BOOL_MAP = {
+        "available": ("Dostupno nedostupno", False),
+    }
+
+    REQUIRED_COLUMNS = [
+        ["Maloprodajna cijena", "MPC"],
+        "Cijena po JM",
+        ["Sidrena cijena na 2.5.2025", "Sidrena cijena"],
+        "Naziv proizvoda",
+        "Sifra proizvoda",
+        "Marka proizvoda",
+        "Jedinica mjere",
+        "Barkod",
+    ]
+
+    OPTIONAL_COLUMNS = [
+        "Neto kolicina",
+        "Kategorija proizvoda",
+        "MPC za vrijeme posebnog oblika prodaje",
+        "Najniza cijena u poslj. 30 dana",
+        "Naziv posebnog oblika prodaje",
+        "Dostupno nedostupno",
+    ]
 
     def get_index(self, date: datetime.date) -> str:
         content = self.fetch_text(self.INDEX_URL)
@@ -105,6 +137,26 @@ class PlodineCrawler(BaseCrawler):
             logger.error(f"Failed to parse store from filename {filename}: {str(e)}")
             return None
 
+    def parse_file_timestamp(self, filename: str) -> Optional[datetime.datetime]:
+        """
+        Extract the publication timestamp from a CSV filename.
+
+        Example: ..._VISKOVO_001_509_02102026035529.csv -> 2026-10-02 03:55:29
+
+        Args:
+            filename: Name of the CSV file
+
+        Returns:
+            Publication timestamp, or None if the filename doesn't carry one
+        """
+        match = self.FILE_TIMESTAMP_PATTERN.search(filename)
+        if not match:
+            return None
+        try:
+            return datetime.datetime.strptime(match.group(1), "%d%m%Y%H%M%S")
+        except ValueError:
+            return None
+
     def get_all_products(self, date: datetime.date) -> list[Store]:
         """
         Main method to fetch and parse all products from Plodine's price lists.
@@ -120,21 +172,52 @@ class PlodineCrawler(BaseCrawler):
             ValueError: If the price list ZIP cannot be found or processed
         """
         zip_url = self.get_index(date)
-        stores = []
+        # store_id -> (publication timestamp, store)
+        stores: dict[str, tuple[datetime.datetime, Store]] = {}
 
         for filename, content in self.get_zip_contents(zip_url, ".csv"):
             logger.debug(f"Processing file: {filename}")
+
+            published = self.parse_file_timestamp(filename)
+            if published is None:
+                logger.warning(f"Skipping CSV {filename}: no timestamp in filename")
+                continue
+            if published.date() != date:
+                logger.debug(
+                    f"Skipping CSV {filename}: published on {published:%Y-%m-%d}"
+                )
+                continue
+
             store = self.parse_store_from_filename(filename)
             if not store:
                 logger.warning(f"Skipping CSV {filename} due to store parsing failure")
                 continue
 
-            # Parse CSV and add products to the store
-            products = self.parse_csv(content.decode("utf-8"), delimiter=";")
-            store.items = products
-            stores.append(store)
+            existing = stores.get(store.store_id)
+            if existing and existing[0] >= published:
+                logger.debug(f"Skipping CSV {filename}: newer file for the same store")
+                continue
 
-        return stores
+            # Parse CSV and add products to the store
+            try:
+                products = self.parse_csv(content.decode("utf-8"), delimiter=";")
+            except Exception as e:
+                logger.error(f"Error processing CSV {filename}: {e}", exc_info=True)
+                continue
+
+            store.items = products
+            stores[store.store_id] = (published, store)
+
+        return [store for _, store in stores.values()]
+
+    def fix_product_data(self, data: dict) -> dict:
+        """Mirror the promotional price for the NN 101/2026 format."""
+        data = super().fix_product_data(data)
+
+        if data.get("special_sale_type") and data.get("special_price") is None:
+            data["special_price"] = data.get("price")
+
+        return data
 
 
 if __name__ == "__main__":

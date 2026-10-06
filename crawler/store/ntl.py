@@ -2,7 +2,7 @@ import datetime
 import logging
 import os
 import re
-from urllib.parse import quote_plus, unquote
+from urllib.parse import unquote
 
 from bs4 import BeautifulSoup
 
@@ -21,9 +21,23 @@ class NtlCrawler(BaseCrawler):
 
     # Regex to parse store information from the filename
     # Format: Supermarket_Ljudevita Gaja 1_DUGA RESA_10103_263_25052025_07_22_36.csv
+    # The street address can itself contain underscores (e.g. "Calinec 179_b",
+    # where the source has a slash), so the pattern is anchored on the
+    # fixed-format tail and the address takes whatever is left.
     STORE_FILENAME_PATTERN = re.compile(
-        r"(?P<store_type>[^_]+)_(?P<street_address>[^_]+)_(?P<city>[^_]+)_(?P<store_id>\d+)_.*\.csv$"
+        r"(?P<store_type>[^_]+)_(?P<street_address>.+)_(?P<city>[^_]+)_(?P<store_id>\d+)_\d+_\d{8}_\d{2}_\d{2}_\d{2}\.csv$"
     )
+
+    # Publication date (DDMMYYYY) and time from the same filename. Used to check
+    # that the index really served the date we asked for, since the date is a
+    # query parameter and a silently ignored one would file another day's prices
+    # under the requested date.
+    FILENAME_DATE_PATTERN = re.compile(
+        r"_(\d{8})_\d{2}_\d{2}_\d{2}\.csv$", re.IGNORECASE
+    )
+
+    # The index keeps the last 30 days, as the page itself states.
+    RETENTION_DAYS = 30
 
     # Mapping for price fields from CSV columns
     PRICE_MAP = {
@@ -31,7 +45,12 @@ class NtlCrawler(BaseCrawler):
         "price": ("Maloprodajna cijena", False),
         "unit_price": ("Cijena za jedinicu mjere", False),
         "special_price": ("MPC za vrijeme posebnog oblika prodaje", False),
-        "anchor_price": ("Sidrena cijena na 2.5.2025", False),
+        # Renamed on 2026-09-25 when the chain moved to the NN 101/2026 format.
+        # NTL dropped the reference date from the header entirely, where
+        # Gavranović and Trgovina Krk spell it out; the values themselves are
+        # still mostly the 2.5.2025 anchor, so neither spelling tells us which
+        # reference date a given row refers to.
+        "anchor_price": (["Sidrena cijena na 2.5.2025", "Sidrena cijena"], False),
     }
 
     # Mapping for other product fields from CSV columns
@@ -43,7 +62,35 @@ class NtlCrawler(BaseCrawler):
         "quantity": ("Neto količina", False),
         "unit": ("Jedinica mjere", False),
         "category": ("Kategorija proizvoda", False),
+        "special_sale_type": ("Naziv posebnog oblika prodaje", False),
     }
+
+    BOOL_MAP = {
+        "available": ("Dostupnost", False),
+    }
+
+    REQUIRED_COLUMNS = [
+        "Maloprodajna cijena",
+        "Cijena za jedinicu mjere",
+        ["Sidrena cijena na 2.5.2025", "Sidrena cijena"],
+        "Šifra proizvoda",
+        "Barkod",
+        "Naziv proizvoda",
+        "Marka proizvoda",
+        "Jedinica mjere",
+    ]
+
+    # On 2026-09-25 the chain dropped the special price and 30-day low columns
+    # and added the sale name and availability ones. Files from either side of
+    # the switch must keep parsing, since the index serves the last 30 days and
+    # most of those are still in the old format.
+    OPTIONAL_COLUMNS = [
+        "Neto količina",
+        "Kategorija proizvoda",
+        "MPC za vrijeme posebnog oblika prodaje",
+        "Naziv posebnog oblika prodaje",
+        "Dostupnost",
+    ]
 
     def parse_index(self, content: str) -> list[str]:
         """
@@ -64,86 +111,21 @@ class NtlCrawler(BaseCrawler):
 
         return list(set(urls))  # Return unique URLs
 
-    def get_store_list(self) -> list[str]:
+    def filename_date(self, url: str) -> datetime.date | None:
         """
-        Get list of all available stores from the main page dropdown.
+        Read the publication date out of a CSV filename.
 
-        Returns:
-            List of store names
+        The date is the second-to-last group before the time, e.g.
+        Supermarket_Ljudevita Gaja 1_DUGA RESA_10103_263_25052025_07_22_36.csv
+        is 25.05.2025. Returns None if the filename doesn't carry a usable date.
         """
-        content = self.fetch_text(self.BASE_URL)
-        if not content:
-            logger.warning(f"No content found at NTL index URL: {self.BASE_URL}")
-            return []
-
-        soup = BeautifulSoup(content, "html.parser")
-        stores = []
-
-        select_element = soup.find("select")
-        if not select_element:
-            logger.warning("No store dropdown found on the NTL index page")
-            return []
-
-        options = select_element.select("option[value]")
-        for option in options:
-            store_value = option.get("value", "").strip()
-            if store_value and not store_value.startswith("Odaberi"):
-                stores.append(store_value)
-
-        logger.info(f"Found {len(stores)} stores: {'; '.join(stores)}")
-        return stores
-
-    def get_historical_csv_for_date(
-        self,
-        store_name: str,
-        target_date: datetime.date,
-    ) -> str | None:
-        """
-        Get historical CSV URL for a specific store and date.
-
-        Args:
-            store_name: Store name from dropdown
-            target_date: Date to find CSV for
-
-        Returns:
-            CSV URL if found, None if not available
-        """
-        archive_url = f"{self.BASE_URL}?pageName=archeive&archive_file_name={quote_plus(store_name)}"
-        logger.debug(f"Fetching archive page for {store_name}: {archive_url}")
-
-        try:
-            content = self.fetch_text(archive_url)
-            if not content:
-                logger.warning(f"No content found at archive URL: {archive_url}")
-                return None
-
-            soup = BeautifulSoup(content, "html.parser")
-
-            target_date_str = target_date.strftime("%d-%m-%Y")
-
-            for row in soup.select("table tr"):
-                cells = row.find_all("td")
-                if len(cells) >= 4:  # Expect at least 4 cells: #, store, date, download
-                    date_cell = cells[2].get_text().strip()
-                    if date_cell == target_date_str:
-                        # Find the download link in the last cell
-                        download_link = cells[-1].select_one("a[href$='.csv']")
-                        if download_link:
-                            csv_url = download_link.get("href")
-                            logger.info(
-                                f"Found historical CSV for {store_name} on {target_date_str}: {csv_url}"
-                            )
-                            return csv_url
-
-            logger.debug(
-                f"No historical data found for {store_name} on {target_date_str}"
-            )
+        match = self.FILENAME_DATE_PATTERN.search(unquote(os.path.basename(url)))
+        if not match:
             return None
 
-        except Exception as e:
-            logger.error(
-                f"Error fetching historical data for {store_name}: {e}", exc_info=True
-            )
+        try:
+            return datetime.datetime.strptime(match.group(1), "%d%m%Y").date()
+        except ValueError:
             return None
 
     def parse_store_info(self, url: str) -> Store:
@@ -221,42 +203,43 @@ class NtlCrawler(BaseCrawler):
         Returns:
             List of CSV URLs available for the given date.
         """
-        today = datetime.date.today()
+        index_url = f"{self.BASE_URL}?date={date:%Y-%m-%d}"
+        logger.info(f"Fetching NTL CSV files for {date:%Y-%m-%d} from {index_url}")
 
-        if date == today:
-            logger.info(f"Fetching current CSV files for today ({date:%Y-%m-%d})")
+        content = self.fetch_text(index_url)
+        if not content:
+            logger.warning(f"No content found at NTL index URL: {index_url}")
+            return []
 
-            content = self.fetch_text(self.BASE_URL)
-            if not content:
-                logger.warning(f"No content found at NTL index URL: {self.BASE_URL}")
-                return []
+        all_urls = self.parse_index(content)
+        if not all_urls:
+            age = (datetime.date.today() - date).days
+            if age > self.RETENTION_DAYS:
+                logger.warning(
+                    f"No NTL CSV URLs for {date:%Y-%m-%d}: {age} days old, past the "
+                    f"{self.RETENTION_DAYS}-day retention window"
+                )
+            else:
+                logger.warning(f"No NTL CSV URLs listed for {date:%Y-%m-%d}")
+            return []
 
-            all_urls = self.parse_index(content)
-            if not all_urls:
-                logger.warning("No NTL CSV URLs found on index page")
+        # The date is a query parameter, so confirm the files we got back are the
+        # ones we asked for rather than trusting the page. Files whose filename
+        # carries no date are kept, since only the date claim is being checked
+        # here and parse_store_info rejects unusable names anyway.
+        urls = []
+        for url in all_urls:
+            file_date = self.filename_date(url)
+            if file_date is not None and file_date != date:
+                logger.warning(
+                    f"Ignoring NTL CSV dated {file_date:%Y-%m-%d} listed under "
+                    f"{date:%Y-%m-%d}: {url}"
+                )
+                continue
+            urls.append(url)
 
-            return all_urls
-        else:
-            logger.info(f"Fetching historical CSV files for date ({date:%Y-%m-%d})")
-
-            stores = self.get_store_list()
-            if not stores:
-                logger.warning("No stores found in dropdown")
-                return []
-
-            historical_urls = []
-            for store_name in stores:
-                csv_url = self.get_historical_csv_for_date(store_name, date)
-                if csv_url:
-                    historical_urls.append(csv_url)
-
-            if not historical_urls:
-                raise ValueError(f"No stores found for date {date:%Y-%m-%d}")
-
-            logger.info(
-                f"Found {len(historical_urls)} historical CSV files for {date:%Y-%m-%d}"
-            )
-            return historical_urls
+        logger.info(f"Found {len(urls)} NTL CSV files for {date:%Y-%m-%d}")
+        return urls
 
     def get_all_products(self, date: datetime.date) -> list[Store]:
         """
@@ -314,7 +297,21 @@ class NtlCrawler(BaseCrawler):
             data["product"] = data["product"].strip()
 
         # Call parent method for common fixups
-        return super().fix_product_data(data)
+        data = super().fix_product_data(data)
+
+        # Since 2026-09-25 the chain publishes one price column plus the name of
+        # the special form of sale, having dropped the separate special price
+        # column. When a sale name is present the published price is the
+        # promotional one, so mirror it into special_price to keep the "on sale"
+        # signal. Verified against the last file published in the old format:
+        # of 400 rows carrying a sale name (AKC, RAS or TNC), all 400 had a
+        # special price the previous day and 399 of them at exactly this price,
+        # and none of the 5094 rows without a name did. The regular pre-promo
+        # price is no longer published.
+        if data.get("special_sale_type") and data.get("special_price") is None:
+            data["special_price"] = data.get("price")
+
+        return data
 
 
 if __name__ == "__main__":

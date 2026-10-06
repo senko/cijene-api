@@ -39,6 +39,24 @@ class KtcCrawler(BaseCrawler):
         "category": ("Kategorija", False),
     }
 
+    REQUIRED_COLUMNS = [
+        "Maloprodajna cijena",
+        "Cijena za jedinicu mjere",
+        "Naziv proizvoda",
+        "Šifra proizvoda",
+        "Marka proizvoda",
+        "Jedinica mjere",
+        "Barkod",
+    ]
+
+    # Not required by NN 101/2026, so the chain may drop them when it switches.
+    OPTIONAL_COLUMNS = [
+        "Neto količina",
+        "Kategorija",
+        "MPC za vrijeme posebnog oblika prodaje",
+        "Najniža cijena u posljednjih 30 dana",
+    ]
+
     CITIES = [
         "KRIZEVCI",
         "VARAZDIN",

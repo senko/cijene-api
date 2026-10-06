@@ -51,6 +51,7 @@ class DjeloVodiceCrawler(BaseCrawler):
     # Not used — XLSX is parsed by column position, not by CSV column names
     PRICE_MAP = {}
     FIELD_MAP = {}
+    REQUIRED_COLUMNS = []
 
     def get_index(self, date: datetime.date) -> str:
         """
@@ -148,7 +149,7 @@ class DjeloVodiceCrawler(BaseCrawler):
                     "quantity": "",
                 }
                 data = self.fix_product_data(data)
-                products.append(Product(**data))  # type: ignore
+                products.append(Product(**data))
             except Exception as e:
                 row_txt = "; ".join("" if v is None else str(v) for v in row)
                 logger.warning(f"Failed to parse row {row_idx + 2}: `{row_txt}`: {e}")

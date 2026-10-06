@@ -43,6 +43,25 @@ class RotoCrawler(BaseCrawler):
         "category": ("Kategorija proizvoda", False),
     }
 
+    REQUIRED_COLUMNS = [
+        "MPC",
+        "Cijena za jedinicu mjere",
+        "sidrena cijena na 2.5.2025.",
+        "Naziv artikla",
+        "ŠIFRA ARTIKLA",
+        "BRAND",
+        "Jedinica mjere",
+        "Barkod",
+    ]
+
+    # Not required by NN 101/2026, so the chain may drop them when it switches.
+    OPTIONAL_COLUMNS = [
+        "neto količina",
+        "Kategorija proizvoda",
+        "MPC za vrijeme posebnog oblika prodaje",
+        "Najniža cijena u posljednjih 30 dana",
+    ]
+
     def get_csv_urls(self, soup: BeautifulSoup, date: datetime.date) -> list[str]:
         anchors = soup.select("a.cjenici-table-row")
         hr_date = date.strftime("%d.%m.%Y")

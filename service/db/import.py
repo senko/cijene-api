@@ -33,7 +33,7 @@ async def read_csv(file_path: Path) -> List[Dict[str, str]]:
     """
     try:
         with open(file_path, "r", encoding="utf-8") as f:
-            reader = DictReader(f)  # type: ignore
+            reader = DictReader(f)
             return [row for row in reader]
     except Exception as e:
         logger.error(f"Error reading {file_path}: {e}")
@@ -311,7 +311,7 @@ async def import_archive(path: Path, compute_stats_flag: bool = True):
         logger.error(f"`{path.stem}` is not a valid date in YYYY-MM-DD format")
         return
 
-    with TemporaryDirectory() as temp_dir:  # type: ignore
+    with TemporaryDirectory() as temp_dir:
         logger.debug(f"Extracting archive {path} to {temp_dir}")
         with zipfile.ZipFile(path, "r") as zip_ref:
             zip_ref.extractall(temp_dir)

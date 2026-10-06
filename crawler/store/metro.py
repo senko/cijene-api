@@ -50,6 +50,25 @@ class MetroCrawler(BaseCrawler):
         "category": ("KATEGORIJA", False),
     }
 
+    REQUIRED_COLUMNS = [
+        "MPC",
+        "CIJENA_PO_MJERI",
+        "SIDRENA_02_05",
+        "NAZIV",
+        "SIFRA",
+        "MARKA",
+        "JED_MJERE",
+        "BARKOD",
+    ]
+
+    # Not required by NN 101/2026, so the chain may drop them when it switches.
+    OPTIONAL_COLUMNS = [
+        "NETO_KOLICINA",
+        "KATEGORIJA",
+        "POSEBNA_PRODAJA",
+        "NAJNIZA_30_DANA",
+    ]
+
     def parse_index(self, content: str) -> list[str]:
         """
         Parse the Metro index page to extract CSV links.
