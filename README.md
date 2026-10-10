@@ -221,6 +221,13 @@ direktno u bazi podataka koristeći SQL, npr:
 INSERT INTO users (name, api_key, is_active) VALUES ('Senko', 'secret-key', TRUE);
 ```
 
+## Cijene API
+
+[Cijene API](https://cijene.dev) je javno dostupna instanca ovog servisa koja
+objavljuje dnevne arhive cijena (rezultat crawlera), kao i API za pretraživanje
+i pristup cijenama, za komercijalnu (uz pretplatu) i nekomercijalnu (besplatnu)
+upotrebu.
+
 ## Licenca
 
 Ovaj projekt je licenciran pod [AGPL-3 licencom](LICENSE).
