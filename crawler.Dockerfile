@@ -24,12 +24,15 @@ COPY common/ ./common/
 COPY enrichment/ ./enrichment/
 RUN uv sync --frozen --no-dev
 
-FROM python:3.13.13-alpine3.23 AS crawler
+FROM python:3.13.13-alpine3.23 AS cijene-api-dev-crawler
 
 ENV PYTHONUNBUFFERED=1 \
     PATH="/app/.venv/bin:$PATH"
 
-RUN addgroup -S app && adduser -S app -G app
+RUN addgroup -g 1000 -S app && \
+    adduser -u 1000 -S app -G app && \
+    mkdir -p /app/output && \
+    chown -R app:app /app
 
 RUN apk add --no-cache \
     libxml2 \
@@ -38,7 +41,6 @@ RUN apk add --no-cache \
 WORKDIR /app
 
 COPY --from=builder /app /app
-RUN mkdir -p /app/output && chown -R app:app /app
 
 USER app
 
