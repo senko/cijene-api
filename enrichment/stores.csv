@@ -661,9 +661,9 @@ id,chain_code,code,type,address,city,zipcode,lat,lon,phone
 4709,eurospin,310005,diskontna_prodavaonica,Ulica hrvatskih branitelja 2,Samobor,10430,45.8107400608298,15.7144251921177,
 6887,trgocentar,P120,supermarket,Vladimira Nazora 58,Sveti Ivan Zelina,,45.96658,16.25044,
 775,plodine,074,supermarket,S S Kranjcevica 4,Novalja,53291,44.55235,14.88604,
-6884,trgocentar,P195,supermarket,Varazdinska 2A,Zlatar,,16.07808,46.09327,+38549268005
+6884,trgocentar,P195,supermarket,Varazdinska 2A,Zlatar,,46.09327,16.07808,+38549268005
 7135,ntl,10102,supermarket,Soblinečka 55,Soblinec,,,,
-6883,trgocentar,P060,supermarket,Bana Josipa Jelacica 139,Zaprešić,,15.8025,45.87014,+38516313053
+6883,trgocentar,P060,supermarket,Bana Josipa Jelacica 139,Zaprešić,,45.87014,15.8025,+38516313053
 7134,ntl,20202,supermarket,Ulica kralja Tomislava 0,Čepin,,,,
 771,plodine,172,supermarket,Stancija Kaligari 2,Poreč,52440,45.212,13.671,
 4711,eurospin,310002,diskontna_prodavaonica,I Štefanovecki zavoj 12,Zagreb,10000,45.8186907749337,16.0436990999999,
@@ -675,8 +675,8 @@ id,chain_code,code,type,address,city,zipcode,lat,lon,phone
 773,plodine,020,supermarket,Štrmac 320,Labin,52220,45.09464,14.12185,
 774,plodine,070,supermarket,Sv Vid 200,Malinska,51511,45.12833,14.5419,
 776,plodine,037,supermarket,Tomislavova 51,Križevci,48260,46.01451,16.54591,
-6885,trgocentar,P080,supermarket,103 Brigade 8,Zabok,,15.90014,46.02166,+38549225764
-6888,trgocentar,P220,supermarket,Hum Na Sutli 185,Hum na Sutli,,15.70261,46.22192,+38549419513
+6885,trgocentar,P080,supermarket,103 Brigade 8,Zabok,,46.02166,15.90014,+38549225764
+6888,trgocentar,P220,supermarket,Hum Na Sutli 185,Hum na Sutli,,46.22192,15.70261,+38549419513
 6886,trgocentar,P100,supermarket,Vrankovec,Sveti Križ Začretje,,,,+38549227424
 8372,tommy,10260,supermarket,Brajde 9,Tar,52465,45.297914,13.620814,+385913192260
 8377,tommy,10109,supermarket,Domovinskog Rata 93,Split,21000,43.51958,16.47262,
