@@ -104,6 +104,7 @@ class Product(BaseModel):
     # Optional fields
     best_price_30: Optional[Decimal] = None      # Lowest price in 30 days
     special_price: Optional[Decimal] = None      # Promotional price
+    available: Optional[bool] = None             # In stock
     anchor_price: Optional[Decimal] = None       # Reference price (2.5.2025)
     anchor_price_date: Optional[str] = None      # Date of anchor price
     packaging: Optional[str] = None              # Packaging info
@@ -560,7 +561,7 @@ The output system generates three CSV files per chain:
    - `product_id`, `barcode`, `name`, `brand`, `category`, `unit`, `quantity`
 
 3. **prices.csv**: Price data linking stores and products
-   - `store_id`, `product_id`, `price`, `unit_price`, `best_price_30`, `anchor_price`, `special_price`
+   - `store_id`, `product_id`, `price`, `unit_price`, `best_price_30`, `anchor_price`, `special_price`, `available`
 
 ### ZIP Archive
 

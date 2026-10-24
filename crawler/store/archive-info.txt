@@ -60,8 +60,13 @@ Stupci:
 * price - cijena proizvoda
 * unit_price - cijena po jedinici mjere (ako je dostupno, inače prazno)
 * best_price_30 - najbolja cijena u zadnjih 30 dana (ako je dostupno, inače prazno)
-* anchor_price - cijena na 2.5.2025. (ako je dostupn, inače prazno)
+* anchor_price - cijena na 2.5.2025. (ako je dostupno, inače prazno)
 * special_price - cijena s popustom (ako je dostupno, inače prazno)
+* available - dostupnost proizvoda u poslovnici: 1 (dostupan), 0 (nedostupan), ili prazno
+  ako trgovački lanac ne objavljuje taj podatak
+
+Napomena: retci s `available` = 0 su proizvodi koji su na cjeniku, ali nisu dostupni u
+poslovnici. Stupac `available` dodan je naknadno, pa ga starije arhive nemaju.
 
 ## Izvor i obrada podataka
 

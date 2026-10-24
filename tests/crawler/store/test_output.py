@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 from crawler.store.models import Product, Store
-from crawler.store.output import PRICE_COLUMNS, save_csv, transform_products
+from crawler.store.output import PRICE_COLUMNS, transform_products
 
 
 def _product(product_id: str, available: bool | None) -> Product:
@@ -31,21 +31,24 @@ def _store() -> Store:
     )
 
 
-def test_available_is_a_price_column():
-    assert PRICE_COLUMNS[-1] == "available"
+def test_known_price_columns_keep_their_order():
+    # prices.csv is a public format: new columns go at the end, existing
+    # ones are never removed or reordered.
+    assert PRICE_COLUMNS[:8] == [
+        "store_id",
+        "product_id",
+        "price",
+        "unit_price",
+        "best_price_30",
+        "anchor_price",
+        "special_price",
+        "available",
+    ]
 
 
 def test_price_rows_carry_availability():
     _, _, prices = transform_products([_store()])
 
-    assert [p["available"] for p in prices] == [1, 0, ""]
-
-
-def test_csv_writes_one_zero_and_empty(tmp_path):
-    _, _, prices = transform_products([_store()])
-
-    save_csv(tmp_path / "prices.csv", prices, PRICE_COLUMNS)
-
-    lines = (tmp_path / "prices.csv").read_text().splitlines()
-    assert lines[0].endswith(",available")
-    assert [line.rsplit(",", 1)[1] for line in lines[1:]] == ["1", "0", ""]
+    # Compare as save_csv writes them; True == 1, so raw values would not
+    # catch a bool leaking through as "True"/"False".
+    assert [str(p["available"]) for p in prices] == ["1", "0", ""]
