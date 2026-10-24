@@ -39,6 +39,7 @@ PRICE_COLUMNS = [
     "best_price_30",
     "anchor_price",
     "special_price",
+    "available",
 ]
 
 
@@ -95,6 +96,9 @@ def transform_products(
                     "best_price_30": maybe(product.best_price_30),
                     "anchor_price": maybe(product.anchor_price),
                     "special_price": maybe(product.special_price),
+                    "available": ""
+                    if product.available is None
+                    else int(product.available),
                 }
             )
 
