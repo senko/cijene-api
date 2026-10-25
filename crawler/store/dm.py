@@ -32,7 +32,34 @@ class DmCrawler(BaseCrawler):
     # own normalized names, so the shared map-driven parser never runs here.
     PRICE_MAP = {}
     FIELD_MAP = {}
-    REQUIRED_COLUMNS = []
+
+    SPECIAL_PRICE_COLUMN = "mpc za vrijeme posebnog oblika prodaje (rasprodaja proizvoda koji izlaze iz asortimana)"
+    BEST_PRICE_30_COLUMN = "najniza cijena u posljednjih 30 dana prije rasprodaje"
+    ANCHOR_PRICE_COLUMN = "sidrena cijena na 2.5.2025. ili na datum ulistanja"
+
+    # The header says "on 2.5.2025 or on the listing date", but the file doesn't
+    # give listing dates, so 2.5.2025 is used for all products.
+    ANCHOR_PRICE_DATE = datetime.date(2025, 5, 2)
+
+    # Column names as normalized by detect_columns, checked by parse_excel
+    REQUIRED_COLUMNS = [
+        "naziv",
+        "sifra",
+        "marka",
+        "barkod",
+        "jedinica mjere",
+        "cijena za jedinicu mjere",
+        "mpc",
+        ANCHOR_PRICE_COLUMN,
+    ]
+
+    # Not required by NN 101/2026, so the chain may drop them when it switches.
+    OPTIONAL_COLUMNS = [
+        "kategorija proizvoda",
+        "neto kolicina",
+        SPECIAL_PRICE_COLUMN,
+        BEST_PRICE_30_COLUMN,
+    ]
 
     def parse_date_from_title(self, title: str) -> datetime.date:
         """
@@ -188,6 +215,7 @@ class DmCrawler(BaseCrawler):
 
             columns = self.detect_columns(worksheet)
             logger.debug(f"Detected columns: {columns}")
+            self.check_columns(columns)
 
             for row_idx, row in enumerate(worksheet.iter_rows(), start=1):
                 # Skip header and empty rows
@@ -204,29 +232,21 @@ class DmCrawler(BaseCrawler):
                         "product_id": row_map["sifra"],
                         "brand": row_map["marka"],
                         "barcode": row_map["barkod"],
-                        "category": row_map["kategorija proizvoda"],
-                        "quantity": row_map["neto kolicina"],
+                        "category": row_map.get("kategorija proizvoda", ""),
+                        "quantity": row_map.get("neto kolicina", ""),
                         "unit": row_map["jedinica mjere"],
                         "unit_price": self.parse_price(
                             row_map["cijena za jedinicu mjere"], False
                         ),
                         "price": self.parse_price(row_map["mpc"], False),
                         "special_price": self.parse_price(
-                            row_map[
-                                "mpc za vrijeme posebnog oblika prodaje (rasprodaja proizvoda koji izlaze iz asortimana)"
-                            ],
-                            False,
+                            row_map.get(self.SPECIAL_PRICE_COLUMN), False
                         ),
                         "best_price_30": self.parse_price(
-                            row_map[
-                                "najniza cijena u posljednjih 30 dana prije rasprodaje"
-                            ],
-                            False,
+                            row_map.get(self.BEST_PRICE_30_COLUMN), False
                         ),
                         "anchor_price": self.parse_price(
-                            row_map[
-                                "sidrena cijena na 2.5.2025. ili na datum ulistanja"
-                            ],
+                            row_map[self.ANCHOR_PRICE_COLUMN],
                             False,
                         ),
                     }

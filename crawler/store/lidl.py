@@ -34,6 +34,8 @@ class LidlCrawler(BaseCrawler):
     CSV_DATE_PATTERN = re.compile(r"_(\d{1,2})\.(\d{1,2})\.(\d{4})_")
 
     ANCHOR_PRICE_COLUMN = "Sidrena_cijena_na_02.05.2025"
+    ANCHOR_PRICE_DATE = datetime.date(2025, 5, 2)
+
     PRICE_MAP = {
         "price": ("MALOPRODAJNA_CIJENA", False),
         "unit_price": ("CIJENA_ZA_JEDINICU_MJERE", False),

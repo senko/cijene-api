@@ -41,17 +41,34 @@ class DjeloVodiceCrawler(BaseCrawler):
     Crawler for Djelo Vodice store prices.
 
     Djelo Vodice is a single-store supermarket in Vodice that publishes daily
-    XLSX pricelists as a directory listing. Each file contains ~7,500 products
-    with fixed columns parsed by position.
+    XLSX pricelists as a directory listing. Each file contains ~7,500 products,
+    read by the column names in the header row.
     """
 
     CHAIN = "djelo_vodice"
     BASE_URL = "https://dv10.djelo-vodice.hr"
 
-    # Not used — XLSX is parsed by column position, not by CSV column names
+    # Not used — parse_excel reads the XLSX itself, so the shared map-driven
+    # parser never runs here.
     PRICE_MAP = {}
     FIELD_MAP = {}
-    REQUIRED_COLUMNS = []
+
+    REQUIRED_COLUMNS = [
+        "Šifra prodajnog mjesta",
+        "Naziv prodajnog mjesta",
+        "Šifra artikla",
+        "Naziv artikla",
+        "Sidrena cijena",
+        "Barkod",
+        "MP cijena",
+        "Cijena za jedinicu mj.",
+        "Obr. jedinica mjere",
+    ]
+
+    # Not required by NN 101/2026, so the chain may drop it when it switches.
+    OPTIONAL_COLUMNS = [
+        "Kategorija",
+    ]
 
     def get_index(self, date: datetime.date) -> str:
         """
@@ -87,16 +104,19 @@ class DjeloVodiceCrawler(BaseCrawler):
         """
         Parse an XLSX file into a Store object and list of Product objects.
 
-        The XLSX has a single sheet "Cijene na dan" with columns:
-        A=store_id, B=store_name, C=product_id, D=product_name,
-        E=anchor_price, F=barcode, G=unit_type, H=category,
-        I=price, J=unit_price, K=unit, L=net_quantity (always 0).
+        The XLSX has a single sheet "Cijene na dan" with a header row. Besides
+        the columns in REQUIRED_COLUMNS and OPTIONAL_COLUMNS it has
+        "Jedinica mjere" (KOMAD etc.) and "Neto količina" (always 0), which
+        are not used.
 
         Args:
             excel_data: Raw XLSX file content as bytes.
 
         Returns:
             Tuple of (Store, list of Products).
+
+        Raises:
+            ValueError: If a required column is missing.
         """
         workbook = openpyxl.load_workbook(BytesIO(excel_data), data_only=True)
         worksheet = workbook.active
@@ -104,15 +124,21 @@ class DjeloVodiceCrawler(BaseCrawler):
         if not worksheet:
             raise ValueError("No active worksheet found in the Excel file")
 
+        rows = worksheet.iter_rows(values_only=True)
+        header = [cell_str(name) for name in next(rows, ())]
+        self.check_columns(header)
+        index = {name.lower(): i for i, name in enumerate(header) if name}
+
+        def cell(row: tuple, column: str) -> str:
+            i = index.get(column.lower())
+            return cell_str(row[i]) if i is not None and i < len(row) else ""
+
         products = []
         store = None
 
-        for row_idx, row in enumerate(worksheet.iter_rows(min_row=2, values_only=True)):
-            if len(row) < 11:
-                continue
-
-            store_id = str(row[0] or "").strip()
-            store_name = str(row[1] or "").strip()
+        for row_idx, row in enumerate(rows, start=2):
+            store_id = cell(row, "Šifra prodajnog mjesta")
+            store_name = cell(row, "Naziv prodajnog mjesta")
 
             if not store_id:
                 continue
@@ -137,14 +163,18 @@ class DjeloVodiceCrawler(BaseCrawler):
 
             try:
                 data = {
-                    "product_id": cell_str(row[2]),
-                    "product": cell_str(row[3]),
-                    "anchor_price": self.parse_price(cell_str(row[4]), False),
-                    "barcode": cell_str(row[5]),
-                    "category": cell_str(row[7]),
-                    "price": self.parse_price(cell_str(row[8]), True),
-                    "unit_price": self.parse_price(cell_str(row[9]), True),
-                    "unit": cell_str(row[10]),
+                    "product_id": cell(row, "Šifra artikla"),
+                    "product": cell(row, "Naziv artikla"),
+                    "anchor_price": self.parse_price(
+                        cell(row, "Sidrena cijena"), False
+                    ),
+                    "barcode": cell(row, "Barkod"),
+                    "category": cell(row, "Kategorija"),
+                    "price": self.parse_price(cell(row, "MP cijena"), True),
+                    "unit_price": self.parse_price(
+                        cell(row, "Cijena za jedinicu mj."), True
+                    ),
+                    "unit": cell(row, "Obr. jedinica mjere"),
                     "brand": "",
                     "quantity": "",
                 }
@@ -152,7 +182,7 @@ class DjeloVodiceCrawler(BaseCrawler):
                 products.append(Product(**data))
             except Exception as e:
                 row_txt = "; ".join("" if v is None else str(v) for v in row)
-                logger.warning(f"Failed to parse row {row_idx + 2}: `{row_txt}`: {e}")
+                logger.warning(f"Failed to parse row {row_idx}: `{row_txt}`: {e}")
                 continue
 
         if store is None:

@@ -117,8 +117,9 @@ class BaseCrawler:
     Columns the source file must contain. A missing one is a breaking format
     change: the file is abandoned and an error is logged.
 
-    Every crawler declares this, like PRICE_MAP and FIELD_MAP above. The two
-    crawlers that parse by column position rather than by name declare it empty.
+    Every crawler declares this, like PRICE_MAP and FIELD_MAP above. Crawlers
+    that parse files with their own code instead of the maps (dm, Djelo Vodice)
+    call `check_columns` themselves.
 
     This deliberately repeats column names from the maps above, because it
     answers a different question than the `is_required` flag there. That flag
@@ -132,6 +133,15 @@ class BaseCrawler:
     """
     Columns we expect but can process without, such as the ones dropped by
     NN 101/2026. A missing one is logged as a warning and parsing continues.
+    """
+
+    ANCHOR_PRICE_DATE: datetime.date | None = None
+    """
+    Reference date of the anchor price, as stated in the anchor price column
+    header the chain publishes (e.g. "Sidrena cijena na 2.5.2025"). Set per
+    crawler from that header, not detected at runtime. None when the header
+    doesn't state a date: the date is then left empty rather than guessed.
+    A date the chain publishes per product takes precedence.
     """
 
     TRUE_VALUES = frozenset({"dostupno", "dostupan", "da", "d", "1", "true", "yes"})
@@ -186,7 +196,7 @@ class BaseCrawler:
 
         A bare string is wrapped rather than iterated, since a string is itself
         a sequence of characters. Empty names are dropped: a few crawlers
-        declare a field the source doesn't have, such as Vrutak's anchor price.
+        declare a field the source doesn't have, such as Vrutak's special price.
         """
         names = [spec] if isinstance(spec, str) else list(spec)
         names = [name for name in names if name]
@@ -673,6 +683,28 @@ class BaseCrawler:
             if unicodedata.category(c) != "Mn"
         )
 
+    @staticmethod
+    def parse_anchor_date(value: str) -> str:
+        """
+        Parse an anchor price date published by the chain, best-effort.
+
+        Args:
+            value: Date such as "2.5.2025", "02.05.2025." or "02052025"
+
+        Returns:
+            ISO date, or "" if the value isn't a recognized date
+        """
+        # Clean up common noise: trailing dots, double dots
+        value = value.strip().rstrip(".").replace("..", ".")
+
+        for fmt in ("%d.%m.%Y", "%d.%m.%y", "%d%m%Y"):
+            try:
+                return datetime.datetime.strptime(value, fmt).date().isoformat()
+            except ValueError:
+                continue
+
+        return ""
+
     def fix_product_data(self, data: dict[str, Any]) -> dict[str, Any]:
         """
         Do any cleaning or transformation of the Product data here.
@@ -702,8 +734,16 @@ class BaseCrawler:
             else:
                 data["price"] = data["special_price"]
 
-        if data.get("anchor_price") is not None and not data.get("anchor_price_date"):
-            data["anchor_price_date"] = datetime.date(2025, 5, 2).isoformat()
+        # A date published per product wins over the one stated in the header
+        source_date = self.parse_anchor_date(data.get("anchor_price_date") or "")
+        if data.get("anchor_price") is None:
+            data["anchor_price_date"] = None
+        elif source_date:
+            data["anchor_price_date"] = source_date
+        elif self.ANCHOR_PRICE_DATE:
+            data["anchor_price_date"] = self.ANCHOR_PRICE_DATE.isoformat()
+        else:
+            data["anchor_price_date"] = None
 
         # Distinguish "no promotion" from "chain publishes a name for it"
         if data.get("special_sale_type") is not None:

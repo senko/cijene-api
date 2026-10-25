@@ -29,6 +29,8 @@ class JadrankaTrgovinaCrawler(BaseCrawler):
         r"MARKET_MAXI_DRAZICA5_MALILOSINJ_607_(\d{2})(\d{2})(\d{4})_0800\.csv"
     )
 
+    ANCHOR_PRICE_DATE = datetime.date(2025, 5, 2)
+
     # Mapping for price fields from CSV columns
     # CSV columns in Croatian:
     # NAZIV PROIZVODA, ŠIFRA PROIZVODA, MARKA PROIZVODA, NETO KOLIČINA,

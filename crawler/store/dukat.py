@@ -24,6 +24,8 @@ class DukatCrawler(BaseCrawler):
     BASE_URL = "https://dukat.hr"
     INDEX_URL = f"{BASE_URL}/diskonti"
 
+    ANCHOR_PRICE_DATE = datetime.date(2025, 5, 2)
+
     PRICE_MAP = {
         "price": ("MALOPRODAJNA CIJENA", False),
         "unit_price": ("CIJENA ZA JEDINICU MJERE", False),

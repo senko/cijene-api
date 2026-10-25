@@ -49,6 +49,8 @@ class KonzumCrawler(BaseCrawler):
     REQUEST_BUDGET = 800
     """Runaway guard on price list requests per run; a full recovery costs ~490."""
 
+    ANCHOR_PRICE_DATE = datetime.date(2025, 5, 2)
+
     # Mapping for price fields
     PRICE_MAP = {
         # field: (column, is_required)

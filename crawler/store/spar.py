@@ -79,6 +79,9 @@ class SparCrawler(BaseCrawler):
         "sv._ivan_zelina",
         "kastel_sucurac",
     ]
+
+    ANCHOR_PRICE_DATE = datetime.date(2025, 5, 2)
+
     PRICE_MAP = {
         "price": ("MPC (EUR)", False),
         "unit_price": ("cijena za jedinicu mjere (EUR)", False),

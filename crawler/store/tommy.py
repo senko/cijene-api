@@ -23,6 +23,8 @@ class TommyCrawler(BaseCrawler):
     CHAIN = "tommy"
     BASE_URL = "https://spiza.tommy.hr/api/v2"
 
+    ANCHOR_PRICE_DATE = datetime.date(2025, 5, 2)
+
     PRICE_MAP = {
         "price": ("MPC", False),
         "unit_price": ("CIJENA_PO_JM", False),

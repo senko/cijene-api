@@ -25,12 +25,20 @@ class RotoCrawler(BaseCrawler):
     INDEX_URL = f"{BASE_URL}/cjenici/"
 
     ANCHOR_PRICE_COLUMN = "sidrena cijena na 2.5.2025."
+    ANCHOR_PRICE_DATE = datetime.date(2025, 5, 2)
+
+    # Roto also publishes the price on 10.9.2026. It is used only for products
+    # without a 2.5.2025 price, i.e. those listed after that date.
+    NEW_ANCHOR_PRICE_COLUMN = "sidrena cijena na 10.9.2026."
+    NEW_ANCHOR_PRICE_DATE = datetime.date(2026, 9, 10)
+
     PRICE_MAP = {
         "price": ("MPC", True),
         "unit_price": ("Cijena za jedinicu mjere", True),
         "special_price": ("MPC za vrijeme posebnog oblika prodaje", False),
         "best_price_30": ("Najniža cijena u posljednjih 30 dana", False),
         "anchor_price": (ANCHOR_PRICE_COLUMN, False),
+        "new_anchor_price": (NEW_ANCHOR_PRICE_COLUMN, False),
     }
 
     FIELD_MAP = {
@@ -60,7 +68,19 @@ class RotoCrawler(BaseCrawler):
         "Kategorija proizvoda",
         "MPC za vrijeme posebnog oblika prodaje",
         "Najniža cijena u posljednjih 30 dana",
+        "sidrena cijena na 10.9.2026.",
     ]
+
+    def fix_product_data(self, data: dict) -> dict:
+        """Fall back to the 10.9.2026 anchor price for newer products."""
+        new_anchor_price = data.pop("new_anchor_price", None)
+        data = super().fix_product_data(data)
+
+        if data.get("anchor_price") is None and new_anchor_price is not None:
+            data["anchor_price"] = new_anchor_price
+            data["anchor_price_date"] = self.NEW_ANCHOR_PRICE_DATE.isoformat()
+
+        return data
 
     def get_csv_urls(self, soup: BeautifulSoup, date: datetime.date) -> list[str]:
         anchors = soup.select("a.cjenici-table-row")

@@ -74,6 +74,8 @@ class BrankaCrawler(BaseCrawler):
     # generous; it exists to reject misparses, not to bound the index.
     MAX_FILE_AGE_DAYS = 40
 
+    ANCHOR_PRICE_DATE = datetime.date(2025, 5, 2)
+
     PRICE_MAP = {
         "price": ("MPC", True),
         "unit_price": ("MPC", True),

@@ -265,35 +265,17 @@ class KauflandCrawler(BaseCrawler):
             row["Sidrena cijena"] = price_str
 
             # Try to parse the date (best-effort)
-            anchor_date = self._parse_anchor_date(date_part)
+            anchor_date = self.parse_anchor_date(date_part)
         elif anchor_price and not anchor_price.startswith("MPC"):
             # Garbage value (shifted column data) — discard
             row["Sidrena cijena"] = ""
 
         product = super().parse_csv_row(row)
 
-        if anchor_date:
+        if anchor_date and product.anchor_price is not None:
             product.anchor_price_date = anchor_date
 
         return product
-
-    def _parse_anchor_date(self, date_part: str) -> str:
-        """Try to parse a date from the anchor price date string. Returns ISO date or ''."""
-        # Clean up common noise: trailing dots, double dots
-        date_part = date_part.rstrip(".")
-        date_part = date_part.replace("..", ".")
-
-        for fmt in ("%d.%m.%Y", "%d.%m.%y", "%d%m%Y"):
-            try:
-                return (
-                    datetime.datetime.strptime(date_part, fmt)
-                    .date()
-                    .strftime("%Y-%m-%d")
-                )
-            except ValueError:
-                continue
-
-        return ""
 
     def get_all_products(self, date: datetime.date) -> list[Store]:
         """

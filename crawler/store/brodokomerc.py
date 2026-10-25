@@ -42,6 +42,8 @@ class BrodokomercCrawler(BaseCrawler):
         "F.+BELULOVICA+5.": "Ulica Franje Belulovića 5",
     }
 
+    ANCHOR_PRICE_DATE = datetime.date(2025, 5, 2)
+
     # Mapping for price fields
     PRICE_MAP = {
         "price": ("Maloprodajna cijena", True),
