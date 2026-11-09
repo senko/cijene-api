@@ -3,8 +3,11 @@
 Servis za preuzimanje javnih podataka o cijenama proizvoda u trgovačkim lancima u Republici Hrvatskoj.
 
 Preuzimanje podataka o cijenama proizvoda u trgovačkim lancima u Republici Hrvatskoj
-temeljeno je na Odluci o objavi cjenika i isticanju dodatne cijene kao mjeri izravne
-kontrole cijena u trgovini na malo, NN 75/2025 od 2.5.2025.
+temeljeno je na Odluci o objavi cjenika proizvoda i usluga kao mjera izravne kontrole
+cijena i Odluci o isticanju dodatne cijene kao mjera izravne kontrole cijena
+(NN 101/2026, 110/2026), koje se primjenjuju od 17.11.2026. Do tada se primjenjivala
+Odluka o objavi cjenika i isticanju dodatne cijene kao mjeri izravne kontrole cijena
+u trgovini na malo, NN 75/2025 od 2.5.2025.
 
 Trenutno podržani trgovački lanci:
 
@@ -284,8 +287,11 @@ upotrebu.
 Ovaj projekt je licenciran pod [AGPL-3 licencom](LICENSE).
 
 Podaci prikupljeni putem ovog projekta su javni i dostupni svima, temeljem
-Odluke o objavi cjenika i isticanju dodatne cijene kao mjeri izravne
-kontrole cijena u trgovini na malo, NN 75/2025 od 2.5.2025.
+Odluke o objavi cjenika proizvoda i usluga kao mjera izravne kontrole cijena
+i Odluke o isticanju dodatne cijene kao mjera izravne kontrole cijena
+(NN 101/2026, 110/2026), odnosno za podatke do 16.11.2026. temeljem Odluke o
+objavi cjenika i isticanju dodatne cijene kao mjeri izravne kontrole cijena u
+trgovini na malo, NN 75/2025 od 2.5.2025.
 
 Pročišćeni CSV podaci o proizvodima
 ([`enrichment/products.csv`](enrichment/products.csv))

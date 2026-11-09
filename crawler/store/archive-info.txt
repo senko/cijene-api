@@ -18,7 +18,9 @@ Objašnjenje:
 * `prices.csv` - popis cijena proizvoda po poslovnici (referencira ID proizvoda i poslovnice)
 
 Arhiva sadrži podatke za sljedeće trgovačke lance: Konzum, Spar, Studenac, Plodine, Lidl, Tommy,
-Kaufland, Eurospin, dm, KTC, Metro, Trgocentar, Žabac, Vrutak, Ribola, NTL, Roto.
+Kaufland, Eurospin, dm, KTC, Metro, Trgocentar, Žabac, Vrutak, Ribola, NTL, Roto, Boso,
+Brodokomerc, Lorenco, Trgovina Krk, Jadranka Trgovina, Gavranović, Branka, Djelo Vodice, Bure,
+Dukat, Diskont Stanić, Stridon.
 
 ## Formati CSV datoteka
 
@@ -82,7 +84,8 @@ naknadno, pa ih starije arhive nemaju.
 ## Izvor i obrada podataka
 
 Podaci su prikupljeni putem web scrapinga s web stranica trgovačkih lanaca,
-temeljem Odluke o objavi cjenika i isticanju dodatne cijene kao mjeri izravne
-kontrole cijena u trgovini na malo, NN 75/2025 od 2.5.2025.
+temeljem Odluke o objavi cjenika proizvoda i usluga kao mjera izravne kontrole
+cijena i Odluke o isticanju dodatne cijene kao mjera izravne kontrole cijena
+(NN 101/2026, 110/2026).
 
 Obrada podataka: https://cijene.dev
