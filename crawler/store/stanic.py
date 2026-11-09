@@ -77,6 +77,7 @@ STORES: dict[str, dict[str, str]] = {
     "8301": {"name": "Diskont Stari Grad", "city": "Stari Grad"},
     "8303": {"name": "Diskont Trogir", "city": "Trogir"},
     "8307": {"name": "Diskont Kaštel Gomilica", "city": "Kaštel Gomilica"},
+    "8631": {"name": "Diskont Dubrovnik 4", "city": "Dubrovnik"},
 }
 
 
