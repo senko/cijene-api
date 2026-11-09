@@ -9,6 +9,13 @@ from crawler.store.models import Store
 
 logger = logging.getLogger(__name__)
 
+# Wrong postcodes in Plodine's file names: (store_id, published) -> correct.
+# Keyed on the published value too, so a fix stops applying once Plodine
+# corrects the file name.
+ZIPCODE_FIXES = {
+    ("010", "51470"): "52470",  # Umag; wrong since early 2026 (#118)
+}
+
 
 class PlodineCrawler(BaseCrawler):
     """
@@ -116,6 +123,7 @@ class PlodineCrawler(BaseCrawler):
             store_type, street_address, zipcode, city, store_id = match.groups()
 
             city = city.replace("_", " ").title()
+            zipcode = ZIPCODE_FIXES.get((store_id, zipcode), zipcode)
 
             store = Store(
                 chain="plodine",
