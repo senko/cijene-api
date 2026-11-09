@@ -218,6 +218,10 @@ async def process_prices(
             return None
         return dval
 
+    def clean_date(value: str | None) -> date | None:
+        value = (value or "").strip()
+        return date.fromisoformat(value) if value else None
+
     for price_row in prices_data:
         store_id = store_map[price_row["store_id"]]
         product_id = chain_product_map.get(price_row["product_id"])
@@ -239,6 +243,13 @@ async def process_prices(
                 unit_price=clean_price(price_row["unit_price"]),
                 best_price_30=clean_price(price_row["best_price_30"]),
                 anchor_price=clean_price(price_row["anchor_price"]),
+                # Added to the archive later, so older archives don't have them
+                available={"1": True, "0": False}.get(
+                    (price_row.get("available") or "").strip()
+                ),
+                special_sale_type=(price_row.get("special_sale_type") or "").strip()
+                or None,
+                anchor_price_date=clean_date(price_row.get("anchor_price_date")),
             )
         )
 

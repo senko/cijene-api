@@ -115,11 +115,21 @@ CREATE TABLE IF NOT EXISTS prices (
     -- current_price DECIMAL(10, 2) NOT NULL,
     best_price_30 DECIMAL(10, 2),
     anchor_price DECIMAL(10, 2),
+    available BOOLEAN,
+    special_sale_type VARCHAR(255),
+    anchor_price_date DATE,
     UNIQUE (chain_product_id, store_id, price_date)
 );
 
 -- Mark regular_price as required if the table already exists
 ALTER TABLE prices ALTER COLUMN regular_price SET NOT NULL;
+
+-- Add new columns to existing prices table if they don't exist. NULL when
+-- the chain doesn't publish the value, and for prices imported before.
+ALTER TABLE prices
+ADD COLUMN IF NOT EXISTS available BOOLEAN,
+ADD COLUMN IF NOT EXISTS special_sale_type VARCHAR(255),
+ADD COLUMN IF NOT EXISTS anchor_price_date DATE;
 
 -- To speed up compute_chain_prices() and compute_chain_stats()
 CREATE INDEX IF NOT EXISTS idx_prices_price_date_chain_product

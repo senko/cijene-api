@@ -333,6 +333,7 @@ class Database(ABC):
 
         This method computes min/avg/max prices for all products in all stores
         for a given chain and date, and stores them in a separate table.
+        Prices of items marked as unavailable are left out.
 
         Args:
             date: The date for which to compute prices.
@@ -420,6 +421,7 @@ class Database(ABC):
         self,
         product_ids: list[int],
         store_ids: list[int] | None = None,
+        include_unavailable: bool = False,
     ) -> list[StorePrice]:
         """
         For given products return latest available prices per store.
@@ -427,6 +429,9 @@ class Database(ABC):
         Args:
             product_ids: The IDs of the products to fetch
             store_ids: Optional list of store IDs to filter by.
+            include_unavailable: Also return prices of items marked as
+                unavailable. Items without availability info are always
+                returned.
 
         Returns:
             A list of StorePrice objects

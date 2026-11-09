@@ -360,6 +360,11 @@ async def get_prices(
         10.0,
         description="Distance in kilometers for geolocation search (default: 10.0)",
     ),
+    include_unavailable: bool = Query(
+        False,
+        description="Also return prices of items the store marks as unavailable "
+        "(default: false)",
+    ),
 ) -> StorePricesResponse:
     """
     Get product prices by store with store filtering capabilities.
@@ -367,6 +372,9 @@ async def get_prices(
     Returns prices for products in stores matching the filter criteria.
     For geolocation search, both lat and lon must be provided together.
     The EANs parameter is required and must contain at least one EAN code.
+    Prices of items marked as unavailable are left out unless
+    include_unavailable is set. Prices from chains that don't publish
+    availability are always returned.
     """
     # Validate EANs parameter
     if not eans or not eans.strip():
@@ -428,6 +436,7 @@ async def get_prices(
     store_prices = await db.get_product_store_prices(
         product_ids=[product.id for product in products],
         store_ids=store_ids,
+        include_unavailable=include_unavailable,
     )
     return StorePricesResponse(store_prices=store_prices)
 

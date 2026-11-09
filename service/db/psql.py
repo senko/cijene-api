@@ -320,6 +320,7 @@ class PostgresDatabase(Database):
         self,
         product_ids: list[int],
         store_ids: list[int] | None = None,
+        include_unavailable: bool = False,
     ) -> list[StorePrice]:
         async with self._get_conn() as conn:
             query = """
@@ -339,6 +340,9 @@ class PostgresDatabase(Database):
                     prices.best_price_30,
                     prices.unit_price,
                     prices.anchor_price,
+                    prices.available,
+                    prices.special_sale_type,
+                    prices.anchor_price_date,
                     stores.code AS store_code,
                     stores.type,
                     stores.address,
@@ -365,6 +369,10 @@ class PostgresDatabase(Database):
                 params.append(store_ids)
                 param_idx += 1
 
+            if not include_unavailable:
+                # NULL means the chain doesn't publish availability
+                query += " AND prices.available IS DISTINCT FROM FALSE"
+
             rows = await conn.fetch(query, *params)
 
             return [
@@ -377,6 +385,9 @@ class PostgresDatabase(Database):
                     unit_price=row["unit_price"],
                     best_price_30=row["best_price_30"],
                     anchor_price=row["anchor_price"],
+                    available=row["available"],
+                    special_sale_type=row["special_sale_type"],
+                    anchor_price_date=row["anchor_price_date"],
                     store=Store(
                         chain_id=row["chain_id"],
                         code=row["store_code"],
@@ -634,7 +645,10 @@ class PostgresDatabase(Database):
                     special_price DECIMAL(10, 2),
                     unit_price DECIMAL(10, 2),
                     best_price_30 DECIMAL(10, 2),
-                    anchor_price DECIMAL(10, 2)
+                    anchor_price DECIMAL(10, 2),
+                    available BOOLEAN,
+                    special_sale_type VARCHAR(255),
+                    anchor_price_date DATE
                 )
                 """
             )
@@ -650,6 +664,9 @@ class PostgresDatabase(Database):
                         p.unit_price,
                         p.best_price_30,
                         p.anchor_price,
+                        p.available,
+                        p.special_sale_type,
+                        p.anchor_price_date,
                     )
                     for p in prices
                 ),
@@ -664,7 +681,10 @@ class PostgresDatabase(Database):
                     special_price,
                     unit_price,
                     best_price_30,
-                    anchor_price
+                    anchor_price,
+                    available,
+                    special_sale_type,
+                    anchor_price_date
                 )
                 SELECT * from temp_prices
                 ON CONFLICT DO NOTHING
@@ -769,7 +789,9 @@ class PostgresDatabase(Database):
                         2
                     ) AS avg_price
                 FROM prices
-                WHERE price_date = $1
+                -- An unavailable item's price can't be paid, so it isn't
+                -- counted. NULL means the chain doesn't publish availability.
+                WHERE price_date = $1 AND available IS DISTINCT FROM FALSE
                 GROUP BY chain_product_id, price_date
                 ON CONFLICT (chain_product_id, price_date)
                 DO UPDATE SET

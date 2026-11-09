@@ -97,6 +97,9 @@ class Price:
     unit_price: Optional[Decimal] = None
     best_price_30: Optional[Decimal] = None
     anchor_price: Optional[Decimal] = None
+    available: Optional[bool] = None
+    special_sale_type: Optional[str] = None
+    anchor_price_date: Optional[date] = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -109,4 +112,7 @@ class StorePrice:
     unit_price: Optional[Decimal]
     best_price_30: Optional[Decimal]
     anchor_price: Optional[Decimal]
+    available: Optional[bool]
+    special_sale_type: Optional[str]
+    anchor_price_date: Optional[date]
     store: Store
