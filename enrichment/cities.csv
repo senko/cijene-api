@@ -1,5 +1,6 @@
 key,canonical
 a gornja stubica,Gornja Stubica
+aljmas,Aljmaš
 banjole,Banjole
 baska,Baška
 baska krk,Baška
@@ -15,39 +16,57 @@ bjelovar,Bjelovar
 borovo,Borovo
 brckovljani,Brckovljani
 brela,Brela
+breznica nasicka,Breznica Našička
+brodanci,Brođanci
+budinscina,Budinščina
 buje,Buje
 buzet,Buzet
+cacinci,Čačinci
+cadavica,Čađavica
+caglin,Čaglin
 cakovec,Čakovec
 catrnja rakovica,Rakovica
 cavle,Čavle
 cazma,Čazma
+ceminac,Čeminac
 cepin,Čepin
 cestica,Cestica
 cibaca,Čibača
 cista provo,Cista Provo
 cres,Cres
 crikvenica,Crikvenica
+crnkovci,Črnkovci
 dakovo,Đakovo
 daruvar,Daruvar
+delekovec,Đelekovec
 delnice,Delnice
 djakovo,Đakovo
+donja moticina,Donja Motičina
+donja pusca,Donja Pušća
 donja stubica,Donja Stubica
 donji kneginec,Donji Kneginec
 donji miholjac,Donji Miholjac
 donji stupnik,Donji Stupnik
+draganici,Draganić
 drazice,Dražice
 drenovci,Drenovci
+dreznica,Drežnica
 drnis,Drniš
+dubosevica,Duboševica
 dubrovnik,Dubrovnik
 duga resa,Duga Resa
 dugi rat,Dugi Rat
 dugo selo,Dugo Selo
 dugopolje,Dugopolje
+dulovac,Đulovac
+durdenovac,Đurđenovac
 durdevac,Đurđevac
 fazana,Fažana
 funtana,Funtana
+garcin,Garčin
 garesnica,Garešnica
 glina,Glina
+gorican,Goričan
 gospic,Gospić
 grabovac,Grabovac
 gracac,Gračac
@@ -55,6 +74,7 @@ gradiste,Gradište
 grohote,Grohote
 grubisno,Grubišno Polje
 grubisno polje,Grubišno Polje
+hrv kostajnica,Hrvatska Kostajnica
 hum na sutli,Hum na Sutli
 hvar,Hvar
 ilok,Ilok
@@ -71,6 +91,7 @@ jelsa,Jelsa
 jezera,Jezera
 kali,Kali
 karlovac,Karlovac
+kasina,Kašina
 kastav,Kastav
 kastel gomilica,Kaštel Gomilica
 kastel kambelovac,Kaštel Kambelovac
@@ -80,36 +101,46 @@ kastel stafilic,Kaštel Štafilić
 kastel stari,Kaštel Stari
 kastel sucurac,Kaštel Sućurac
 kastela,Kaštela
+knezevi vinogradi,Kneževi Vinogradi
 knin,Knin
 komiza,Komiža
 komolac,Komolac
+koncanica,Končanica
 koprivnica,Koprivnica
+koprivnicki ivanec,Koprivnički Ivanec
 korcula,Korčula
 korenica,Korenica
+koska,Koška
 kostajnica,Hrvatska Kostajnica
 kostrena,Kostrena
 kotoriba,Kotoriba
 krapina,Krapina
 krapinske toplice,Krapinske Toplice
 krizevci,Križevci
+krizpolje,Križpolje
 krk,Krk
 kukuljanovo,Kukuljanovo
 kupari,Kupari
 kutina,Kutina
 labin,Labin
+laslovo szentlaszlo,Laslovo
 lepoglava,Lepoglava
 lopar,Lopar
 lovran,Lovran
 ludberg,Ludbreg
 ludbreg,Ludbreg
+mahicno,Mahićno
 makarska,Makarska
 mali losinj,Mali Lošinj
 malinska,Malinska
 malinska krk,Malinska
 marija bistrica,Marija Bistrica
+marusevec,Maruševec
 matulji,Matulji
 medulin,Medulin
 metkovic,Metković
+miholjacki porec,Miholjački Poreč
+mikleus,Mikleuš
 mlini,Mlini
 mocici,Močići
 mursko sredisce,Mursko Središće
@@ -117,7 +148,9 @@ murter,Murter
 murter betina,Betina
 nasice,Našice
 necujam,Nečujam
+nedelisce,Nedelišće
 nedescina,Nedešćina
+netretic,Netretić
 nin,Nin
 nova gradiska,Nova Gradiška
 novalja,Novalja
@@ -138,6 +171,7 @@ orebic,Orebić
 oriovac,Oriovac
 oroslavje,Oroslavje
 osijek,Osijek
+ostarije,Oštarije
 otocac,Otočac
 otok,Otok
 ozalj,Ozalj
@@ -148,10 +182,14 @@ pasman,Pašman
 pazin,Pazin
 petrinja,Petrinja
 pirovac,Pirovac
+piskorevci,Piškorevci
 pitomaca,Pitomača
 plano,Plano
+plaski,Plaški
 pleternica,Pleternica
+plitvicka jezera,Plitvička Jezera
 ploce,Ploče
+podgorac,Podgorač
 podstrana,Podstrana
 pomer,Pomer
 popovaca,Popovača
@@ -171,6 +209,7 @@ ravna gora,Ravna Gora
 razanac,Ražanac
 razanj,Ražanj
 razine,Šibenik
+recica,Rečica
 rijeka,Rijeka
 rijeka skurinje,Rijeka
 rijeka zamet,Rijeka
@@ -178,21 +217,26 @@ rogoznica,Rogoznica
 rovinj,Rovinj
 rovinj rovigno,Rovinj
 rubesi,Rubeši
+ruscica,Ruščica
 s kraljevec,Sesvetski Kraljevec
 sali,Sali
 samobor,Samobor
+satnica dakovacka,Satnica Đakovačka
 seget donji,Seget Donji
 sela,Sela
 selca,Selca
 selce,Selce
 senj,Senj
+senkovec,Šenkovec
 sestanovac,Šestanovac
 sestenovac,Šestanovac
 sesvete,Sesvete
+sesvete kraljevec,Sesvetski Kraljevec
 sesvetski kraljevec,Sesvetski Kraljevec
 sibenik,Šibenik
 sibenik razine,Šibenik
 sinj,Sinj
+sirac,Sirač
 sisak,Sisak
 slatina,Slatina
 slavonski brod,Slavonski Brod
@@ -207,6 +251,7 @@ starigrad,Starigrad
 starigrad paklenica,Starigrad
 stobrec,Stobreč
 ston,Ston
+strigova,Štrigova
 strmec,Strmec
 strozanac,Strožanac
 suhopolje,Suhopolje
@@ -218,6 +263,7 @@ sv ivan zelina,Sveti Ivan Zelina
 sv kriz zacretje,Sveti Križ Začretje
 sveta nedelja,Sveta Nedelja
 sveta nedjelja,Sveta Nedelja
+sveti durd,Sveti Đurđ
 sveti filip i jakov,Sveti Filip i Jakov
 sveti ivan zelina,Sveti Ivan Zelina
 sveti kriz zacretje,Sveti Križ Začretje
@@ -228,9 +274,12 @@ tribunj,Tribunj
 trilj,Trilj
 trnovec bartolovecki,Trnovec Bartolovečki
 trogir,Trogir
+turcin,Turčin
+tusilovic,Tušilović
 ugljan,Ugljan
 umag,Umag
 umag umago,Umag-Umago
+v gorica,Velika Gorica
 valpovo,Valpovo
 varazdin,Varaždin
 varazdin biskupec,Varaždin
@@ -244,10 +293,13 @@ vir,Vir
 virovitica,Virovitica
 vis,Vis
 viskovo,Viškovo
+visnjevac,Višnjevac
+vocin,Voćin
 vodice,Vodice
 vodnjan,Vodnjan
 vojnic,Vojnić
 volosko,Volosko
+vratisinec,Vratišinec
 vrbovec,Vrbovec
 vrpolje,Vrpolje
 vrsar,Vrsar
@@ -261,6 +313,7 @@ zagreb,Zagreb
 zagreb barutanski jarak,Zagreb
 zagreb blato,Zagreb
 zagreb dubec,Zagreb
+zagreb dubrava,Zagreb
 zagreb jablanska,Zagreb
 zagreb jankomir,Zagreb
 zagreb kvatric,Zagreb
@@ -272,11 +325,15 @@ zagreb sesvete,Sesvete
 zagreb slobostina,Zagreb
 zagreb sredisce,Zagreb
 zagreb st grad,Zagreb
+zagreb susedgrad,Zagreb
+zakanje,Žakanje
 zaostrog,Zaostrog
 zapresic,Zaprešić
 zaton,Zaton
 zaton nin,Zaton
+zelcin,Zelčin
 zlatar,Zlatar
 zlatar bistrica,Zlatar Bistrica
 zminj,Žminj
 zupanja,Županja
+zvecaj,Zvečaj

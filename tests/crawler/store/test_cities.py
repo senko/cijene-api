@@ -27,6 +27,11 @@ CASES = [
     ("Sv.Kriz Zacretje", "Sveti Križ Začretje"),
     ("Grubisno", "Grubišno Polje"),
     ("Kostajnica", "Hrvatska Kostajnica"),
+    ("Hrv.kostajnica", "Hrvatska Kostajnica"),
+    ("V.gorica", "Velika Gorica"),
+    ("Sesvete - Kraljevec", "Sesvetski Kraljevec"),  # post office name
+    ("Draganici", "Draganić"),
+    ("Laslovo (szentlaszlo)", "Laslovo"),
     # Istrian towns: Croatian-only short form (official register is bilingual)
     ("Pula", "Pula"),
     ("Vodnjan", "Vodnjan"),
@@ -34,6 +39,7 @@ CASES = [
     ("Novigrad(Cittanova)", "Novigrad"),
     # Zagreb districts collapse to Zagreb, except Sesvete kept separate
     ("Zagreb Prečko", "Zagreb"),
+    ("Zagreb-Dubrava", "Zagreb"),
     ("Zagreb - Sesvete", "Sesvete"),
 ]
 
