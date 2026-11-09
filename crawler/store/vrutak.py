@@ -34,7 +34,7 @@ class VrutakCrawler(BaseCrawler):
         "unit_price": ("mpcijenamjera", False),
         "special_price": ("", False),  # No equivalent in Vrutak XML
         "best_price_30": ("", False),  # No equivalent in Vrutak XML
-        "anchor_price": ("", False),  # No equivalent in Vrutak XML
+        "anchor_price": ("mpcijenasidrena", False),
     }
 
     FIELD_MAP = {
@@ -45,6 +45,8 @@ class VrutakCrawler(BaseCrawler):
         "unit": ("mjera", False),
         "barcode": ("barkod", False),
         "category": ("kategorija", False),
+        # Published per product: 02.05.2025, or the date it was listed
+        "anchor_price_date": ("mpcijenasidrenadatum", False),
     }
 
     REQUIRED_COLUMNS = [
@@ -58,9 +60,12 @@ class VrutakCrawler(BaseCrawler):
     ]
 
     # Not required by NN 101/2026, so the chain may drop them when it switches.
+    # The anchor price tags are only in the hipermarket's file (2026-10-23).
     OPTIONAL_COLUMNS = [
         "nettokolicina",
         "kategorija",
+        "mpcijenasidrena",
+        "mpcijenasidrenadatum",
     ]
 
     def parse_index(self, content: str) -> dict[datetime.date, list[str]]:

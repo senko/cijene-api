@@ -49,6 +49,8 @@ class TrgocentarCrawler(BaseCrawler):
         "ZAPRESIC",
     ]
 
+    ANCHOR_PRICE_DATE = datetime.date(2025, 5, 2)
+
     PRICE_MAP = {
         "price": ("mpc", False),
         "unit_price": ("c_jmj", False),

@@ -71,6 +71,13 @@ class BureCrawler(BaseCrawler):
         "unit": ("JedinicaMjere", False),
         "barcode": ("Barkod", False),
         "category": ("KategorijeProizvoda", False),
+        "special_sale_type": ("NazivPosebnogOblikaProdaje", False),
+    }
+
+    # <PosebniOblikProdaje> is a DA/NE flag and isn't mapped: rows on sale
+    # also fill <MaloprodajnaCijenaAkcija>.
+    BOOL_MAP = {
+        "available": ("Dostupnost", False),
     }
 
     REQUIRED_COLUMNS = [
@@ -84,12 +91,15 @@ class BureCrawler(BaseCrawler):
         "Barkod",
     ]
 
-    # Not required by NN 101/2026, so the chain may drop them when it switches.
+    # The first four aren't required by NN 101/2026, so the chain may drop
+    # them. The last two were added on 2026-10-27; older files don't have them.
     OPTIONAL_COLUMNS = [
         "NetoKolicina",
         "KategorijeProizvoda",
         "MaloprodajnaCijenaAkcija",
         "NajnizaCijena",
+        "NazivPosebnogOblikaProdaje",
+        "Dostupnost",
     ]
 
     def get_zip_url(self, date: datetime.date) -> str:

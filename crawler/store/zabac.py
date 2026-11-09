@@ -21,6 +21,8 @@ class ZabacCrawler(BaseCrawler):
     CHAIN = "zabac"
     BASE_URL = "https://zabacfoodoutlet.hr/cjenik/"
 
+    ANCHOR_PRICE_DATE = datetime.date(2025, 5, 2)
+
     # Mapping for price fields from CSV columns
     PRICE_MAP = {
         # field: (column_name, is_required)

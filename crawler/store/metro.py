@@ -29,6 +29,8 @@ class MetroCrawler(BaseCrawler):
         r"(?P<city>[^.]+)\.csv$"
     )
 
+    ANCHOR_PRICE_DATE = datetime.date(2025, 5, 2)
+
     # Mapping for price fields from CSV columns
     PRICE_MAP = {
         # field: (column_name, is_required)

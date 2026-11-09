@@ -18,6 +18,8 @@ class StridonCrawler(BaseCrawler):
     CHAIN = "stridon"
     BASE_URL = "https://stridon.hr/hr/supermarketi"
 
+    ANCHOR_PRICE_DATE = datetime.date(2025, 5, 2)
+
     PRICE_MAP = {
         "price": ("MALOPRODAJNA_CIJENA", False),
         "unit_price": ("CIJENA_ZA_JEDINICU_MJERE", False),

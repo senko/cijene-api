@@ -27,6 +27,8 @@ class GavranovicCrawler(BaseCrawler):
     BASE_URL = "https://gavranovic.hr"
     INDEX_URL = "https://gavranoviccjenik.com.hr/"
 
+    ANCHOR_PRICE_DATE = datetime.date(2026, 9, 10)
+
     PRICE_MAP = {
         "price": ("Maloprodajna cijena", True),
         "unit_price": ("Cijena za jedinicu mjere", True),

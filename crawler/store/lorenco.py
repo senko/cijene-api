@@ -39,6 +39,8 @@ class LorencoCrawler(BaseCrawler):
         "product": ("Naziv", True),
         "barcode": ("Barkod", True),
         "unit": ("JMjere", False),
+        # Published per product: the date of the anchor price
+        "anchor_price_date": ("DatumSid", False),
     }
 
     REQUIRED_COLUMNS = [
@@ -48,6 +50,10 @@ class LorencoCrawler(BaseCrawler):
         "Naziv",
         "Barkod",
         "JMjere",
+    ]
+
+    OPTIONAL_COLUMNS = [
+        "DatumSid",
     ]
 
     def get_csv_url(self, soup: BeautifulSoup, date: datetime.date) -> str | None:

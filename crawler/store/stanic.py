@@ -230,6 +230,12 @@ STORES: dict[str, dict[str, str]] = {
         "street_address": "Cesta dr. Franje Tuđmana 285A",
         "zipcode": "21213",
     },
+    "8631": {
+        "name": "Diskont Dubrovnik 4",
+        "city": "Dubrovnik",
+        "street_address": "Tomislava Macana 8",
+        "zipcode": "20207",
+    },
 }
 
 

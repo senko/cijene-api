@@ -35,6 +35,8 @@ class BosoCrawler(BaseCrawler):
     at 2s apart.
     """
 
+    ANCHOR_PRICE_DATE = datetime.date(2025, 5, 2)
+
     PRICE_MAP = {
         "price": ("MPC", False),
         "unit_price": ("cijena za jedinicu mjere", False),

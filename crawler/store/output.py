@@ -40,6 +40,8 @@ PRICE_COLUMNS = [
     "anchor_price",
     "special_price",
     "available",
+    "special_sale_type",
+    "anchor_price_date",
 ]
 
 
@@ -99,6 +101,8 @@ def transform_products(
                     "available": ""
                     if product.available is None
                     else int(product.available),
+                    "special_sale_type": product.special_sale_type or "",
+                    "anchor_price_date": product.anchor_price_date or "",
                 }
             )
 
