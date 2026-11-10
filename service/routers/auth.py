@@ -1,12 +1,28 @@
+import os
 import time
 import logging
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from service.config import settings
 from service.db.models import User
 
 logger = logging.getLogger(__name__)
+
+# Record which user makes each request.
+# Off unless API_KEY_LOG is set to a file path.
+# Line format (space-separated):
+#   <timestamp> <user id> <method> <path> <client host> <user agent...>
+_key_log: logging.Logger | None = None
+if _key_log_path := os.getenv("API_KEY_LOG"):
+    _key_log = logging.getLogger("api_key_log")
+    _key_log.propagate = False
+    _key_log.setLevel(logging.INFO)
+    _key_log_handler = logging.FileHandler(_key_log_path)
+    _key_log_handler.setFormatter(
+        logging.Formatter("%(asctime)s %(message)s", datefmt="%Y-%m-%dT%H:%M:%S%z")
+    )
+    _key_log.addHandler(_key_log_handler)
 
 # Security scheme for OpenAPI documentation
 security_scheme = HTTPBearer(scheme_name="HTTPBearer")
@@ -62,12 +78,14 @@ async def _lookup_user_by_token(api_key: str) -> User | None:
 
 
 async def verify_authentication(
+    request: Request,
     credentials: HTTPAuthorizationCredentials = Depends(security_scheme),
 ) -> User:
     """
     Verify bearer token authentication.
 
     Args:
+        request: The incoming request (used for the optional key log).
         credentials: The HTTP authorization credentials containing the bearer token.
 
     Returns:
@@ -83,6 +101,15 @@ async def verify_authentication(
         )
 
     logger.debug(f"Authenticated access for user: {user.name} (id={user.id})")
+    if _key_log:
+        _key_log.info(
+            "%s %s %s %s %s",
+            user.id,
+            request.method,
+            request.url.path,
+            request.client.host if request.client else "-",
+            request.headers.get("user-agent", "-"),
+        )
     return user
 
 
