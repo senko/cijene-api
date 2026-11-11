@@ -350,6 +350,43 @@ class Database(ABC):
         pass
 
     @abstractmethod
+    async def count_prices_before(self, before: date) -> dict[date, int]:
+        """
+        Count the price rows that delete_prices_before() would delete.
+
+        Args:
+            before: Count rows with a price date before this date.
+
+        Returns:
+            Number of rows per price date, oldest first. Dates with no rows
+            to delete are not included.
+        """
+        pass
+
+    @abstractmethod
+    async def delete_prices_before(self, before: date) -> dict[date, int]:
+        """
+        Delete the price rows with a price date before the given date.
+
+        The rows of each chain's latest data date stay, also when that date
+        is before the given date, so the API still shows chains that stopped
+        publishing data. Computed chain prices and chain stats stay.
+
+        Each date is deleted in a separate transaction. An interrupted run
+        keeps the dates it finished, and the next run continues from there.
+        After the delete, storage maintenance runs so that the database can
+        use the space again. This can take several minutes.
+
+        Args:
+            before: Delete rows with a price date before this date.
+
+        Returns:
+            Number of deleted rows per price date, oldest first. Dates with
+            no deleted rows are not included.
+        """
+        pass
+
+    @abstractmethod
     async def get_product_prices(
         self,
         product_ids: list[int],
