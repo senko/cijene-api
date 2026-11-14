@@ -27,12 +27,16 @@ class BosoCrawler(BaseCrawler):
     BASE_URL = "https://www.boso.hr"
     PRICE_LIST_URL = "https://www.boso.hr/cjenik/"
 
-    REQUEST_DELAY = 2.0
+    REQUEST_DELAY = 7.0
     """
-    The wp-admin AJAX endpoint answers 429 at ~6 req/s, costing 11 of 14 stores.
+    www.boso.hr answers 429 after about 10 requests in a row. The first two
+    429s ask for 60s, the third for 3600s, which ends the crawl (CrawlerBlocked).
 
-    Conservative on purpose: at 14 stores a full pass stays under a minute even
-    at 2s apart.
+    At 2s apart, a full pass hit the third 429 once the dropdown grew from 14
+    to 15 entries (2026-11-11). Each run lost its last store, and a run that
+    started within the next hour got nothing. The window length is not known;
+    7s stays under 10 requests per minute. On 2026-11-14 a pass made 30
+    requests in 203s with no 429.
     """
 
     ANCHOR_PRICE_DATE = datetime.date(2025, 5, 2)
