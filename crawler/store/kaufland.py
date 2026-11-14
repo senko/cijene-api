@@ -55,15 +55,19 @@ class KauflandCrawler(BaseCrawler):
         "barkod",
     ]
 
-    # Availability was added on 2026-09-24 for NN 101/2026. The chain's promo
-    # marker stays the pre-existing "akc.cijena, A=akcija" flag, which carries
-    # no name for the form of sale, so special_sale_type is left unmapped.
+    # The chain's promo marker stays the pre-existing "akc.cijena, A=akcija"
+    # flag, which carries no name for the form of sale, so special_sale_type is
+    # left unmapped.
+    #
+    # "Dostupan/Nedostupan" (availability, added 2026-09-24 for NN 101/2026) is
+    # not listed: it is absent from every store file since at least 2026-11-09,
+    # and one warning per file (53 per run) hides real format changes. BOOL_MAP
+    # still reads it if it comes back.
     OPTIONAL_COLUMNS = [
         "neto količina(KG)",
         "kategorija proizvoda",
         "MPC poseb.oblik prod",
         "Najniža MPC u 30dana",
-        "Dostupan/Nedostupan",
     ]
 
     CITIES = [
