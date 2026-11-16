@@ -80,14 +80,18 @@ class SparCrawler(BaseCrawler):
         "kastel_sucurac",
     ]
 
-    ANCHOR_PRICE_DATE = datetime.date(2025, 5, 2)
+    # Renamed on 2026-11-16, when the chain moved to the NN 101/2026 format and
+    # added ~13k non-food products. Values for the products already listed did
+    # not change with the header, so neither spelling tells us which reference
+    # date (2.5.2025 or 10.9.2026) a given row refers to. No ANCHOR_PRICE_DATE.
+    ANCHOR_PRICE_COLUMN = ["sidrena cijena na 2.5.2025. (EUR)", "sidrena cijena (EUR)"]
 
     PRICE_MAP = {
         "price": ("MPC (EUR)", False),
         "unit_price": ("cijena za jedinicu mjere (EUR)", False),
         "special_price": ("MPC za vrijeme posebnog oblika prodaje (EUR)", False),
         "best_price_30": ("Najniža cijena u posljednjih 30 dana (EUR)", False),
-        "anchor_price": ("sidrena cijena na 2.5.2025. (EUR)", False),
+        "anchor_price": (ANCHOR_PRICE_COLUMN, False),
     }
 
     FIELD_MAP = {
@@ -98,12 +102,13 @@ class SparCrawler(BaseCrawler):
         "quantity": ("neto količina", False),
         "unit": ("jedinica mjere", False),
         "category": ("kategorija proizvoda", False),
+        "special_sale_type": ("Naziv posebnog oblika prodaje", False),
     }
 
     REQUIRED_COLUMNS = [
         "MPC (EUR)",
         "cijena za jedinicu mjere (EUR)",
-        "sidrena cijena na 2.5.2025. (EUR)",
+        ANCHOR_PRICE_COLUMN,
         "barkod",
         "naziv",
         "šifra",
@@ -117,6 +122,7 @@ class SparCrawler(BaseCrawler):
         "kategorija proizvoda",
         "MPC za vrijeme posebnog oblika prodaje (EUR)",
         "Najniža cijena u posljednjih 30 dana (EUR)",
+        "Naziv posebnog oblika prodaje",
     ]
 
     # Required to detect text encoding
