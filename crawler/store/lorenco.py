@@ -13,7 +13,11 @@ from .base import BaseCrawler
 
 logger = logging.getLogger(__name__)
 
-CSV_DATE_PATTERN = re.compile(r"Cijen[a-z]+-(\d{2}\.\d{2}\.\d{4})\.csv$")
+# Seen: "Cijenik-DD.MM.YYYY.csv", "Cijene-...", "Cjenik-...", "Cijenik12.11.2026.csv"
+CSV_DATE_PATTERN = re.compile(r"Ci?jen[a-z]+-?(\d{2}\.\d{2}\.\d{4})\.csv$")
+
+# The newer variant spells the anchor date out: "Cijena na datum 02.05.2025: 1,87 EUR"
+ANCHOR_DATE_PATTERN = re.compile(r"\d{1,2}\.\d{1,2}\.\d{4}")
 
 
 class LorencoCrawler(BaseCrawler):
@@ -56,6 +60,11 @@ class LorencoCrawler(BaseCrawler):
         "DatumSid",
     ]
 
+    # A full price list has ~20k products. Now and then the chain publishes
+    # only a few changed prices for the day instead. The API serves only the
+    # chain's latest load, so importing such a file would hide the full list.
+    MIN_PRODUCTS = 1000
+
     def get_csv_url(self, soup: BeautifulSoup, date: datetime.date) -> str | None:
         """Find the CSV URL for the given date from the index page."""
         hr_date = date.strftime("%d.%m.%Y")
@@ -94,6 +103,9 @@ class LorencoCrawler(BaseCrawler):
             whole = (row.get("Cijena") or "").strip()
             dec = (row.get("CijenaDec") or "").strip()
             row["MPC"] = f"{whole},{dec.zfill(2)}" if whole else ""
+
+        m = ANCHOR_DATE_PATTERN.search(row.get("DatumSid") or "")
+        row["DatumSid"] = m.group(0) if m else ""
         return super().parse_csv_row(row)
 
     def fix_product_data(self, data: dict[str, Any]) -> dict[str, Any]:
@@ -136,8 +148,11 @@ class LorencoCrawler(BaseCrawler):
 
         products = self.parse_csv(csv_content, delimiter=";")
 
-        if not products:
-            logger.warning(f"No products found for date {date}")
+        if len(products) < self.MIN_PRODUCTS:
+            logger.warning(
+                f"Skipping {csv_url}: {len(products)} products, "
+                f"expected at least {self.MIN_PRODUCTS} for a full price list"
+            )
             return []
 
         store = Store(
