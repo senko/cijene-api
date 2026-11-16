@@ -1,7 +1,8 @@
 import datetime
 import logging
 import os
-from urllib.parse import urljoin
+from csv import DictReader
+from urllib.parse import unquote, urljoin
 
 from bs4 import BeautifulSoup
 from lxml import etree  # type: ignore
@@ -17,23 +18,39 @@ class VrutakCrawler(BaseCrawler):
     """
     Crawler for Vrutak store prices.
 
-    This class handles downloading and parsing price data from Vrutak's website.
-    It fetches the HTML index page to find XML files for each store, downloads them,
-    and parses the XML data to create a structured representation of stores and their products.
+    The index page lists per-store price files by date. Since 2026-11-16 the
+    chain publishes a CSV per location, in a separate table above the original
+    XML one. The CSVs cover more locations and carry availability and anchor
+    prices for every store, so they are used whenever the date has them. The
+    XMLs, published only for the four original stores, are the fallback.
     """
 
     CHAIN = "vrutak"
     BASE_URL = "https://www.vrutak.hr"
     INDEX_URL = "https://www.vrutak.hr/cjenik-svih-artikala"
 
-    # Known store types
-    STORE_TYPES = ["hipermarket", "supermarket"]
+    # Store type and address by store ID. The file names spell the address
+    # without spaces or diacritics, and the CSV ones call the hipermarket a
+    # supermarket, so they are not usable as-is.
+    STORES = {
+        "001": ("hipermarket", "Vodovodna 20A"),
+        "200": ("supermarket", "Ivana Rabara 1A"),
+        "600": ("supermarket", "Slavoljuba Bulvana 20"),
+        "900": ("supermarket", "Samoborska cesta 161A"),
+        "008": ("minimarket", "Krapinska 16"),
+        "400": ("minimarket", "Hrvoja Macanovića 10"),
+        "500": ("minimarket", "Kaptol 1"),
+        "700": ("minimarket", "Lanište 1G"),
+        "007": ("webshop", "Vodovodna 20A"),
+    }
 
+    # The CSV headers are the XML tag names with spaces ("mpcijena mjera" for
+    # <mpcijenamjera>). read_csv removes the spaces, so these maps serve both.
     PRICE_MAP = {
         "price": ("mpcijena", True),
         "unit_price": ("mpcijenamjera", False),
-        "special_price": ("", False),  # No equivalent in Vrutak XML
-        "best_price_30": ("", False),  # No equivalent in Vrutak XML
+        "special_price": ("mpcijenaakcija", False),  # CSV only
+        "best_price_30": ("", False),  # Not published
         "anchor_price": ("mpcijenasidrena", False),
     }
 
@@ -44,9 +61,13 @@ class VrutakCrawler(BaseCrawler):
         "quantity": ("nettokolicina", False),
         "unit": ("mjera", False),
         "barcode": ("barkod", False),
-        "category": ("kategorija", False),
+        "category": ("kategorija", False),  # XML only
         # Published per product: 02.05.2025, or the date it was listed
         "anchor_price_date": ("mpcijenasidrenadatum", False),
+    }
+
+    BOOL_MAP = {
+        "available": ("raspolozivost", False),  # CSV only, DA/NE
     }
 
     REQUIRED_COLUMNS = [
@@ -59,82 +80,86 @@ class VrutakCrawler(BaseCrawler):
         "barkod",
     ]
 
-    # Not required by NN 101/2026, so the chain may drop them when it switches.
-    # The anchor price tags are only in the hipermarket's file (2026-10-23).
+    # Not required by NN 101/2026, so the chain may drop them. The XMLs have no
+    # special price or availability, and their anchor price tags are only in
+    # the hipermarket's file (2026-10-23).
     OPTIONAL_COLUMNS = [
         "nettokolicina",
-        "kategorija",
+        "mpcijenaakcija",
         "mpcijenasidrena",
         "mpcijenasidrenadatum",
+        "raspolozivost",
     ]
 
     def parse_index(self, content: str) -> dict[datetime.date, list[str]]:
         """
-        Parse the Vrutak index page to extract XML file URLs grouped by date.
+        Parse the Vrutak index page to extract price file URLs grouped by date.
+
+        Both tables on the page (CSV and XML) share the row layout: index, date,
+        then one cell per store with a download link.
 
         Args:
             content: HTML content of the index page
 
         Returns:
-            Dictionary mapping dates to lists of XML file URLs
+            Dictionary mapping dates to lists of CSV and XML file URLs
         """
         soup = BeautifulSoup(content, "html.parser")
-        urls_by_date = {}
+        urls_by_date: dict[datetime.date, list[str]] = {}
 
-        # Find all rows in tbody
         for row in soup.select("tbody tr"):
             cells = row.select("td")
             if len(cells) < 3:
                 continue
 
-            # Second cell contains the date
-            date_cell = cells[1]
-            date_text = date_cell.get_text(strip=True)
-
+            date_text = cells[1].get_text(strip=True)
             try:
-                # Parse date in DD.MM.YYYY format
                 date_obj = datetime.datetime.strptime(date_text, "%d.%m.%Y.").date()
             except ValueError:
                 # Non-data row
                 continue
 
-            # Extract XML URLs from remaining cells
-            xml_urls = []
+            urls = []
             for cell in cells[2:]:  # Skip index and date cells
-                link = cell.select_one('a[href$=".xml"]')
+                link = cell.select_one('a[href$=".csv"], a[href$=".xml"]')
                 if link:
-                    href = str(link.get("href"))
-                    full_url = urljoin(self.BASE_URL, href)
-                    xml_urls.append(full_url)
+                    urls.append(urljoin(self.BASE_URL, str(link.get("href"))))
 
-            if xml_urls:
-                urls_by_date[date_obj] = xml_urls
+            if urls:
+                urls_by_date.setdefault(date_obj, []).extend(urls)
 
         return urls_by_date
 
-    def parse_store_info(self, xml_url: str) -> Store:
+    def parse_store_info(self, url: str) -> Store:
         """
-        Parse store information from an XML file URL.
+        Parse store information from a price file URL.
+
+        Supported file names:
+            `supermarket-vodovodna20a-001-20261116_073500.csv`
+            `vrutak-hipermarket-vodovodna20a-001-270-20261116-072800.xml`
 
         Args:
-            xml_url: URL to the XML file containing store/product data
+            url: URL of the CSV or XML price file
 
         Returns:
             Store object with parsed store information
         """
-        logger.debug(f"Parsing store information from Vrutak URL: {xml_url}")
+        logger.debug(f"Parsing store information from Vrutak URL: {url}")
 
-        filename = os.path.basename(xml_url)
-        # Remove .xml extension and split by dashes
-        parts = filename[:-4].split("-")
+        filename = unquote(os.path.basename(url))
+        stem = os.path.splitext(filename)[0].removeprefix("vrutak-")
+        parts = stem.split("-")
 
         if len(parts) < 4:
-            raise ValueError(f"Invalid XML filename format for Vrutak: {filename}")
+            raise ValueError(f"Invalid file name format for Vrutak: {filename}")
 
-        # Expected format: vrutak-type-address-store_id-serial-datetime
-        store_type = parts[1]  # hipermarket or supermarket
-        street_address = parts[2].title()
-        store_id = parts[3]
+        # type-address-store_id-...
+        store_id = parts[2]
+        if store_id in self.STORES:
+            store_type, street_address = self.STORES[store_id]
+        else:
+            logger.warning(f"Unknown Vrutak store {store_id} in {filename}")
+            store_type, street_address = parts[0], parts[1].title()
 
         store = Store(
             chain=self.CHAIN,
@@ -152,6 +177,12 @@ class VrutakCrawler(BaseCrawler):
             f"Address: {store.street_address}, City: {store.city}"
         )
         return store
+
+    def read_csv(self, text: str, delimiter: str = ",") -> DictReader:
+        reader = super().read_csv(text, delimiter=delimiter)
+        if reader.fieldnames:
+            reader.fieldnames = [name.replace(" ", "") for name in reader.fieldnames]
+        return reader
 
     def parse_xml(self, xml_content: bytes) -> list[Product]:
         """
@@ -188,39 +219,31 @@ class VrutakCrawler(BaseCrawler):
             logger.error(f"Failed to parse XML: {e}", exc_info=True)
             return []
 
-    def get_store_data(self, xml_url: str) -> Store:
+    def get_products(self, url: str) -> list[Product]:
         """
-        Fetch and parse both store info and products from a Vrutak XML URL.
+        Fetch and parse the products from a CSV or XML price file.
 
         Args:
-            xml_url: URL to the XML file
+            url: URL of the price file
 
         Returns:
-            Store populated with Products
+            List of Product objects
         """
-        try:
-            store = self.parse_store_info(xml_url)
+        if url.endswith(".csv"):
+            content = self.fetch_text(url, ["windows-1250"])
+            return self.parse_csv(content, delimiter=";")
 
-            xml_content = self.fetch_text(xml_url).encode("utf-8")
-            products = self.parse_xml(xml_content)
-            store.items = products
-            return store
-        except Exception as e:
-            logger.error(
-                f"Failed to get Vrutak store data from {xml_url}: {e}",
-                exc_info=True,
-            )
-            raise
+        return self.parse_xml(self.fetch_text(url).encode("utf-8"))
 
     def get_index_urls_for_date(self, date: datetime.date) -> list[str]:
         """
-        Fetch and parse the Vrutak index page to get XML URLs for the specified date.
+        Fetch and parse the Vrutak index page to get price file URLs for a date.
 
         Args:
-            date: The date to search for in the XML filenames.
+            date: The date to search for in the index.
 
         Returns:
-            List of XML URLs containing data for the specified date.
+            CSV URLs for the date if there are any, XML URLs otherwise.
         """
         content = self.fetch_text(self.INDEX_URL)
 
@@ -228,13 +251,12 @@ class VrutakCrawler(BaseCrawler):
             logger.warning(f"No content found at Vrutak index URL: {self.INDEX_URL}")
             return []
 
-        urls_by_date = self.parse_index(content)
-        matching_urls = urls_by_date.get(date, [])
-
-        if not matching_urls:
+        urls = self.parse_index(content).get(date, [])
+        if not urls:
             logger.warning(f"No Vrutak URLs found matching date {date:%Y-%m-%d}")
 
-        return matching_urls
+        csv_urls = [url for url in urls if url.endswith(".csv")]
+        return csv_urls or urls
 
     def get_all_products(self, date: datetime.date) -> list[Store]:
         """
@@ -246,16 +268,17 @@ class VrutakCrawler(BaseCrawler):
         Returns:
             List of Store objects with their products.
         """
-        xml_urls = self.get_index_urls_for_date(date)
+        urls = self.get_index_urls_for_date(date)
 
-        if not xml_urls:
-            logger.warning(f"No Vrutak XML URLs found for date {date.isoformat()}")
+        if not urls:
+            logger.warning(f"No Vrutak price files found for date {date.isoformat()}")
             return []
 
         stores = []
-        for url in xml_urls:
+        for url in urls:
             try:
-                store = self.get_store_data(url)
+                store = self.parse_store_info(url)
+                store.items = self.get_products(url)
             except Exception as e:
                 logger.error(
                     f"Error processing Vrutak store from {url}: {e}", exc_info=True
