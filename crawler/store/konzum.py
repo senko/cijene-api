@@ -187,8 +187,11 @@ class KonzumCrawler(BaseCrawler):
         if len(parts) < 6:  # Ensure we have the expected number of parts
             raise ValueError(f"Invalid CSV title format: {title}")
 
-        # Extract store type
+        # Extract store type. "INTERNET" is the web shop's regional price list
+        # (5 regions since 2026-11-17); other chains call it "webshop".
         store_type = (parts[0]).lower()
+        if store_type == "internet":
+            store_type = "webshop"
         store_id = parts[2] if len(parts) == 6 else parts[3]
 
         # Format:

@@ -31,6 +31,7 @@ STORES = {
     "554": ("Market Bijar", "Osor bb", "Osor"),
     "513": ("Market Belej", "Belej 50", "Belej"),
     "508": ("Prodavaonica Ćunski", "Ćunski 42", "Ćunski"),
+    "WEB": ("Webshop", "Dražica 5", "Mali Lošinj"),
 }
 
 # City as spelled in the file name, for stores not in STORES.
@@ -46,19 +47,19 @@ CITIES = {
     "CUNSKI": "Ćunski",
 }
 
-# File name prefix (type of point of sale) -> store type. Only markets and
-# prodavaonice are crawled.
+# File name prefix (type of point of sale) -> store type. Only markets,
+# prodavaonice and the web shop are crawled.
 STORE_TYPES = {
     "MARKET": "market",
     "PRODAVAONA": "prodavaonica",
+    "WEBSHOP": "webshop",
 }
 
-# Other points of sale that publish price lists: cafés, pastry shops, the web
-# shop, a kiosk, a bakery, a gourmet shop and a home and garden shop.
+# Other points of sale that publish price lists: cafés, pastry shops, a kiosk,
+# a bakery, a gourmet shop and a home and garden shop.
 SKIPPED_TYPES = (
     "KAFIC",
     "DULCINEA",
-    "WEBSHOP",
     "KIOSK",
     "PEKARA",
     "GOURMET_BOUTIQUE",
@@ -83,6 +84,9 @@ class JadrankaTrgovinaCrawler(BaseCrawler):
     INDEX_URL = "https://jadranka-trgovina.com/cjenici/"
 
     FILENAME_DATE_PATTERN = re.compile(r"_(\d{2})(\d{2})(\d{4})_\d{4}\.csv$")
+
+    # First day whose file names have a file ID after the store ID.
+    FILE_ID_SINCE = datetime.date(2026, 11, 17)
 
     # Applies only to the old anchor column, whose header states the date.
     ANCHOR_PRICE_DATE = datetime.date(2025, 5, 2)
@@ -223,9 +227,11 @@ class JadrankaTrgovinaCrawler(BaseCrawler):
 
         # ..._ADDRESS_CITY_STOREID_FILEID_DATE_TIME.csv; until 2026-11-16 the
         # file ID was missing, so the token before the date was the store ID
-        # and the one before that the city.
+        # and the one before that the city. Store IDs are numbers, except the
+        # web shop's "WEB", so the file date tells the two formats apart.
         tokens = filename.removesuffix(".csv").split("_")
-        idx = len(tokens) - (4 if tokens[-4].isdigit() else 3)
+        file_date = datetime.datetime.strptime(tokens[-2], "%d%m%Y").date()
+        idx = len(tokens) - (4 if file_date >= self.FILE_ID_SINCE else 3)
         store_id = tokens[idx]
 
         if store_id in STORES:
