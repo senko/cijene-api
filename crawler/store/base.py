@@ -734,6 +734,14 @@ class BaseCrawler:
             else:
                 data["price"] = data["special_price"]
 
+        # A price of 0 means the chain publishes none for the row. KTC and
+        # Eurospin fill empty special prices and 30-day lows with 0.00, and
+        # several chains do the same for the anchor price. The importer already
+        # reads 0 as no price; doing it here makes the archive agree.
+        for field in ("special_price", "best_price_30", "anchor_price"):
+            if data.get(field) == 0:
+                data[field] = None
+
         # A date published per product wins over the one stated in the header
         source_date = self.parse_anchor_date(data.get("anchor_price_date") or "")
         if data.get("anchor_price") is None:
