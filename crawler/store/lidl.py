@@ -36,19 +36,38 @@ class LidlCrawler(BaseCrawler):
     ANCHOR_PRICE_COLUMN = "Sidrena_cijena_na_02.05.2025"
     ANCHOR_PRICE_DATE = datetime.date(2025, 5, 2)
 
+    # Since 2026-11-17 the anchor column has no date in its name, and each
+    # value carries its own date: "MPC na 10.9.2026: 5,99€". The spelling
+    # varies from row to row ("MPC na 2.5.2025.:1,99€", "MPC na 4.11.2026..
+    # 1,89€", "MPC na 10.9.2026: 3,€", "MPC 2.5. 2,29€"), so the date and the
+    # price are matched separately.
+    NEW_ANCHOR_PRICE_COLUMN = "SIDRENA_CIJENA"
+    ANCHOR_DATE_PATTERN = re.compile(r"(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4}|\d{2})(?!\d)")
+    ANCHOR_VALUE_PATTERN = re.compile(
+        r"(\d{1,3}(?:\.\d{3})+|\d+)\s*([.,]\s*\d{0,2})?\s*(?:€|EUR)?\s*$"
+    )
+
+    # The 2026-11-17 file renamed several columns, one with a typo
+    # ("JEDINICIN"). Both spellings are accepted.
     PRICE_MAP = {
         "price": ("MALOPRODAJNA_CIJENA", False),
-        "unit_price": ("CIJENA_ZA_JEDINICU_MJERE", False),
+        "unit_price": (
+            ("CIJENA_ZA_JEDINICU_MJERE", "CIJENA_ZA_JEDINICIN_MJERE"),
+            False,
+        ),
         "special_price": ("MPC_ZA_VRIJEME_POSEBNOG_OBLIKA_PRODAJE", False),
-        "anchor_price": (ANCHOR_PRICE_COLUMN, False),
-        "best_price_30": ("NAJNIZA_CIJENA_U_POSLJ._30_DANA", False),
+        "anchor_price": ((ANCHOR_PRICE_COLUMN, NEW_ANCHOR_PRICE_COLUMN), False),
+        "best_price_30": (
+            ("NAJNIZA_CIJENA_U_POSLJ._30_DANA", "NAJNIZA_CIJENA_U_POSLJ_30_DANA"),
+            False,
+        ),
     }
 
     FIELD_MAP = {
         "product": ("NAZIV", False),
         "product_id": ("ŠIFRA", True),
         "brand": ("MARKA", False),
-        "quantity": ("NETO_KOLIČINA", False),
+        "quantity": (("NETO_KOLIČINA", "NETO_KOLICINA"), False),
         "unit": ("JEDINICA_MJERE", False),
         "barcode": ("BARKOD", False),
         "category": ("KATEGORIJA_PROIZVODA", False),
@@ -56,8 +75,8 @@ class LidlCrawler(BaseCrawler):
 
     REQUIRED_COLUMNS = [
         "MALOPRODAJNA_CIJENA",
-        "CIJENA_ZA_JEDINICU_MJERE",
-        "Sidrena_cijena_na_02.05.2025",
+        ("CIJENA_ZA_JEDINICU_MJERE", "CIJENA_ZA_JEDINICIN_MJERE"),
+        (ANCHOR_PRICE_COLUMN, NEW_ANCHOR_PRICE_COLUMN),
         "NAZIV",
         "ŠIFRA",
         "MARKA",
@@ -67,10 +86,10 @@ class LidlCrawler(BaseCrawler):
 
     # Not required by NN 101/2026, so the chain may drop them when it switches.
     OPTIONAL_COLUMNS = [
-        "NETO_KOLIČINA",
+        ("NETO_KOLIČINA", "NETO_KOLICINA"),
         "KATEGORIJA_PROIZVODA",
         "MPC_ZA_VRIJEME_POSEBNOG_OBLIKA_PRODAJE",
-        "NAJNIZA_CIJENA_U_POSLJ._30_DANA",
+        ("NAJNIZA_CIJENA_U_POSLJ._30_DANA", "NAJNIZA_CIJENA_U_POSLJ_30_DANA"),
     ]
 
     ADDRESS_PATTERN = re.compile(
@@ -127,11 +146,52 @@ class LidlCrawler(BaseCrawler):
             return None
 
     def parse_csv_row(self, row: dict) -> Product:
-        anchor_price = row.get(self.ANCHOR_PRICE_COLUMN, "").strip()
+        anchor_price = (row.get(self.ANCHOR_PRICE_COLUMN) or "").strip()
         if "Nije_bilo_u_prodaji" in anchor_price:
             row[self.ANCHOR_PRICE_COLUMN] = None
 
-        return super().parse_csv_row(row)
+        if self.NEW_ANCHOR_PRICE_COLUMN not in row:
+            return super().parse_csv_row(row)
+
+        price, anchor_date = self.parse_anchor_value(
+            row[self.NEW_ANCHOR_PRICE_COLUMN] or ""
+        )
+        row[self.NEW_ANCHOR_PRICE_COLUMN] = price
+        product = super().parse_csv_row(row)
+
+        # The new header states no date, so ANCHOR_PRICE_DATE doesn't apply:
+        # use the date from the value, or none.
+        product.anchor_price_date = (
+            anchor_date if product.anchor_price is not None else None
+        )
+        return product
+
+    def parse_anchor_value(self, value: str) -> tuple[str, str | None]:
+        """
+        Split an anchor value such as "MPC na 10.9.2026: 5,99€".
+
+        Args:
+            value: Value of the SIDRENA_CIJENA column
+
+        Returns:
+            Tuple of (price string for parse_price, or "" if none; ISO date,
+            or None if the value has no recognizable date)
+        """
+        # A few values repeat: "MPC na 2.5.2025: 1,05€ | MPC na 2.5.2025: 1,05€"
+        value = value.split("|")[0].strip()
+
+        anchor_date = None
+        date_match = self.ANCHOR_DATE_PATTERN.search(value)
+        if date_match:
+            anchor_date = self.parse_anchor_date(".".join(date_match.groups())) or None
+            value = value[date_match.end() :]
+
+        price_match = self.ANCHOR_VALUE_PATTERN.search(value)
+        if not price_match:
+            return "", None
+
+        whole, fraction = price_match.groups()
+        return whole.replace(".", "") + (fraction or "").replace(" ", ""), anchor_date
 
     def date_from_csv_filename(self, filename: str) -> Optional[datetime.date]:
         """Extract the date embedded in a CSV filename, if present."""
