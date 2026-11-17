@@ -68,7 +68,13 @@ class KtcCrawler(BaseCrawler):
     # Since 2026-11-17 KTC also publishes price lists for points of sale that
     # are not grocery shops. The source writes "č" as "^", so the beauty salon
     # is "kozmeti^ki salon"; matched by prefix in case that gets fixed.
-    SKIPPED_STORE_TYPES = ("poljoljekarna", "benzinska", "autopraona", "kozmeti")
+    SKIPPED_STORE_TYPES = (
+        "poljoljekarna",
+        "benzinska",
+        "autopraona",
+        "kozmeti",
+        "frizerski salon",
+    )
 
     CITIES = [
         "KRIZEVCI",
