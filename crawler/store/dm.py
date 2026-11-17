@@ -3,6 +3,7 @@ import json
 import logging
 import re
 import warnings
+from collections.abc import Iterable
 from io import BytesIO
 from tempfile import TemporaryFile
 from typing import Any, List
@@ -17,7 +18,14 @@ logger = logging.getLogger(__name__)
 
 
 class DmCrawler(BaseCrawler):
-    """Crawler for DM (DrogerieMarkt) store prices."""
+    """
+    Crawler for DM (DrogerieMarkt) store prices.
+
+    Until 2026-11-16 dm published one Excel file per day. Since 2026-11-17 it
+    publishes a semicolon-separated CSV instead, with a single price column,
+    the name of the special form of sale, and the anchor price as
+    "bazna cijena". Both formats are read into the same normalized row.
+    """
 
     CHAIN = "dm"
     BASE_URL = "https://www.dm.hr"
@@ -28,20 +36,25 @@ class DmCrawler(BaseCrawler):
     STORE_ID = "all"
     STORE_NAME = "DM"
 
-    # Not used — parse_excel detects the header row and reads columns by its
-    # own normalized names, so the shared map-driven parser never runs here.
+    # Not used — parse_rows reads columns by their normalized names, so the
+    # shared map-driven parser never runs here.
     PRICE_MAP = {}
     FIELD_MAP = {}
 
+    # Column names as normalized by normalize_column. Where a tuple is given,
+    # the first name is the Excel one and the second the CSV one.
+    PRICE_COLUMN = ("mpc", "maloprodajna cijena")
     SPECIAL_PRICE_COLUMN = "mpc za vrijeme posebnog oblika prodaje (rasprodaja proizvoda koji izlaze iz asortimana)"
     BEST_PRICE_30_COLUMN = "najniza cijena u posljednjih 30 dana prije rasprodaje"
     ANCHOR_PRICE_COLUMN = "sidrena cijena na 2.5.2025. ili na datum ulistanja"
+    NEW_ANCHOR_PRICE_COLUMN = "bazna cijena"
+    SALE_TYPE_COLUMN = "poseban oblik prodaje"
 
-    # The header says "on 2.5.2025 or on the listing date", but the file doesn't
-    # give listing dates, so 2.5.2025 is used for all products.
+    # The Excel header says "on 2.5.2025 or on the listing date", but the file
+    # doesn't give listing dates, so 2.5.2025 is used for all products. The
+    # CSV header gives no date, so CSV rows get none.
     ANCHOR_PRICE_DATE = datetime.date(2025, 5, 2)
 
-    # Column names as normalized by detect_columns, checked by parse_excel
     REQUIRED_COLUMNS = [
         "naziv",
         "sifra",
@@ -49,21 +62,28 @@ class DmCrawler(BaseCrawler):
         "barkod",
         "jedinica mjere",
         "cijena za jedinicu mjere",
-        "mpc",
-        ANCHOR_PRICE_COLUMN,
+        PRICE_COLUMN,
+        (ANCHOR_PRICE_COLUMN, NEW_ANCHOR_PRICE_COLUMN),
     ]
 
-    # Not required by NN 101/2026, so the chain may drop them when it switches.
+    # The first four aren't required by NN 101/2026, and the CSV doesn't have
+    # them. The sale name was added with the CSV; the Excel files don't have it.
     OPTIONAL_COLUMNS = [
         "kategorija proizvoda",
         "neto kolicina",
         SPECIAL_PRICE_COLUMN,
         BEST_PRICE_30_COLUMN,
+        SALE_TYPE_COLUMN,
     ]
 
     def parse_date_from_title(self, title: str) -> datetime.date:
         """
-        Extract date from the title the Excel link.
+        Extract the date from the title of a price list link.
+
+        Titles seen:
+            "Važeći cjenik dm_trgovine_dm_online_shop_551_16.11.2026_05.04.45"
+            "94124811986_ZA_SVA_PRODAJNA_MJESTA_ROBA_1_20261117_1034" (since
+            2026-11-17: OIB, ..., date as YYYYMMDD, time as HHMM)
 
         Args:
             title: Title attribute of the link
@@ -73,25 +93,31 @@ class DmCrawler(BaseCrawler):
         """
         # Match date in format DD.MM.YYYY where D or M can be single-digit
         date_match = re.search(r"(\d{1,2})\.(\d{1,2})\.(\d{4})", title)
-        if not date_match:
-            raise ValueError(f"Could not extract date from title: {title}")
+        if date_match:
+            day, month, year = map(int, date_match.groups())
+            return datetime.date(year, month, day)
 
-        day, month, year = map(int, date_match.groups())
-        return datetime.date(year, month, day)
+        # YYYYMMDD followed by _HHMM; the lookbehind keeps it out of the OIB
+        date_match = re.search(r"(?<!\d)(\d{4})(\d{2})(\d{2})_\d{4}(?!\d)", title)
+        if date_match:
+            year, month, day = map(int, date_match.groups())
+            return datetime.date(year, month, day)
 
-    def find_excel_url(self, json_content: str, target_date: datetime.date) -> str:
+        raise ValueError(f"Could not extract date from title: {title}")
+
+    def find_price_list_url(self, json_content: str, target_date: datetime.date) -> str:
         """
-        Parse the JSON data to find the Excel file URL for the target date.
+        Parse the JSON data to find the price list URL for the target date.
 
         Args:
             json_content: JSON content from the index page
             target_date: The date to search for
 
         Returns:
-            URL of the Excel file
+            URL of the price list (Excel until 2026-11-16, CSV since)
 
         Raises:
-            ValueError: If no Excel file is found for the target date
+            ValueError: If no price list is found for the target date
         """
         try:
             # Parse JSON data
@@ -111,7 +137,7 @@ class DmCrawler(BaseCrawler):
             raise ValueError("No Excel links found in JSON data")
 
         target_date_str = f"{target_date.day}.{target_date.month}.{target_date.year}"
-        logger.info(f"Looking for Excel file with date {target_date_str}")
+        logger.info(f"Looking for price list with date {target_date_str}")
 
         for entry in excel_entries:
             headline = entry.get("headline", "")
@@ -128,13 +154,13 @@ class DmCrawler(BaseCrawler):
                         url = f"{self.CONTENT_BASE_URL}{link_target}"
                     else:
                         url = link_target
-                    logger.info(f"Found Excel file with date {link_date}: {url}")
+                    logger.info(f"Found price list with date {link_date}: {url}")
                     return url
             except Exception as e:
                 logger.warning(f"Error parsing date from headline '{headline}': {e}")
                 continue
 
-        raise ValueError(f"No Excel file found for date {target_date_str}")
+        raise ValueError(f"No price list found for date {target_date_str}")
 
     def detect_columns(self, worksheet: Any) -> list[str]:
         """
@@ -150,19 +176,8 @@ class DmCrawler(BaseCrawler):
         Returns:
             List of column headers
         """
-
-        def fix_col_name(name: str | None) -> str:
-            """
-            Normalize column names.
-            """
-            name = str(name or "")
-            name = self.strip_diacritics(name.lower())
-            words = name.split()
-            return " ".join(w for w in words if w)
-            return self.strip_diacritics(name.lower().replace("\n", " "))
-
         for row in worksheet.iter_rows():
-            row_str = [fix_col_name(cell.value) for cell in row]
+            row_str = [self.normalize_column(cell.value) for cell in row]
             if "naziv + sifra" in row_str:
                 idx = row_str.index("naziv + sifra")
                 if row_str[idx + 1] != "":
@@ -176,6 +191,12 @@ class DmCrawler(BaseCrawler):
         raise ValueError(
             "Could not detect Excel columns, DM file format may have changed"
         )
+
+    def normalize_column(self, name: Any) -> str:
+        """
+        Normalize a column name: lowercase, no diacritics, single spaces.
+        """
+        return " ".join(self.strip_diacritics(str(name or "").lower()).split())
 
     @staticmethod
     def map_columns(row: Any, columns: list) -> dict[str, Any]:
@@ -217,56 +238,122 @@ class DmCrawler(BaseCrawler):
             logger.debug(f"Detected columns: {columns}")
             self.check_columns(columns)
 
-            for row_idx, row in enumerate(worksheet.iter_rows(), start=1):
-                # Skip header and empty rows
-                if len(row) != len(columns):
-                    continue
-
-                row_map = self.map_columns(row, columns)
-                if not row_map["sifra"]:
-                    continue
-
-                try:
-                    product_data = {
-                        "product": row_map["naziv"],
-                        "product_id": row_map["sifra"],
-                        "brand": row_map["marka"],
-                        "barcode": row_map["barkod"],
-                        "category": row_map.get("kategorija proizvoda", ""),
-                        "quantity": row_map.get("neto kolicina", ""),
-                        "unit": row_map["jedinica mjere"],
-                        "unit_price": self.parse_price(
-                            row_map["cijena za jedinicu mjere"], False
-                        ),
-                        "price": self.parse_price(row_map["mpc"], False),
-                        "special_price": self.parse_price(
-                            row_map.get(self.SPECIAL_PRICE_COLUMN), False
-                        ),
-                        "best_price_30": self.parse_price(
-                            row_map.get(self.BEST_PRICE_30_COLUMN), False
-                        ),
-                        "anchor_price": self.parse_price(
-                            row_map[self.ANCHOR_PRICE_COLUMN],
-                            False,
-                        ),
-                    }
-
-                    # Apply common fixups from base class
-                    product_data = self.fix_product_data(product_data)
-
-                    # Create Product object
-                    product = Product(**product_data)
-                    products.append(product)
-                except Exception as e:
-                    row_txt = "; ".join([str(cell.value or "") for cell in row])
-                    logger.warning(f"Failed to parse row {row_idx}: `{row_txt}`: {e}")
-                    continue
+            # Skip header and empty rows
+            row_maps = (
+                self.map_columns(row, columns)
+                for row in worksheet.iter_rows()
+                if len(row) == len(columns)
+            )
+            products = self.parse_rows(row_maps)
 
         except Exception as e:
             logger.error(f"Error parsing Excel file: {e}", exc_info=True)
             raise
 
         logger.debug(f"Parsed {len(products)} products from Excel file")
+        return products
+
+    def parse_csv_file(self, content: str) -> List[Product]:
+        """
+        Parse the CSV price list published since 2026-11-17.
+
+        Args:
+            content: CSV text, semicolon-separated
+
+        Returns:
+            List of Product objects
+        """
+        reader = self.read_csv(content, delimiter=";")
+        names = list(reader.fieldnames or [])
+        columns = [self.normalize_column(name) for name in names]
+        self.check_columns(columns)
+
+        row_maps = (
+            {
+                column: (row.get(name) or "").strip()
+                for column, name in zip(columns, names)
+            }
+            for row in reader
+        )
+        products = self.parse_rows(row_maps)
+
+        logger.debug(f"Parsed {len(products)} products from CSV file")
+        return products
+
+    def parse_rows(self, row_maps: Iterable[dict[str, str]]) -> List[Product]:
+        """
+        Turn normalized rows from either format into Product objects.
+
+        Args:
+            row_maps: Rows keyed by normalized column name
+
+        Returns:
+            List of Product objects; rows that fail to parse are logged and skipped
+        """
+        products = []
+
+        for row_idx, row_map in enumerate(row_maps, start=1):
+            if not row_map.get("sifra"):
+                continue
+
+            try:
+                price_column = next(c for c in self.PRICE_COLUMN if c in row_map)
+                price = self.parse_price(row_map[price_column], False)
+                special_price = self.parse_price(
+                    row_map.get(self.SPECIAL_PRICE_COLUMN), False
+                )
+
+                # The CSV has one price column, holding the sale price on rows
+                # that name a special form of sale. Checked against the last
+                # Excel file (2026-11-16): on every such row the CSV price
+                # equals the previous special price.
+                sale_type = row_map.get(self.SALE_TYPE_COLUMN) or None
+                if sale_type and special_price is None:
+                    special_price = price
+
+                new_anchor = self.NEW_ANCHOR_PRICE_COLUMN in row_map
+                anchor_column = (
+                    self.NEW_ANCHOR_PRICE_COLUMN
+                    if new_anchor
+                    else self.ANCHOR_PRICE_COLUMN
+                )
+
+                product_data = {
+                    "product": row_map["naziv"],
+                    "product_id": row_map["sifra"],
+                    "brand": row_map["marka"],
+                    "barcode": row_map["barkod"],
+                    "category": row_map.get("kategorija proizvoda", ""),
+                    # The CSV writes "0,2" and "kg" where the Excel file had
+                    # 0.2 and "KG"; keep the Excel form so products don't change.
+                    "quantity": row_map.get("neto kolicina", "").replace(",", "."),
+                    "unit": row_map["jedinica mjere"].upper(),
+                    "unit_price": self.parse_price(
+                        row_map["cijena za jedinicu mjere"], False
+                    ),
+                    "price": price,
+                    "special_price": special_price,
+                    "special_sale_type": sale_type,
+                    "best_price_30": self.parse_price(
+                        row_map.get(self.BEST_PRICE_30_COLUMN), False
+                    ),
+                    "anchor_price": self.parse_price(row_map[anchor_column], False),
+                }
+
+                # Apply common fixups from base class
+                product_data = self.fix_product_data(product_data)
+
+                # The CSV anchor header states no date, so ANCHOR_PRICE_DATE
+                # doesn't apply to it.
+                if new_anchor:
+                    product_data["anchor_price_date"] = None
+
+                products.append(Product(**product_data))
+            except Exception as e:
+                row_txt = "; ".join(str(v) for v in row_map.values())
+                logger.warning(f"Failed to parse row {row_idx}: `{row_txt}`: {e}")
+                continue
+
         return products
 
     def get_all_products(self, date: datetime.date) -> list[Store]:
@@ -287,18 +374,18 @@ class DmCrawler(BaseCrawler):
             logger.warning(f"No content found at {self.INDEX_URL}")
             return []
 
-        # Find Excel file URL for the exact target date from JSON
-        excel_url = self.find_excel_url(content, date)
-        logger.info(f"Found Excel file URL: {excel_url}")
+        # Find the price list URL for the exact target date from JSON
+        url = self.find_price_list_url(content, date)
 
-        # Download Excel file
         with TemporaryFile(mode="w+b") as temp_file:
-            self.fetch_binary(excel_url, temp_file)
+            self.fetch_binary(url, temp_file)
             temp_file.seek(0)
-            excel_data = temp_file.read()
+            data = temp_file.read()
 
-        # Parse Excel file
-        products = self.parse_excel(excel_data)
+        if url.lower().endswith(".csv"):
+            products = self.parse_csv_file(data.decode("utf-8-sig"))
+        else:
+            products = self.parse_excel(data)
 
         if not products:
             logger.warning(f"No products found for date {date}")
