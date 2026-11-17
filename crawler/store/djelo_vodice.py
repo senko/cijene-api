@@ -1,6 +1,8 @@
+import csv
 import datetime
 import logging
 import re
+from collections.abc import Iterable
 from io import BytesIO
 from tempfile import TemporaryFile
 from urllib.parse import unquote
@@ -22,12 +24,15 @@ def cell_str(val):
 
 # Decoded file name: "#"-separated store type, street address, place, store id,
 # file id and timestamp. The place is "ZIP CITY" since 2026-11-14 and only the
-# city before that. Older names lost their diacritics to "?".
+# city before that. Older names lost their diacritics to "?". The files are CSV
+# since 2026-11-16 10:19, XLSX before that.
+#   PRODAVAONICA#ČIKOLE 2#22320 DRNIŠ#02044#26321#2026-11-17T010554.csv
 #   PRODAVAONICA#ČIKOLE 2#22320 DRNIŠ#02044#26318#2026-11-14T010557.xlsx
 #   SUPERMARKET#PUT GA?ELEZA 5A#VODICE#02010#26317#2026-11-13T010506.xlsx
 FILENAME_PATTERN = re.compile(
     r"^(?P<store_type>[^#]*)#(?P<address>[^#]*)#(?P<place>[^#]*)#"
-    r"(?P<store_id>\d+)#\d+#(?P<date>\d{4}-\d{2}-\d{2})T(?P<time>\d{6})\.xlsx$"
+    r"(?P<store_id>\d+)#\d+#(?P<date>\d{4}-\d{2}-\d{2})T(?P<time>\d{6})"
+    r"\.(?:xlsx|csv)$"
 )
 PLACE_PATTERN = re.compile(r"^(?P<zipcode>\d{5})\s+(?P<city>.+)$")
 
@@ -61,11 +66,12 @@ class DjeloVodiceCrawler(BaseCrawler):
     """
     Crawler for Djelo Vodice store prices.
 
-    Djelo Vodice publishes one XLSX pricelist per store per day as a directory
+    Djelo Vodice publishes one pricelist per store per day as a directory
     listing, and the store's address is in the file name. Until 2026-11-13 the
     listing had only the Vodice supermarket (02010). From 2026-11-14 it has
-    about 38 points of sale, mostly shops around Šibenik. Each file is read by
-    the column names in the header row.
+    about 38 points of sale, mostly shops around Šibenik. The files were XLSX
+    until 2026-11-16 and are CSV (";", UTF-8) since, with the same columns.
+    Each file is read by the column names in the header row.
     """
 
     CHAIN = "djelo_vodice"
@@ -88,17 +94,20 @@ class DjeloVodiceCrawler(BaseCrawler):
         "Obr. jedinica mjere",
     ]
 
-    # "Raspoloživo" (availability) appeared on 2026-11-14. "Kategorija" was
-    # dropped the same day; it is still read from older files, but not listed
-    # here, because it would warn on every file. "Akcija" (Da/Ne) is a promo
-    # flag without the name of the form of sale, so it is not read.
+    # "Raspoloživo" (availability) and "Akcija" (Da/Ne promo flag) appeared on
+    # 2026-11-14. "Kategorija" was dropped the same day; it is still read from
+    # older files, but not listed here, because it would warn on every file.
+    # On "Akcija" rows "MP cijena" is the promo price, so it is also the
+    # special price. The flag doesn't name the form of sale, so
+    # special_sale_type stays empty.
     OPTIONAL_COLUMNS = [
         "Raspoloživo",
+        "Akcija",
     ]
 
     def get_index(self, date: datetime.date) -> list[tuple[str, dict[str, str]]]:
         """
-        Find the XLSX file of each store for the given date.
+        Find the price list file of each store for the given date.
 
         If a store has more than one file for the date, the latest one wins.
 
@@ -118,7 +127,7 @@ class DjeloVodiceCrawler(BaseCrawler):
         target = date.isoformat()
         latest: dict[str, tuple[str, str, dict[str, str]]] = {}
 
-        for link in soup.select('a[href$=".xlsx"]'):
+        for link in soup.select('a[href$=".xlsx"], a[href$=".csv"]'):
             href = link.get("href")
             if not href:
                 continue
@@ -145,7 +154,7 @@ class DjeloVodiceCrawler(BaseCrawler):
                 latest[store_id] = (time, f"{self.BASE_URL}/{href}", info)
 
         if not latest:
-            raise ValueError(f"No XLSX file found for date {date}")
+            raise ValueError(f"No price list found for date {date}")
 
         return [(url, info) for _, url, info in latest.values()]
 
@@ -176,7 +185,49 @@ class DjeloVodiceCrawler(BaseCrawler):
         if not worksheet:
             raise ValueError("No active worksheet found in the Excel file")
 
-        rows = worksheet.iter_rows(values_only=True)
+        return self.parse_rows(worksheet.iter_rows(values_only=True), store_info)
+
+    def parse_csv_file(
+        self, text: str, store_info: dict[str, str] | None = None
+    ) -> tuple[Store, list[Product]]:
+        """
+        Parse a CSV price list into a Store object and list of Product objects.
+
+        The CSV has the same columns as the XLSX, separated by ";", with
+        decimal commas.
+
+        Args:
+            text: CSV file content.
+            store_info: Store type, address, city and zip code from the file
+                name. Entries in STORES take precedence.
+
+        Returns:
+            Tuple of (Store, list of Products).
+
+        Raises:
+            ValueError: If a required column is missing.
+        """
+        rows = csv.reader(text.splitlines(), delimiter=";")
+        return self.parse_rows((tuple(row) for row in rows), store_info)
+
+    def parse_rows(
+        self, rows: Iterable[tuple], store_info: dict[str, str] | None = None
+    ) -> tuple[Store, list[Product]]:
+        """
+        Parse the rows of a price list, header first, into a Store and Products.
+
+        Args:
+            rows: Rows of cell values (XLSX) or strings (CSV).
+            store_info: Store type, address, city and zip code from the file
+                name. Entries in STORES take precedence.
+
+        Returns:
+            Tuple of (Store, list of Products).
+
+        Raises:
+            ValueError: If a required column is missing.
+        """
+        rows = iter(rows)
         header = [cell_str(name) for name in next(rows, ())]
         self.check_columns(header)
         index = {name.lower(): i for i, name in enumerate(header) if name}
@@ -231,6 +282,8 @@ class DjeloVodiceCrawler(BaseCrawler):
                     "brand": "",
                     "quantity": "",
                 }
+                if self.parse_bool(cell(row, "Akcija")):
+                    data["special_price"] = data["price"]
                 data = self.fix_product_data(data)
                 products.append(Product(**data))
             except Exception as e:
@@ -255,25 +308,29 @@ class DjeloVodiceCrawler(BaseCrawler):
             List of stores with their products.
         """
         files = self.get_index(date)
-        logger.info(f"Found {len(files)} XLSX files for {date}")
+        logger.info(f"Found {len(files)} price lists for {date}")
         stores = []
 
-        for xlsx_url, store_info in files:
+        for url, store_info in files:
             try:
-                with TemporaryFile(mode="w+b") as temp_file:
-                    self.fetch_binary(xlsx_url, temp_file)
-                    temp_file.seek(0)
-                    excel_data = temp_file.read()
+                if url.endswith(".csv"):
+                    text = self.fetch_text(url, encodings=["utf-8-sig", "windows-1250"])
+                    store, products = self.parse_csv_file(text, store_info)
+                else:
+                    with TemporaryFile(mode="w+b") as temp_file:
+                        self.fetch_binary(url, temp_file)
+                        temp_file.seek(0)
+                        excel_data = temp_file.read()
 
-                store, products = self.parse_excel(excel_data, store_info)
+                    store, products = self.parse_excel(excel_data, store_info)
             except CrawlerBlocked:
                 raise
             except Exception as e:
-                logger.error(f"Error processing {xlsx_url}: {e}", exc_info=True)
+                logger.error(f"Error processing {url}: {e}", exc_info=True)
                 continue
 
             if not products:
-                logger.warning(f"No products found in {xlsx_url}")
+                logger.warning(f"No products found in {url}")
                 continue
 
             store.items = products
