@@ -7,7 +7,8 @@ temeljeno je na Odluci o objavi cjenika proizvoda i usluga kao mjera izravne kon
 cijena i Odluci o isticanju dodatne cijene kao mjera izravne kontrole cijena
 (NN 101/2026, 110/2026), koje se primjenjuju od 17.11.2026. Do tada se primjenjivala
 Odluka o objavi cjenika i isticanju dodatne cijene kao mjeri izravne kontrole cijena
-u trgovini na malo, NN 75/2025 od 2.5.2025.
+u trgovini na malo, NN 75/2025 od 2.5.2025. Baznu (sidrenu) cijenu od 17.11.2026.
+uređuje i Pravilnik o isticanju bazne cijene proizvoda (NN 132/2026).
 
 Trenutno podržani trgovački lanci:
 
