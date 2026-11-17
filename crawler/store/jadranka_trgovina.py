@@ -5,50 +5,111 @@ import re
 from bs4 import BeautifulSoup
 from crawler.store.models import Product, Store
 
-from .base import BaseCrawler
+from .base import BaseCrawler, CrawlerBlocked
 
 logger = logging.getLogger(__name__)
+
+# Store info keyed by the store ID in the file name. The file names spell the
+# address without spaces or diacritics ("BRACEVIDULICA20", "MALILOSINJ").
+STORES = {
+    "607": ("Market Maxi", "Dražica 5", "Mali Lošinj"),
+    "501": ("Market Centar", "Braće Vidulića 20", "Mali Lošinj"),
+    "531": ("Market Zagazine", "Trg Zagazinjine 1", "Mali Lošinj"),
+    "504": ("Market Škverić", "Lošinjskih brodograditelja 14", "Mali Lošinj"),
+    "201": ("Market Čikat", "Čikat 6a", "Mali Lošinj"),
+    "558": ("Market Priko", "Priko 46", "Mali Lošinj"),
+    "503": ("Market Veli Lošinj", "Vladimira Nazora 25", "Veli Lošinj"),
+    "540": ("Market Riva", "Obala maršala Tita 4", "Veli Lošinj"),
+    "507": ("Market Nerezine", "Nerezinskih pomoraca 22a", "Nerezine"),
+    "539": ("Market Bučanje", "Bučanje 115", "Nerezine"),
+    "233": ("Prodavaonica Punta Križa", "Punta Križa 20a", "Punta Križa"),
+    "234": ("Market Baldarin", "Bokinić 75", "Punta Križa"),
+    "213": ("Market Slatina", "Martinšćica 92", "Martinšćica"),
+    "051": ("Market Zaglav", "Zaglav 31", "Martinšćica"),
+    "510": ("Market Susak", "Susak 56", "Susak"),
+    "511": ("Prodavaonica Osor", "Osor 48", "Osor"),
+    "554": ("Market Bijar", "Osor bb", "Osor"),
+    "513": ("Market Belej", "Belej 50", "Belej"),
+    "508": ("Prodavaonica Ćunski", "Ćunski 42", "Ćunski"),
+}
+
+# City as spelled in the file name, for stores not in STORES.
+CITIES = {
+    "MALILOSINJ": "Mali Lošinj",
+    "VELILOSINJ": "Veli Lošinj",
+    "NEREZINE": "Nerezine",
+    "PUNTAKRIZA": "Punta Križa",
+    "MARTINSCICA": "Martinšćica",
+    "SUSAK": "Susak",
+    "OSOR": "Osor",
+    "BELEJ": "Belej",
+    "CUNSKI": "Ćunski",
+}
+
+# File name prefix (type of point of sale) -> store type. Only markets and
+# prodavaonice are crawled.
+STORE_TYPES = {
+    "MARKET": "market",
+    "PRODAVAONA": "prodavaonica",
+}
+
+# Other points of sale that publish price lists: cafés, pastry shops, the web
+# shop, a kiosk, a bakery, a gourmet shop and a home and garden shop.
+SKIPPED_TYPES = (
+    "KAFIC",
+    "DULCINEA",
+    "WEBSHOP",
+    "KIOSK",
+    "PEKARA",
+    "GOURMET_BOUTIQUE",
+    "HOME_GARDEN",
+)
 
 
 class JadrankaTrgovinaCrawler(BaseCrawler):
     """
     Crawler for Jadranka Trgovina store prices.
 
-    Jadranka Trgovina publishes daily CSV price lists for a single store location
-    (Market Maxi Dražica 5, Mali Lošinj). Files follow the pattern:
-    MARKET_MAXI_DRAZICA5_MALILOSINJ_607_DDMMYYYY_0800.csv
+    Jadranka Trgovina publishes one CSV per point of sale per day. File names:
+    TYPE[_NAME]_ADDRESS_CITY_STOREID_FILEID_DDMMYYYY_HHMM.csv, e.g.
+    MARKET_CENTAR_BRACEVIDULICA20_MALILOSINJ_501_132_17112026_0800.csv.
+
+    Until 2026-11-16 only Market Maxi (607) published, without the file ID:
+    MARKET_MAXI_DRAZICA5_MALILOSINJ_607_16112026_0800.csv.
     """
 
     CHAIN = "jadranka_trgovina"
     BASE_URL = "https://jadranka-trgovina.com"
     INDEX_URL = "https://jadranka-trgovina.com/cjenici/"
 
-    # Regex to match CSV filenames and extract date
-    # Format: MARKET_MAXI_DRAZICA5_MALILOSINJ_607_DDMMYYYY_0800.csv
-    CSV_FILENAME_PATTERN = re.compile(
-        r"MARKET_MAXI_DRAZICA5_MALILOSINJ_607_(\d{2})(\d{2})(\d{4})_0800\.csv"
-    )
+    FILENAME_DATE_PATTERN = re.compile(r"_(\d{2})(\d{2})(\d{4})_\d{4}\.csv$")
 
+    # Applies only to the old anchor column, whose header states the date.
     ANCHOR_PRICE_DATE = datetime.date(2025, 5, 2)
 
-    # Mapping for price fields from CSV columns
-    # CSV columns in Croatian:
-    # NAZIV PROIZVODA, ŠIFRA PROIZVODA, MARKA PROIZVODA, NETO KOLIČINA,
-    # JEDINICA MJERE, MALOPRODAJNA CIJENA, CIJENA ZA JEDINICU MJERE,
-    # MPC ZA VRIJEME POSEBNOG OBLIKA PRODAJE, NAJNIŽA CIJENA U POSLJEDNIH 30 DANA,
-    # SIDRENA CIJENA NA 2.5.2025, BARKOD, KATEGORIJA PROIZVODA
+    OLD_ANCHOR_PRICE_COLUMN = "SIDRENA CIJENA NA 2.5.2025"
+    NEW_ANCHOR_PRICE_COLUMN = "SIDRENA CIJENA"
+
+    # Since 2026-11-17 the only price column is "MPC ZA VRIJEME POSEBNOG
+    # OBLIKA PRODAJE". It is filled on every row and holds the shelf price,
+    # so it is read as the price, not as a special price.
+    PRICE_COLUMN = "MALOPRODAJNA CIJENA"
+    SPECIAL_PRICE_COLUMN = "MPC ZA VRIJEME POSEBNOG OBLIKA PRODAJE"
+
     PRICE_MAP = {
         # field: (column_name, is_required)
         # Note: Many products have empty retail price but filled special price
         # Some products also have empty unit_price
-        "price": ("MALOPRODAJNA CIJENA", False),
+        "price": (PRICE_COLUMN, False),
         "unit_price": ("CIJENA ZA JEDINICU MJERE", False),
-        "special_price": ("MPC ZA VRIJEME POSEBNOG OBLIKA PRODAJE", False),
+        "special_price": (SPECIAL_PRICE_COLUMN, False),
         "best_price_30": ("NAJNIŽA CIJENA U POSLJEDNIH 30 DANA", False),
-        "anchor_price": ("SIDRENA CIJENA NA 2.5.2025", False),
+        "anchor_price": (
+            (OLD_ANCHOR_PRICE_COLUMN, NEW_ANCHOR_PRICE_COLUMN),
+            False,
+        ),
     }
 
-    # Mapping for other product fields from CSV columns
     FIELD_MAP = {
         "product_id": ("ŠIFRA PROIZVODA", True),
         "product": ("NAZIV PROIZVODA", True),
@@ -59,10 +120,14 @@ class JadrankaTrgovinaCrawler(BaseCrawler):
         "unit": ("JEDINICA MJERE", False),
     }
 
+    BOOL_MAP = {
+        "available": ("DOSTUPNOST", False),
+    }
+
     REQUIRED_COLUMNS = [
-        "MALOPRODAJNA CIJENA",
+        (PRICE_COLUMN, SPECIAL_PRICE_COLUMN),
         "CIJENA ZA JEDINICU MJERE",
-        "SIDRENA CIJENA NA 2.5.2025",
+        (OLD_ANCHOR_PRICE_COLUMN, NEW_ANCHOR_PRICE_COLUMN),
         "ŠIFRA PROIZVODA",
         "NAZIV PROIZVODA",
         "MARKA PROIZVODA",
@@ -70,12 +135,14 @@ class JadrankaTrgovinaCrawler(BaseCrawler):
         "JEDINICA MJERE",
     ]
 
-    # Not required by NN 101/2026, so the chain may drop them when it switches.
+    # The first four aren't required by NN 101/2026, so the chain may drop
+    # them. DOSTUPNOST was added on 2026-11-17; older files don't have it.
     OPTIONAL_COLUMNS = [
         "NETO KOLIČINA",
         "KATEGORIJA PROIZVODA",
-        "MPC ZA VRIJEME POSEBNOG OBLIKA PRODAJE",
+        SPECIAL_PRICE_COLUMN,
         "NAJNIŽA CIJENA U POSLJEDNIH 30 DANA",
+        "DOSTUPNOST",
     ]
 
     def parse_index(self, content: str) -> list[str]:
@@ -105,57 +172,113 @@ class JadrankaTrgovinaCrawler(BaseCrawler):
 
         return urls
 
-    def get_index(self, date: datetime.date) -> str | None:
+    def get_index(self, date: datetime.date) -> list[str]:
         """
-        Fetch the index page and find the CSV URL for the specified date.
+        Fetch the index page and find the CSV URLs for the specified date.
 
         Args:
-            date: The date for which to fetch the price list
+            date: The date for which to fetch the price lists
 
         Returns:
-            CSV URL for the specified date, or None if not found
+            CSV URLs for the specified date
         """
         content = self.fetch_text(self.INDEX_URL)
         if not content:
             logger.warning(
                 f"No content found at Jadranka Trgovina index URL: {self.INDEX_URL}"
             )
-            return None
+            return []
 
-        urls = self.parse_index(content)
+        urls = []
+        for url in self.parse_index(content):
+            m = self.FILENAME_DATE_PATTERN.search(url)
+            if m and m.groups() == (
+                f"{date.day:02d}",
+                f"{date.month:02d}",
+                str(date.year),
+            ):
+                urls.append(url)
 
-        # Format date as DDMMYYYY to match filename pattern
-        date_str = f"{date.day:02d}{date.month:02d}{date.year}"
+        if not urls:
+            logger.warning(f"No Jadranka Trgovina CSV found for date {date}")
+        return urls
 
-        # Find URL matching the requested date
-        for url in urls:
-            if date_str in url:
-                logger.info(f"Found Jadranka Trgovina CSV for {date}: {url}")
-                return url
-
-        logger.warning(f"No Jadranka Trgovina CSV found for date {date}")
-        return None
-
-    def parse_store_info(self) -> Store:
+    def parse_store_info(self, csv_url: str) -> Store | None:
         """
-        Create store information for the single Jadranka Trgovina location.
+        Get the store from a CSV file name.
 
-        Jadranka Trgovina only has one location that publishes prices:
-        Market Maxi Dražica 5, Mali Lošinj (Store ID: 607)
+        Args:
+            csv_url: URL of the CSV file
 
         Returns:
-            Store object with the fixed store information
+            Store without products, or None for a point of sale that isn't
+            a shop
         """
+        filename = csv_url.rsplit("/", 1)[-1]
+        prefix = next((t for t in STORE_TYPES if filename.startswith(f"{t}_")), None)
+        if prefix is None:
+            if not filename.startswith(SKIPPED_TYPES):
+                logger.warning(f"Unknown Jadranka Trgovina point of sale: {filename}")
+            return None
+
+        # ..._ADDRESS_CITY_STOREID_FILEID_DATE_TIME.csv; until 2026-11-16 the
+        # file ID was missing, so the token before the date was the store ID
+        # and the one before that the city.
+        tokens = filename.removesuffix(".csv").split("_")
+        idx = len(tokens) - (4 if tokens[-4].isdigit() else 3)
+        store_id = tokens[idx]
+
+        if store_id in STORES:
+            name, street_address, city = STORES[store_id]
+        else:
+            logger.warning(
+                f"Unknown Jadranka Trgovina store_id {store_id!r} ({filename}), "
+                f"add it to the STORES map in jadranka_trgovina.py"
+            )
+            name = " ".join(tokens[: idx - 2]).title()
+            street_address = tokens[idx - 2]
+            city = CITIES.get(tokens[idx - 1], tokens[idx - 1].title())
+
         return Store(
             chain=self.CHAIN,
-            store_id="607",
-            name="Jadranka Trgovina Market Maxi",
-            store_type="market",
-            city="Mali Lošinj",
-            street_address="Dražica 5",
+            store_id=store_id,
+            name=f"Jadranka Trgovina {name}",
+            store_type=STORE_TYPES[prefix],
+            city=city,
+            street_address=street_address,
             zipcode="",
             items=[],
         )
+
+    def parse_csv(self, content: str, delimiter: str = ",") -> list[Product]:
+        # A few product names contain the delimiter and aren't quoted, e.g.
+        # "BUKET GERBER 30 CM; CRVENA;1104409;...". Quote the name so the
+        # other columns don't shift.
+        lines = content.splitlines()
+        if lines:
+            width = lines[0].count(delimiter)
+            for i, line in enumerate(lines[1:], start=1):
+                extra = line.count(delimiter) - width
+                if extra > 0:
+                    parts = line.split(delimiter)
+                    name = delimiter.join(parts[: extra + 1]).replace('"', '""')
+                    lines[i] = delimiter.join([f'"{name}"', *parts[extra + 1 :]])
+            content = "\n".join(lines)
+
+        return super().parse_csv(content, delimiter)
+
+    def parse_csv_row(self, row: dict) -> Product:
+        if self.PRICE_COLUMN not in row:
+            row[self.PRICE_COLUMN] = row.pop(self.SPECIAL_PRICE_COLUMN, "")
+
+        product = super().parse_csv_row(row)
+
+        # The new anchor header states no date, so ANCHOR_PRICE_DATE doesn't
+        # apply to it.
+        if self.NEW_ANCHOR_PRICE_COLUMN in row:
+            product.anchor_price_date = None
+
+        return product
 
     def get_store_prices(self, csv_url: str) -> list[Product]:
         """
@@ -170,6 +293,8 @@ class JadrankaTrgovinaCrawler(BaseCrawler):
         try:
             content = self.fetch_text(csv_url, encodings=["windows-1250", "utf-8"])
             return self.parse_csv(content, delimiter=";")
+        except CrawlerBlocked:
+            raise
         except Exception as e:
             logger.error(
                 f"Failed to get Jadranka Trgovina prices from {csv_url}: {e}",
@@ -185,28 +310,25 @@ class JadrankaTrgovinaCrawler(BaseCrawler):
             date: The date for which to fetch price data
 
         Returns:
-            List containing a single Store object with products, or empty list if unavailable
+            List of Store objects with products
         """
-        csv_url = self.get_index(date)
+        stores = []
 
-        if not csv_url:
-            logger.warning(f"No Jadranka Trgovina data available for {date}")
-            return []
+        for csv_url in self.get_index(date):
+            store = self.parse_store_info(csv_url)
+            if store is None:
+                continue
 
-        try:
-            store = self.parse_store_info()
             products = self.get_store_prices(csv_url)
-        except Exception as e:
-            logger.error(f"Error processing Jadranka Trgovina: {e}", exc_info=True)
-            return []
+            if not products:
+                logger.warning(f"No products found in {csv_url}")
+                continue
 
-        if not products:
-            logger.warning("No products found for Jadranka Trgovina")
-            return []
+            store.items = products
+            stores.append(store)
 
-        store.items = products
-        logger.info(f"Jadranka Trgovina: {len(products)} products found")
-        return [store]
+        logger.info(f"Jadranka Trgovina: {len(stores)} stores found")
+        return stores
 
 
 if __name__ == "__main__":
