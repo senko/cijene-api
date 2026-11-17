@@ -26,6 +26,9 @@ class KtcCrawler(BaseCrawler):
         "unit_price": ("Cijena za jedinicu mjere", True),
         "special_price": ("MPC za vrijeme posebnog oblika prodaje", False),
         "best_price_30": ("Najniža cijena u posljednjih 30 dana", False),
+        # Added 2026-11-17. The header gives no date, and the values mix the
+        # 2.5.2025 and 10.9.2026 reference dates, so ANCHOR_PRICE_DATE stays None.
+        "anchor_price": ("Dodatna cijena na referentni datum sidrenja", False),
     }
 
     # Mapping for other fields
@@ -49,12 +52,14 @@ class KtcCrawler(BaseCrawler):
         "Barkod",
     ]
 
-    # Not required by NN 101/2026, so the chain may drop them when it switches.
+    # The first four aren't required by NN 101/2026, so the chain may drop
+    # them. The anchor price was added on 2026-11-17; older files don't have it.
     OPTIONAL_COLUMNS = [
         "Neto količina",
         "Kategorija",
         "MPC za vrijeme posebnog oblika prodaje",
         "Najniža cijena u posljednjih 30 dana",
+        "Dodatna cijena na referentni datum sidrenja",
     ]
 
     CITIES = [
