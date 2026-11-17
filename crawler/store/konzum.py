@@ -47,7 +47,16 @@ class KonzumCrawler(BaseCrawler):
     """Seconds between sweep rounds, to spread the retries out in time."""
 
     REQUEST_BUDGET = 800
-    """Runaway guard on price list requests per run; a full recovery costs ~490."""
+    """
+    Runaway guard on price list requests per run; a full recovery cost ~490
+    requests for 188 lists. A bigger index raises it to REQUEST_BUDGET_PER_LIST
+    per listed price list.
+    """
+
+    REQUEST_BUDGET_PER_LIST = 4
+
+    MAX_INDEX_PAGES = 30
+    """Runaway guard on index pages; 2026-11-17 had 12 pages of 50 stores."""
 
     ANCHOR_PRICE_DATE = datetime.date(2025, 5, 2)
 
@@ -216,7 +225,7 @@ class KonzumCrawler(BaseCrawler):
         """
         Collect price list URLs from every page of the index.
 
-        An unreadable page costs its ~20 stores, not the whole chain.
+        An unreadable page costs its ~50 stores, not the whole chain.
 
         Raises:
             CrawlerBlocked: Upstream is refusing our requests.
@@ -228,7 +237,7 @@ class KonzumCrawler(BaseCrawler):
         pages_read = 0
         pages_failed = 0
 
-        for page in range(1, 10):
+        for page in range(1, self.MAX_INDEX_PAGES + 1):
             page_url = f"{url}&page={page}"
             try:
                 content = self.fetch_text(page_url)
@@ -243,6 +252,11 @@ class KonzumCrawler(BaseCrawler):
 
             pages_read += 1
             csv_urls.extend(csv_urls_on_page)
+        else:
+            logger.warning(
+                f"Stopped at index page {self.MAX_INDEX_PAGES} without reaching "
+                f"an empty page; later pages are missing from this run"
+            )
 
         if not pages_read:
             raise ValueError(f"No index page could be read for {date}")
@@ -302,6 +316,7 @@ class KonzumCrawler(BaseCrawler):
         sweeps = 0
         dropped = 0
         index_requests = self.requests_made
+        budget = max(self.REQUEST_BUDGET, self.REQUEST_BUDGET_PER_LIST * len(pending))
 
         while pending:
             if sweeps:
@@ -314,11 +329,11 @@ class KonzumCrawler(BaseCrawler):
             stop = False
             missing: list[tuple[str, Store]] = []
             for i, (url, store) in enumerate(pending):
-                if self.requests_made - index_requests >= self.REQUEST_BUDGET:
+                if self.requests_made - index_requests >= budget:
                     missing.extend(pending[i:])
                     stop = True
                     logger.error(
-                        f"Request budget of {self.REQUEST_BUDGET} exhausted "
+                        f"Request budget of {budget} exhausted "
                         f"with {len(missing)} price list(s) unresolved"
                     )
                     break

@@ -491,9 +491,23 @@ class TestKonzumIndex:
         assert len(urls) == 4
         assert all("S2-" not in url for url in urls)
 
+    def test_reads_every_page_up_to_the_empty_one(self, sleeps):
+        """On 2026-11-17 the index had 12 pages; the crawler used to stop at 9."""
+        pages = {n: [httpx.Response(200, text=self._page(n))] for n in range(1, 13)}
+        pages[13] = [httpx.Response(200, text="<html></html>")]
+        crawler = self._crawler(pages)
+
+        urls = crawler.get_index(datetime.date(2026, 11, 17))
+
+        assert len(urls) == 24
+
     def test_raises_when_no_page_can_be_read(self, sleeps):
         crawler = self._crawler(
-            {page: [httpx.Response(500)] for page in range(1, 10)}, attempts=1
+            {
+                page: [httpx.Response(500)]
+                for page in range(1, KonzumCrawler.MAX_INDEX_PAGES + 1)
+            },
+            attempts=1,
         )
 
         with pytest.raises(ValueError, match="No index page could be read"):
