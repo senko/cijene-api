@@ -5,6 +5,7 @@ import subprocess
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Generator, Optional, Tuple
+from zipfile import BadZipFile, ZipFile
 
 from lxml import etree  # type: ignore
 
@@ -44,7 +45,11 @@ class StudenacCrawler(BaseCrawler):
         "unit": ("JedinicaMjere", False),
         "barcode": ("Barkod", False),
         "category": ("KategorijeProizvoda", False),
+        "special_sale_type": ("NazivPosebnogOblikaProdaje", False),
     }
+
+    # <PosebniOblikProdaje> is a DA/NE flag and isn't mapped: rows on sale
+    # also fill <MaloprodajnaCijenaAkcija>.
 
     REQUIRED_COLUMNS = [
         "MaloprodajnaCijena",
@@ -57,12 +62,14 @@ class StudenacCrawler(BaseCrawler):
         "Barkod",
     ]
 
-    # Not required by NN 101/2026, so the chain may drop them when it switches.
+    # The first four aren't required by NN 101/2026, so the chain may drop
+    # them. The last one was added on 2026-11-17; older files don't have it.
     OPTIONAL_COLUMNS = [
         "NetoKolicina",
         "KategorijeProizvoda",
         "MaloprodajnaCijenaAkcija",
         "NajnizaCijena",
+        "NazivPosebnogOblikaProdaje",
     ]
 
     def parse_address(self, address: str) -> Tuple[str, str]:
@@ -80,7 +87,7 @@ class StudenacCrawler(BaseCrawler):
         try:
             # The regex matches the last set of uppercase words (city)
             # and everything before it (street address)
-            pattern = r"^(.*?) ([A-ZČĆĐŠŽ][A-ZČĆĐŠŽ\s]+)$"
+            pattern = r"^(.*?) ([A-ZČĆĐŠŽ][A-ZČĆĐŠŽ\s-]+)$"
             match = re.match(pattern, address)
 
             if match:
@@ -184,15 +191,27 @@ class StudenacCrawler(BaseCrawler):
     def get_zip_contents(
         self, url: str, suffix: str
     ) -> Generator[tuple[str, bytes], None, None]:
+        """
+        Download the daily ZIP and yield its files with the given suffix.
+
+        Until 2026-11-16 the ZIP held the store XMLs directly. Their file names
+        use an encoding that only a patched system unzip converts, so the ZIP is
+        extracted with unzip. Since 2026-11-17 it holds a few inner ZIPs with
+        the XMLs (about 1,400 stores, 3.4 GB uncompressed). Those flag their
+        names as UTF-8 and are read with zipfile one file at a time, rather
+        than extracted to disk.
+        """
         with TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
             temp_zip = temp_path / "archive.zip"
             with open(temp_zip, "wb") as fp:
                 self.fetch_binary(url, fp)
 
+            extract_path = temp_path / "files"
+            extract_path.mkdir()
             result = subprocess.run(
                 ["unzip", "-x", temp_zip],
-                cwd=temp_dir,
+                cwd=extract_path,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
             )
@@ -201,12 +220,37 @@ class StudenacCrawler(BaseCrawler):
                 print(result.stdout.decode())
                 print(result.stderr.decode())
 
-            for file in temp_path.iterdir():
-                if file.suffix != suffix:
+            for file in sorted(extract_path.iterdir()):
+                if file.suffix == ".zip":
+                    yield from self.get_inner_zip_contents(file, suffix)
+                elif file.suffix == suffix:
+                    yield file.name, file.read_bytes()
+
+    def get_inner_zip_contents(
+        self, path: Path, suffix: str
+    ) -> Generator[tuple[str, bytes], None, None]:
+        """Yield the files with the given suffix from a ZIP inside the daily ZIP."""
+        try:
+            zip_fp = ZipFile(path)
+        except BadZipFile as e:
+            logger.error(f"Failed to open inner ZIP {path.name}: {e}")
+            return
+
+        with zip_fp:
+            for file_info in zip_fp.infolist():
+                if not file_info.filename.endswith(suffix):
                     continue
 
-                xml_content = open(file, "rb").read()
-                yield file.name, xml_content
+                try:
+                    content = zip_fp.read(file_info)
+                except Exception as e:
+                    logger.error(
+                        f"Failed to read {file_info.filename} from {path.name}: {e}",
+                        exc_info=True,
+                    )
+                    continue
+
+                yield file_info.filename, content
 
 
 if __name__ == "__main__":
