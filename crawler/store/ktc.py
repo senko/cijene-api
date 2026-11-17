@@ -62,6 +62,14 @@ class KtcCrawler(BaseCrawler):
         "Dodatna cijena na referentni datum sidrenja",
     ]
 
+    # Store type is the first part of the CSV file name.
+    STORE_TYPES = {"trgovina"}
+
+    # Since 2026-11-17 KTC also publishes price lists for points of sale that
+    # are not grocery shops. The source writes "č" as "^", so the beauty salon
+    # is "kozmeti^ki salon"; matched by prefix in case that gets fixed.
+    SKIPPED_STORE_TYPES = ("poljoljekarna", "benzinska", "autopraona", "kozmeti")
+
     CITIES = [
         "KRIZEVCI",
         "VARAZDIN",
@@ -246,6 +254,14 @@ class KtcCrawler(BaseCrawler):
                     continue
 
                 store = self.parse_store_info(csv_url)
+                if store.store_type not in self.STORE_TYPES:
+                    if not store.store_type.startswith(self.SKIPPED_STORE_TYPES):
+                        logger.warning(
+                            f"Unknown KTC store type {store.store_type!r}, "
+                            f"skipping {csv_url}"
+                        )
+                    continue
+
                 products = self.get_store_prices(csv_url)
 
                 if not products:
