@@ -184,6 +184,49 @@ class VrutakCrawler(BaseCrawler):
             reader.fieldnames = [name.replace(" ", "") for name in reader.fieldnames]
         return reader
 
+    def parse_csv_row(self, row: dict) -> Product:
+        # Since 2026-11-17 <mpcijenaakcija> holds the name and period of the
+        # sale ("Akcija 09.-22.11.2026.") instead of a price. The regular price
+        # is then not published: <mpcijena> is the price charged during the
+        # sale, so it is also the special price.
+        sale = (row.get("mpcijenaakcija") or "").strip()
+        if not any(ch.isalpha() for ch in sale):
+            return super().parse_csv_row(row)
+
+        row["mpcijenaakcija"] = ""
+        product = super().parse_csv_row(row)
+        product.special_sale_type = sale
+        product.special_price = product.price
+        return product
+
+    @staticmethod
+    def decode_csv(content: bytes) -> str:
+        """
+        Decode a CSV price file, picking the encoding by its Croatian letters.
+
+        The CSVs were windows-1250 until 2026-11-16 and are CP852 (DOS
+        Latin-2) since 2026-11-17. A decode error can't tell them apart: CP852
+        accepts every byte and windows-1250 all but five. The wrong one turns
+        most Croatian letters into other non-ASCII characters ("NARAN¬A" for
+        "NARANČA"), so the encoding with the most Croatian letters and the
+        fewest other non-ASCII characters wins.
+        """
+        letters = set("čćžšđČĆŽŠĐ")
+
+        def score(text: str) -> int:
+            good = sum(ch in letters for ch in text)
+            bad = sum(not ch.isascii() and ch not in letters for ch in text)
+            return good - bad
+
+        # windows-1250 leaves five bytes undefined, and in CP852 they are
+        # letters (0x81 is "ü"), so decode with replacement: a replacement
+        # character counts against that encoding.
+        texts = [
+            content.decode(encoding, errors="replace")
+            for encoding in ("windows-1250", "cp852")
+        ]
+        return max(texts, key=score)
+
     def parse_xml(self, xml_content: bytes) -> list[Product]:
         """
         Parse XML content into a list of products.
@@ -230,8 +273,10 @@ class VrutakCrawler(BaseCrawler):
             List of Product objects
         """
         if url.endswith(".csv"):
-            content = self.fetch_text(url, ["windows-1250"])
-            return self.parse_csv(content, delimiter=";")
+            # Latin-1 maps every byte to one character, so this round trip
+            # returns the raw bytes for decode_csv to pick the encoding.
+            content = self.fetch_text(url, ["latin-1"]).encode("latin-1")
+            return self.parse_csv(self.decode_csv(content), delimiter=";")
 
         return self.parse_xml(self.fetch_text(url).encode("utf-8"))
 
