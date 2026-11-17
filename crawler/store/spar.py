@@ -6,7 +6,7 @@ from typing import Optional
 
 from crawler.store.models import Store
 
-from .base import BaseCrawler
+from .base import BaseCrawler, CrawlerBlocked
 
 logger = logging.getLogger(__name__)
 
@@ -229,20 +229,23 @@ class SparCrawler(BaseCrawler):
                 logger.warning(f"Skipping CSV from {url} due to store parsing failure")
                 continue
 
-            csv_content = self.fetch_text(
-                url, ["iso-8859-2", "windows-1250"], self.CSV_PREFIX
-            )
-            if not csv_content:
-                logger.warning(f"Skipping CSV from {url} due to download failure")
-                continue
-
+            # A store that fails after the retries is skipped, not the chain
             try:
-                products = self.parse_csv(csv_content, ";")
-                store.items = products
-                stores.append(store)
+                csv_content = self.fetch_text(
+                    url, ["iso-8859-2", "windows-1250"], self.CSV_PREFIX
+                )
+                if not csv_content:
+                    logger.warning(f"Skipping CSV from {url} due to download failure")
+                    continue
+
+                store.items = self.parse_csv(csv_content, ";")
+            except CrawlerBlocked:
+                raise
             except Exception as e:
                 logger.error(f"Error processing CSV from {url}: {e}", exc_info=True)
                 continue
+
+            stores.append(store)
 
         return stores
 

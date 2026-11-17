@@ -5,7 +5,7 @@ from typing import Optional
 
 from crawler.store.models import Store
 
-from .base import BaseCrawler
+from .base import BaseCrawler, CrawlerBlocked
 
 logger = logging.getLogger(__name__)
 
@@ -149,8 +149,16 @@ class DukatCrawler(BaseCrawler):
                 logger.warning(f"Skipping CSV {url} due to store parsing failure")
                 continue
 
-            text = self.fetch_text(url, encodings=["windows-1250"])
-            store.items = self.parse_csv(text, delimiter=",")
+            # A store that fails after the retries is skipped, not the chain
+            try:
+                text = self.fetch_text(url, encodings=["windows-1250"])
+                store.items = self.parse_csv(text, delimiter=",")
+            except CrawlerBlocked:
+                raise
+            except Exception as e:
+                logger.error(f"Error processing CSV from {url}: {e}", exc_info=True)
+                continue
+
             stores.append(store)
 
         return stores

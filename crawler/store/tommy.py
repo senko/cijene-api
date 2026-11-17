@@ -4,7 +4,7 @@ import logging
 import re
 from typing import Any, Optional, Tuple
 
-from crawler.store.base import BaseCrawler
+from crawler.store.base import BaseCrawler, CrawlerBlocked
 from crawler.store.models import Store
 from crawler.store.utils import to_camel_case
 
@@ -238,26 +238,31 @@ class TommyCrawler(BaseCrawler):
 
         stores = []
         for filename, url in store_map.items():
-            # Extract store information
-            store_type, store_id, address, zipcode, city = (
-                self.parse_store_from_filename(filename)
-            )
+            # A store that fails after the retries is skipped, not the chain
+            try:
+                store_type, store_id, address, zipcode, city = (
+                    self.parse_store_from_filename(filename)
+                )
 
-            store = Store(
-                chain="tommy",
-                name=f"Tommy {store_type.title()} {address}",
-                store_type=store_type,
-                store_id=store_id,
-                city=city,
-                street_address=address,
-                zipcode=zipcode,
-                items=[],
-            )
+                store = Store(
+                    chain="tommy",
+                    name=f"Tommy {store_type.title()} {address}",
+                    store_type=store_type,
+                    store_id=store_id,
+                    city=city,
+                    street_address=address,
+                    zipcode=zipcode,
+                    items=[],
+                )
 
-            csv_content = self.fetch_text(url)
-            products = self.parse_csv(csv_content)
+                csv_content = self.fetch_text(url)
+                store.items = self.parse_csv(csv_content)
+            except CrawlerBlocked:
+                raise
+            except Exception as e:
+                logger.error(f"Error processing {filename}: {e}", exc_info=True)
+                continue
 
-            store.items = products
             stores.append(store)
 
         return stores
