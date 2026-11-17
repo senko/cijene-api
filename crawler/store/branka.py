@@ -76,12 +76,21 @@ class BrankaCrawler(BaseCrawler):
 
     ANCHOR_PRICE_DATE = datetime.date(2025, 5, 2)
 
+    # Since 2026-11-14 the anchor price is BAZNA_CIJENA (same values as the
+    # old SIDRENA_CIJENA_NA_02_05_25), with its date per product in
+    # DATUM_BAZNE_CIJENE ("02.05.2025 00:00:00.000"). With that column the
+    # header date above doesn't apply.
+    ANCHOR_DATE_COLUMN = "DATUM_BAZNE_CIJENE"
+
     PRICE_MAP = {
         "price": ("MPC", True),
         "unit_price": ("MPC", True),
-        "anchor_price": ("SIDRENA_CIJENA_NA_02_05_25", False),
+        "anchor_price": (("SIDRENA_CIJENA_NA_02_05_25", "BAZNA_CIJENA"), False),
     }
 
+    # OBLIK_PRODAJE is the form of sale, so far only "Po odluci (nova cijena
+    # važeća)". MPC is the price charged and Branka publishes no separate
+    # special price, so special_price is left empty.
     FIELD_MAP = {
         "product_id": ("SIFRA", True),
         "product": ("NAZIV", True),
@@ -90,11 +99,12 @@ class BrankaCrawler(BaseCrawler):
         "unit": ("JEDINICA_MJERE", False),
         "barcode": ("BARKOD", False),
         "category": ("NAZIV_KATEGORIJE", False),
+        "special_sale_type": ("OBLIK_PRODAJE", False),
     }
 
     REQUIRED_COLUMNS = [
         "MPC",
-        "SIDRENA_CIJENA_NA_02_05_25",
+        ("SIDRENA_CIJENA_NA_02_05_25", "BAZNA_CIJENA"),
         "SIFRA",
         "NAZIV",
         "MARKA",
@@ -102,9 +112,13 @@ class BrankaCrawler(BaseCrawler):
         "BARKOD",
     ]
 
+    # The first two aren't required by NN 101/2026, so the chain may drop
+    # them. The last two were added on 2026-11-14; older files don't have them.
     OPTIONAL_COLUMNS = [
         "NETO_KOLICINA",
         "NAZIV_KATEGORIJE",
+        "DATUM_BAZNE_CIJENE",
+        "OBLIK_PRODAJE",
     ]
 
     def parse_index(self, content: str) -> list[str]:
@@ -256,7 +270,34 @@ class BrankaCrawler(BaseCrawler):
             List of Product objects parsed from the CSV
         """
         content = self.fetch_text(csv_url, encodings=["windows-1250"])
+
+        # Since 2026-11-14 the files also have rows with no product, only zero
+        # prices (";;;0;;;;;;0;"). SIFRA is the first column, so drop them here
+        # instead of logging an error for each one.
+        content = "\n".join(
+            line for line in content.splitlines() if not line.startswith(";")
+        )
         return self.parse_csv(content, delimiter=";")
+
+    def parse_csv_row(self, row: dict) -> Product:
+        anchor_date = None
+        has_date_column = self.ANCHOR_DATE_COLUMN in row
+        if has_date_column:
+            # "02.05.2025 00:00:00.000": the time is always midnight
+            date_text = (row[self.ANCHOR_DATE_COLUMN] or "").split(" ")[0]
+            anchor_date = self.parse_anchor_date(date_text) or None
+
+        product = super().parse_csv_row(row)
+
+        # An anchor price of 0 means the product has none
+        if product.anchor_price == 0:
+            product.anchor_price = None
+            product.anchor_price_date = None
+        elif has_date_column:
+            product.anchor_price_date = (
+                anchor_date if product.anchor_price is not None else None
+            )
+        return product
 
     def get_all_products(self, date: datetime.date) -> list[Store]:
         """
