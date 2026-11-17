@@ -72,7 +72,11 @@ class RibolaCrawler(BaseCrawler):
         "unit": ("JedinicaMjere", False),
         "barcode": ("Barkod", False),
         "category": ("KategorijeProizvoda", False),
+        "special_sale_type": ("NazivPosebnogOblikaProdaje", False),
     }
+
+    # <PosebniOblikProdaje> is a DA/NE flag and isn't mapped: rows on sale
+    # also fill <MaloprodajnaCijenaAkcija>.
 
     REQUIRED_COLUMNS = [
         "MaloprodajnaCijena",
@@ -85,12 +89,14 @@ class RibolaCrawler(BaseCrawler):
         "Barkod",
     ]
 
-    # Not required by NN 101/2026, so the chain may drop them when it switches.
+    # The first four aren't required by NN 101/2026, so the chain may drop
+    # them. The last one was added on 2026-11-17; older files don't have it.
     OPTIONAL_COLUMNS = [
         "NetoKolicina",
         "KategorijeProizvoda",
         "MaloprodajnaCijenaAkcija",
         "NajnizaCijena",
+        "NazivPosebnogOblikaProdaje",
     ]
 
     def parse_index(self, content: str) -> list[str]:
