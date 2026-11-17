@@ -3,7 +3,7 @@ import logging
 import re
 import time
 import urllib.parse
-from typing import List
+from typing import Any, List
 
 import httpx
 from bs4 import BeautifulSoup
@@ -51,6 +51,11 @@ class KonzumCrawler(BaseCrawler):
 
     ANCHOR_PRICE_DATE = datetime.date(2025, 5, 2)
 
+    # Since 2026-11-17 the anchor price column is "BAZNA CIJENA". Its values
+    # match the old 2.5.2025 anchor prices, but the header states no date and
+    # the new non-food products have one too, so these rows get no date.
+    NEW_ANCHOR_PRICE_COLUMN = "BAZNA CIJENA"
+
     # Mapping for price fields
     PRICE_MAP = {
         # field: (column, is_required)
@@ -59,6 +64,7 @@ class KonzumCrawler(BaseCrawler):
         "special_price": ("MPC ZA VRIJEME POSEBNOG OBLIKA PRODAJE", False),
         "best_price_30": ("NAJNIŽA CIJENA U POSLJEDNIH 30 DANA", False),
         "anchor_price": ("SIDRENA CIJENA NA 2.5.2025", False),
+        "new_anchor_price": (NEW_ANCHOR_PRICE_COLUMN, False),
     }
 
     # Mapping for other fields
@@ -70,12 +76,17 @@ class KonzumCrawler(BaseCrawler):
         "unit": ("JEDINICA MJERE", False),
         "barcode": ("BARKOD", False),
         "category": ("KATEGORIJA PROIZVODA", False),
+        "special_sale_type": ("NAZIV POSEBNOG OBLIKA PRODAJE", False),
+    }
+
+    BOOL_MAP = {
+        "on_special": ("POSEBAN OBLIK PRODAJE", False),
     }
 
     REQUIRED_COLUMNS = [
         "MALOPRODAJNA CIJENA",
         "CIJENA ZA JEDINICU MJERE",
-        "SIDRENA CIJENA NA 2.5.2025",
+        ("SIDRENA CIJENA NA 2.5.2025", NEW_ANCHOR_PRICE_COLUMN),
         "NAZIV PROIZVODA",
         "ŠIFRA PROIZVODA",
         "MARKA PROIZVODA",
@@ -83,15 +94,39 @@ class KonzumCrawler(BaseCrawler):
         "BARKOD",
     ]
 
-    # Not required by NN 101/2026, so the chain may drop them when it switches.
+    # The first four aren't required by NN 101/2026, so the chain may drop
+    # them. The last two were added on 2026-11-17; older files don't have them.
     OPTIONAL_COLUMNS = [
         "NETO KOLIČINA",
         "KATEGORIJA PROIZVODA",
         "MPC ZA VRIJEME POSEBNOG OBLIKA PRODAJE",
         "NAJNIŽA CIJENA U POSLJEDNIH 30 DANA",
+        "POSEBAN OBLIK PRODAJE",
+        "NAZIV POSEBNOG OBLIKA PRODAJE",
     ]
 
     ADDRESS_PATTERN = re.compile(r"(.*) (\d{5}) (.*)")
+
+    def fix_product_data(self, data: dict[str, Any]) -> dict[str, Any]:
+        new_anchor_price = data.pop("new_anchor_price", None)
+        on_special = data.pop("on_special", None)
+        data = super().fix_product_data(data)
+
+        if data.get("anchor_price") is None and new_anchor_price is not None:
+            data["anchor_price"] = new_anchor_price
+            data["anchor_price_date"] = None
+
+        # Since 2026-11-17 the chain publishes one price column plus a DA/NE
+        # flag and the name of the special form of sale, without a separate
+        # special price. On sale rows the published price is the sale price:
+        # checked against the 2026-11-14 file of one store, it equals the old
+        # special price for 663 of 681 rows. The regular price is no longer
+        # published.
+        on_sale = on_special or data.get("special_sale_type")
+        if on_sale and data.get("special_price") is None:
+            data["special_price"] = data["price"]
+
+        return data
 
     def parse_index(self, content: str) -> list[str]:
         """
