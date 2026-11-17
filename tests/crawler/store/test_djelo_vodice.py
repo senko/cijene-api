@@ -139,7 +139,7 @@ def test_index_without_files_for_the_date_raises(monkeypatch):
         "PRODAVAONICA###05075#26318#2026-11-14T010634.xlsx",
     )
 
-    with pytest.raises(ValueError, match="No XLSX file"):
+    with pytest.raises(ValueError, match="No price list found"):
         crawler.get_index(datetime.date(2026, 11, 14))
 
 
