@@ -1,4 +1,5 @@
 import datetime
+import re
 import unicodedata
 from csv import DictReader
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
@@ -20,6 +21,11 @@ from .models import Product, Store
 logger = getLogger(__name__)
 
 T = TypeVar("T")
+
+# A barcode that a spreadsheet has turned into scientific notation, such as
+# "3,85889E+12". Only the first six digits are left, so it identifies no
+# product, and different products can end up with the same value.
+SCIENTIFIC_BARCODE = re.compile(r"^\d+(?:[.,]\d+)?E[+-]?\d+$", re.IGNORECASE)
 
 
 class CrawlerBlocked(Exception):
@@ -173,6 +179,9 @@ class BaseCrawler:
         # Unrecognized boolean values are reported once each, so a single
         # unknown token can't produce one log line per row.
         self._unknown_bool_values: set[str] = set()
+
+        # Logged once per run for the same reason
+        self._scientific_barcode_logged = False
 
         self._last_request: dict[str, float] = {}
         self._cooldown: dict[str, float] = {}
@@ -716,6 +725,15 @@ class BaseCrawler:
             The cleaned or transformed data
         """
         # Common fixups for all crawlers
+        if SCIENTIFIC_BARCODE.match(data["barcode"].strip()):
+            if not self._scientific_barcode_logged:
+                self._scientific_barcode_logged = True
+                logger.warning(
+                    f"{self.CHAIN}: barcode in scientific notation "
+                    f"({data['barcode']!r}), using the chain product ID instead"
+                )
+            data["barcode"] = ""
+
         if data["barcode"] == "":
             data["barcode"] = f"{self.CHAIN}:{data['product_id']}"
         data["barcode"] = data["barcode"].replace('"', "").replace("'", "").strip()
