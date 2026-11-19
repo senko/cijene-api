@@ -32,6 +32,12 @@ class RotoCrawler(BaseCrawler):
     NEW_ANCHOR_PRICE_COLUMN = "sidrena cijena na 10.9.2026."
     NEW_ANCHOR_PRICE_DATE = datetime.date(2026, 9, 10)
 
+    # Since 2026-11-19 both anchor columns are replaced by "Bazna cijena"
+    # (NN 132/2026). Its values match the 2.5.2025 anchor prices, but the
+    # header states no date and the reference date differs per product, so
+    # these rows get no date.
+    BASE_PRICE_COLUMN = "Bazna cijena"
+
     PRICE_MAP = {
         "price": ("MPC", True),
         "unit_price": ("Cijena za jedinicu mjere", True),
@@ -39,6 +45,7 @@ class RotoCrawler(BaseCrawler):
         "best_price_30": ("Najniža cijena u posljednjih 30 dana", False),
         "anchor_price": (ANCHOR_PRICE_COLUMN, False),
         "new_anchor_price": (NEW_ANCHOR_PRICE_COLUMN, False),
+        "base_price": (BASE_PRICE_COLUMN, False),
     }
 
     FIELD_MAP = {
@@ -54,7 +61,7 @@ class RotoCrawler(BaseCrawler):
     REQUIRED_COLUMNS = [
         "MPC",
         "Cijena za jedinicu mjere",
-        "sidrena cijena na 2.5.2025.",
+        (ANCHOR_PRICE_COLUMN, BASE_PRICE_COLUMN),
         "Naziv artikla",
         "ŠIFRA ARTIKLA",
         "BRAND",
@@ -72,13 +79,22 @@ class RotoCrawler(BaseCrawler):
     ]
 
     def fix_product_data(self, data: dict) -> dict:
-        """Fall back to the 10.9.2026 anchor price for newer products."""
+        """
+        Fall back to the 10.9.2026 anchor price for newer products, and read
+        "Bazna cijena" as the anchor price in files that have it.
+        """
         new_anchor_price = data.pop("new_anchor_price", None)
+        base_price = data.pop("base_price", None)
         data = super().fix_product_data(data)
 
         if data.get("anchor_price") is None and new_anchor_price is not None:
             data["anchor_price"] = new_anchor_price
             data["anchor_price_date"] = self.NEW_ANCHOR_PRICE_DATE.isoformat()
+
+        # A base price of 0 means none is published, as for the other prices
+        if data.get("anchor_price") is None and base_price:
+            data["anchor_price"] = base_price
+            data["anchor_price_date"] = None
 
         return data
 
