@@ -41,11 +41,17 @@ class BosoCrawler(BaseCrawler):
 
     ANCHOR_PRICE_DATE = datetime.date(2025, 5, 2)
 
+    # Since 2026-11-18 the anchor price column is "bazna cijena" (NN 132/2026).
+    # Its values match the 2.5.2025 anchor prices, but the header states no
+    # date and the reference date differs per product, so these rows get none.
+    BASE_PRICE_COLUMN = "bazna cijena"
+
     PRICE_MAP = {
         "price": ("MPC", False),
         "unit_price": ("cijena za jedinicu mjere", False),
         "special_price": ("MPC za vrijeme posebnog oblika prodaje", False),
         "anchor_price": ("sidrena cijena na 2.5.2025", False),
+        "base_price": (BASE_PRICE_COLUMN, False),
     }
 
     FIELD_MAP = {
@@ -61,12 +67,13 @@ class BosoCrawler(BaseCrawler):
 
     BOOL_MAP = {
         "available": ("dostupno", False),
+        "on_special": ("posebni oblik prodaje", False),
     }
 
     REQUIRED_COLUMNS = [
         "MPC",
         "cijena za jedinicu mjere",
-        "sidrena cijena na 2.5.2025",
+        ("sidrena cijena na 2.5.2025", BASE_PRICE_COLUMN),
         "šifra",
         "naziv",
         "marka",
@@ -76,12 +83,15 @@ class BosoCrawler(BaseCrawler):
 
     # Both trailing columns were added on 2026-09-23 for NN 101/2026; the rest
     # of the header was left alone. Availability is published as 1/0 here.
+    # The files of 2026-11-18 dropped the special price, availability and the
+    # sale name, and added "posebni oblik prodaje" (1/0).
     OPTIONAL_COLUMNS = [
         "neto količina",
         "kategorija proizvoda",
         "MPC za vrijeme posebnog oblika prodaje",
         "dostupno",
         "Naziv posebnog oblika prodaje",
+        "posebni oblik prodaje",
     ]
 
     # Date pattern for parsing dates from CSV filenames and HTML
@@ -91,6 +101,27 @@ class BosoCrawler(BaseCrawler):
         super().__init__()
         self._ajax_config = None
         self._price_list_page: str | None = None
+
+    def fix_product_data(self, data: dict) -> dict:
+        base_price = data.pop("base_price", None)
+        on_special = data.pop("on_special", None)
+        data = super().fix_product_data(data)
+
+        # A base price of 0 means none is published, as for the other prices
+        if data.get("anchor_price") is None and base_price:
+            data["anchor_price"] = base_price
+            data["anchor_price_date"] = None
+
+        # Since 2026-11-18 the chain publishes one price column plus a 1/0
+        # flag, without a separate special price or the name of the sale. On
+        # sale rows the published price is the sale price: in one store's
+        # file, 142 products that were at the regular price on 2026-11-17 are
+        # flagged and cheaper, and 200 that were on sale are unflagged and
+        # dearer. The regular price is no longer published.
+        if on_special and data.get("special_price") is None:
+            data["special_price"] = data["price"]
+
+        return data
 
     def get_price_list_page(self) -> str:
         """
