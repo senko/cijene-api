@@ -3,20 +3,21 @@ import logging
 import re
 from csv import DictReader
 from typing import Any
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 
 from bs4 import BeautifulSoup
 
 from crawler.store.models import Store
 
-from .base import BaseCrawler
+from .base import BaseCrawler, CrawlerBlocked
 
 logger = logging.getLogger(__name__)
 
 # Seen: "Cijenik-DD.MM.YYYY.csv", "Cijene-...", "Cjenik-...", "Cijenik12.11.2026.csv",
-# and since 2026-11-17 "Prodavaonica_ZAGREBACKA_12_PAG_PJ01_5_17.11.2026_13_11.csv"
+# and since 2026-11-17 "Prodavaonica_ZAGREBACKA_12_PAG_PJ01_5_17.11.2026_13_11.csv".
+# A file uploaded again under the same name gets "-1", "-1-1", ... appended.
 CSV_DATE_PATTERN = re.compile(
-    r"(?:Ci?jen[a-z]+-?|_)(\d{2}\.\d{2}\.\d{4})(?:_\d{2}_\d{2})?\.csv$"
+    r"(?:Ci?jen[a-z]+-?|_)(\d{2}\.\d{2}\.\d{4})(?:_(\d{2}_\d{2}))?(?:-\d+)*\.csv$"
 )
 
 # Store code in the file names used since 2026-11-17, e.g. "..._PAG_PJ01_5_..."
@@ -33,16 +34,29 @@ class LorencoCrawler(BaseCrawler):
     BASE_URL = "https://lorenco.hr"
     INDEX_URL = f"{BASE_URL}/dnevne-cijene/"
 
-    # Lorenco publishes one price list, for its store PJ01 in Pag. The file
-    # names give the store since 2026-11-17. The ID stays "all" so the store
-    # keeps its price history; change it when a second store appears.
-    STORE_ID = "all"
-    STORE_CODE = "PJ01"
-    STORE_NAME = "Lorenco"
-    STORE_TYPE = "prodavaonica"
-    STREET_ADDRESS = "Zagrebačka 12"
-    CITY = "Pag"
-    ZIPCODE = "23250"
+    # Until 2026-11-17 Lorenco published one price list, for its store PJ01
+    # in Pag, imported as store "all". Since 2026-11-19 it publishes one per
+    # store, with the store code in the file name. PJ01 keeps the ID "all" so
+    # its price history continues; the other stores use their code.
+    MAIN_STORE_CODE = "PJ01"
+    MAIN_STORE_ID = "all"
+
+    # The file names spell the address without diacritics ("ANTE-STARCEVICA"),
+    # so known stores are listed here: (type, street address, city, zip code).
+    # Zip codes are from GeoNames, which gives 23250 for all of these places.
+    STORES = {
+        "PJ01": ("prodavaonica", "Zagrebačka 12", "Pag", "23250"),
+        "PJ03": ("prodavaonica", "Golija 23", "Pag", "23250"),
+        "PJ04": ("prodavaonica", "Ante Starčevića 39", "Povljana", "23250"),
+        "PJ06": ("prodavaonica", "Šimuni 36", "Kolan", "23250"),
+        "PJ09": ("prodavaonica", "Zadarska 15", "Povljana", "23250"),
+        "PJ10": ("prodavaonica", "Put Kolana 42", "Kolan", "23250"),
+    }
+
+    # Points of sale that are not grocery shops, by store code
+    SKIPPED_STORES = {
+        "PJ02": "hardware and household goods",
+    }
 
     # Map CSV columns to price fields
     PRICE_MAP = {
@@ -78,34 +92,66 @@ class LorencoCrawler(BaseCrawler):
     # chain's latest load, so importing such a file would hide the full list.
     MIN_PRODUCTS = 1000
 
-    def get_csv_url(self, soup: BeautifulSoup, date: datetime.date) -> str | None:
-        """Find the CSV URL for the given date from the index page."""
+    def get_csv_urls(self, soup: BeautifulSoup, date: datetime.date) -> dict[str, str]:
+        """
+        Find the price list of each store for the given date on the index page.
+
+        Older file names have no store code; they are the main store's. When a
+        store has several files for the date, the one with the latest time in
+        its name wins, and among equal times the first one listed (the index
+        lists the newest uploads first).
+
+        Returns:
+            CSV URL by store code
+        """
         hr_date = date.strftime("%d.%m.%Y")
-        urls = []
+        candidates: dict[str, tuple[str, str]] = {}
 
         for anchor in soup.select("a[href$='.csv']"):
             href = anchor.get("href")
             if not isinstance(href, str):
                 continue
 
-            path = urlparse(href).path
+            path = unquote(urlparse(href).path)
             m = CSV_DATE_PATTERN.search(path)
-            if m and m.group(1) == hr_date:
-                urls.append(href)
+            if not m or m.group(1) != hr_date:
+                continue
 
-        # Price lists of another store must not be read as store PJ01
-        other_stores = [
-            url
-            for url in urls
-            if (m := STORE_CODE_PATTERN.search(url)) and m.group(1) != self.STORE_CODE
-        ]
-        if other_stores:
-            logger.warning(
-                f"Lorenco published price lists for other stores, not crawled: "
-                f"{other_stores}"
-            )
+            code_match = STORE_CODE_PATTERN.search(path)
+            code = code_match.group(1) if code_match else self.MAIN_STORE_CODE
+            time = m.group(2) or ""
+            if code not in candidates or time > candidates[code][0]:
+                candidates[code] = (time, href)
 
-        return next((url for url in urls if url not in other_stores), None)
+        return {code: href for code, (_time, href) in candidates.items()}
+
+    def get_store(self, code: str, csv_url: str) -> Store:
+        """
+        Build the store for a store code, from STORES or else the file name.
+
+        File name: "Prodavaonica_PUT-KOLANA_42_KOLAN_PJ10_2_19.11.2026_06_46.csv"
+        """
+        if code in self.STORES:
+            store_type, street_address, city, zipcode = self.STORES[code]
+        else:
+            logger.warning(f"Unknown Lorenco store {code} in {csv_url}")
+            parts = unquote(urlparse(csv_url).path).rsplit("/", 1)[-1].split("_")
+            index = parts.index(code) if code in parts else len(parts)
+            store_type = parts[0].lower() if index > 0 else ""
+            street_address = " ".join(parts[1 : index - 1]).replace("-", " ").title()
+            city = parts[index - 1].title() if index > 1 else ""
+            zipcode = ""
+
+        return Store(
+            chain=self.CHAIN,
+            store_type=store_type,
+            store_id=self.MAIN_STORE_ID if code == self.MAIN_STORE_CODE else code,
+            name=f"Lorenco {code}",
+            street_address=street_address,
+            zipcode=zipcode,
+            city=city,
+            items=[],
+        )
 
     def read_csv(self, text: str, delimiter: str = ",") -> DictReader:
         # Since 2026-11-17 the file starts with a few lines of company and
@@ -170,44 +216,52 @@ class LorencoCrawler(BaseCrawler):
             date: The date to search for in the price list.
 
         Returns:
-            List with a single Store object containing all products.
+            List of Store objects, one per store with a price list.
         """
         html = self.fetch_text(self.INDEX_URL)
         soup = BeautifulSoup(html, "html.parser")
-        csv_url = self.get_csv_url(soup, date)
+        csv_urls = self.get_csv_urls(soup, date)
 
-        if not csv_url:
+        if not csv_urls:
             logger.info(f"No price list found for {date}")
             return []
 
-        logger.info(f"Fetching CSV from: {csv_url}")
-        csv_content = self.fetch_text(csv_url, encodings=["windows-1250"])
+        stores = []
+        for code, csv_url in sorted(csv_urls.items()):
+            if code in self.SKIPPED_STORES:
+                logger.info(
+                    f"Skipping Lorenco store {code} "
+                    f"({self.SKIPPED_STORES[code]}): not a grocery shop"
+                )
+                continue
 
-        if not csv_content:
-            logger.warning(f"No content found at {csv_url}")
-            return []
+            try:
+                store = self.get_store(code, csv_url)
 
-        products = self.parse_csv(csv_content, delimiter=";")
+                logger.info(f"Fetching CSV from: {csv_url}")
+                csv_content = self.fetch_text(csv_url, encodings=["windows-1250"])
+                if not csv_content:
+                    logger.warning(f"No content found at {csv_url}")
+                    continue
 
-        if len(products) < self.MIN_PRODUCTS:
-            logger.warning(
-                f"Skipping {csv_url}: {len(products)} products, "
-                f"expected at least {self.MIN_PRODUCTS} for a full price list"
-            )
-            return []
+                products = self.parse_csv(csv_content, delimiter=";")
+            except CrawlerBlocked:
+                raise
+            except Exception as e:
+                logger.error(f"Error processing {csv_url}: {e}", exc_info=True)
+                continue
 
-        store = Store(
-            chain=self.CHAIN,
-            store_type=self.STORE_TYPE,
-            store_id=self.STORE_ID,
-            name=self.STORE_NAME,
-            street_address=self.STREET_ADDRESS,
-            zipcode=self.ZIPCODE,
-            city=self.CITY,
-            items=products,
-        )
+            if len(products) < self.MIN_PRODUCTS:
+                logger.warning(
+                    f"Skipping {csv_url}: {len(products)} products, "
+                    f"expected at least {self.MIN_PRODUCTS} for a full price list"
+                )
+                continue
 
-        return [store]
+            store.items = products
+            stores.append(store)
+
+        return stores
 
 
 if __name__ == "__main__":
