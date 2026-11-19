@@ -51,7 +51,8 @@ class VrutakCrawler(BaseCrawler):
         "unit_price": ("mpcijenamjera", False),
         "special_price": ("mpcijenaakcija", False),  # CSV only
         "best_price_30": ("", False),  # Not published
-        "anchor_price": ("mpcijenasidrena", False),
+        # Renamed to "mpcijena bazna" in the CSVs on 2026-11-19 (NN 132/2026)
+        "anchor_price": (["mpcijenasidrena", "mpcijenabazna"], False),
     }
 
     FIELD_MAP = {
@@ -63,7 +64,10 @@ class VrutakCrawler(BaseCrawler):
         "barcode": ("barkod", False),
         "category": ("kategorija", False),  # XML only
         # Published per product: 02.05.2025, or the date it was listed
-        "anchor_price_date": ("mpcijenasidrenadatum", False),
+        "anchor_price_date": (
+            ["mpcijenasidrenadatum", "mpcijenabaznadatum"],
+            False,
+        ),
     }
 
     BOOL_MAP = {
@@ -86,8 +90,8 @@ class VrutakCrawler(BaseCrawler):
     OPTIONAL_COLUMNS = [
         "nettokolicina",
         "mpcijenaakcija",
-        "mpcijenasidrena",
-        "mpcijenasidrenadatum",
+        ("mpcijenasidrena", "mpcijenabazna"),
+        ("mpcijenasidrenadatum", "mpcijenabaznadatum"),
         "raspolozivost",
     ]
 
@@ -136,7 +140,13 @@ class VrutakCrawler(BaseCrawler):
 
         Supported file names:
             `supermarket-vodovodna20a-001-20261116_073500.csv`
+            `95092888930-vodovodna20a-001-roba-321-20261117_0927.csv`
+            `95092888930-hipermarket-vodovodna-001-roba-323-20261119_0741.csv`
             `vrutak-hipermarket-vodovodna20a-001-270-20261116-072800.xml`
+
+        The store ID is the first part with exactly three digits. Its
+        position changes between formats, and the parts before it are the
+        company OIB (11 digits), the store type and the street.
 
         Args:
             url: URL of the CSV or XML price file
@@ -150,16 +160,22 @@ class VrutakCrawler(BaseCrawler):
         stem = os.path.splitext(filename)[0].removeprefix("vrutak-")
         parts = stem.split("-")
 
-        if len(parts) < 4:
-            raise ValueError(f"Invalid file name format for Vrutak: {filename}")
+        index = next(
+            (i for i, part in enumerate(parts) if len(part) == 3 and part.isdigit()),
+            None,
+        )
+        if index is None:
+            raise ValueError(f"No store ID in Vrutak file name: {filename}")
 
-        # type-address-store_id-...
-        store_id = parts[2]
+        store_id = parts[index]
         if store_id in self.STORES:
             store_type, street_address = self.STORES[store_id]
         else:
             logger.warning(f"Unknown Vrutak store {store_id} in {filename}")
-            store_type, street_address = parts[0], parts[1].title()
+            # [OIB-][type-]street-<store_id>
+            names = [part for part in parts[:index] if not part.isdigit()]
+            street_address = names[-1].title() if names else ""
+            store_type = names[-2] if len(names) > 1 else "store"
 
         store = Store(
             chain=self.CHAIN,
@@ -204,13 +220,22 @@ class VrutakCrawler(BaseCrawler):
         """
         Decode a CSV price file, picking the encoding by its Croatian letters.
 
-        The CSVs were windows-1250 until 2026-11-16 and are CP852 (DOS
-        Latin-2) since 2026-11-17. A decode error can't tell them apart: CP852
-        accepts every byte and windows-1250 all but five. The wrong one turns
-        most Croatian letters into other non-ASCII characters ("NARAN¬A" for
+        The CSVs were windows-1250 until 2026-11-16, CP852 (DOS Latin-2) on
+        2026-11-17 and UTF-8 since 2026-11-19. A file that is valid UTF-8 is
+        read as UTF-8: Croatian text in the other two encodings is almost
+        never valid UTF-8.
+
+        A decode error can't tell windows-1250 and CP852 apart: CP852 accepts
+        every byte and windows-1250 all but five. The wrong one turns most
+        Croatian letters into other non-ASCII characters ("NARAN¬A" for
         "NARANČA"), so the encoding with the most Croatian letters and the
         fewest other non-ASCII characters wins.
         """
+        try:
+            return content.decode("utf-8-sig")
+        except UnicodeDecodeError:
+            pass
+
         letters = set("čćžšđČĆŽŠĐ")
 
         def score(text: str) -> int:
