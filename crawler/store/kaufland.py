@@ -155,15 +155,24 @@ class KauflandCrawler(BaseCrawler):
         # 4. Parse the JSON data to extract CSV URLs
         json_data = loads(json_content)
 
+        # Until 2026-11-19 the file names had the date as "_DD_MM_YYYY_" or
+        # "_DDMMYYYY_", e.g. "Hipermarket_114__Brigade_6_Split_1630_19112026_7-30.csv".
+        # Since then they have the chain's OIB in front and the date as
+        # "_YYYYMMDD_", e.g. "47432874968_Hipermarket_114__Brigade_6_Split_1630_
+        # cjenik robe_1_20261120_0730.csv".
+        date_strs = (
+            date.strftime("_%d_%m_%Y_"),
+            date.strftime("_%d%m%Y_"),
+            date.strftime("_%Y%m%d_"),
+        )
+
         urls = {}
-        date_str = date.strftime("_%d_%m_%Y_")
-        date_str2 = date.strftime("_%d%m%Y_")
         for item in json_data:
             label = item.get("label")
             url = item.get("path")
             if not label or not url:
                 continue
-            if date_str not in label and date_str2 not in label:
+            if not any(date_str in label for date_str in date_strs):
                 continue
             urls[label] = f"{self.BASE_URL}{url}"
 
@@ -179,7 +188,9 @@ class KauflandCrawler(BaseCrawler):
         Returns:
             Store object with parsed information
         """
-        # Format example: Supermarket_Put_Gaceleza_1D_Vodice_6730_15_05_2025_7_30.csv
+        # Format examples:
+        #   Supermarket_Put_Gaceleza_1D_Vodice_6730_15_05_2025_7_30.csv
+        #   47432874968_Hipermarket_114__Brigade_6_Split_1630_cjenik robe_1_20261120_0730.csv
         match = self.ADDRESS_PATTERN.search(title)
         if not match:
             raise ValueError(f"Could not parse store info from filename: {title}")
@@ -294,10 +305,15 @@ class KauflandCrawler(BaseCrawler):
         """
         csv_links = self.get_index(date)
         stores = []
+        store_ids = set()
 
         for title, url in csv_links.items():
             try:
                 store = self.parse_store_info(title)
+                # On 2026-11-19 most stores have a file in both name formats.
+                if store.store_id in store_ids:
+                    logger.info(f"Skipping second price list for store: {title}")
+                    continue
                 products = self.get_store_prices(url)
             except Exception as e:
                 logger.error(f"Error processing store from {url}: {e}", exc_info=True)
@@ -309,6 +325,7 @@ class KauflandCrawler(BaseCrawler):
 
             store.items = products
             stores.append(store)
+            store_ids.add(store.store_id)
 
         return stores
 
