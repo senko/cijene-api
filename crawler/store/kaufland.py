@@ -72,6 +72,7 @@ class KauflandCrawler(BaseCrawler):
 
     CITIES = [
         "Zagreb Blato",
+        "Zagreb Sesvete",
         "Zagreb",
         "Karlovac",
         "Velika Gorica",
@@ -109,6 +110,8 @@ class KauflandCrawler(BaseCrawler):
         "Vodice",
         "Varazdin",
         "Samobor",
+        "Krk",
+        "Lucko",
     ]
 
     # Pattern to parse store information from filename
@@ -156,14 +159,17 @@ class KauflandCrawler(BaseCrawler):
         json_data = loads(json_content)
 
         urls = {}
-        date_str = date.strftime("_%d_%m_%Y_")
-        date_str2 = date.strftime("_%d%m%Y_")
+        date_patterns = (
+            date.strftime("_%d_%m_%Y_"),
+            date.strftime("_%d%m%Y_"),
+            date.strftime("_%Y%m%d_"),
+        )
         for item in json_data:
             label = item.get("label")
             url = item.get("path")
             if not label or not url:
                 continue
-            if date_str not in label and date_str2 not in label:
+            if not any(p in label for p in date_patterns):
                 continue
             urls[label] = f"{self.BASE_URL}{url}"
 
@@ -236,16 +242,39 @@ class KauflandCrawler(BaseCrawler):
             )
             return []
 
+    # Some Kaufland stores publish internal SAP/German column headers instead
+    # of the Croatian ones (e.g. "WG", or the full SAP header row in store 7530).
+    HEADER_ALIASES = {
+        "WG": "kategorija proizvoda",
+        "I~Bezeich": "naziv proizvoda",
+        "A~Material": "šifra proizvoda",
+        "K~Kurztxt ME": "marka proizvoda",
+        "A~Netto": "neto količina(KG)",
+        "A~Einheit": "jedinica mjere",
+        "X~FFPREISFINAL": "maloprod.cijena(EUR)",
+        "X~FFMENGE": "cijena jed.mj.(EUR)",
+        "X~FFAPREIS": "MPC poseb.oblik prod",
+        "X~FF30": "Najniža MPC u 30dana",
+        "L~Kurztxt ME": "Sidrena cijena",
+        "D~EAN/UPC": "barkod",
+        "O~ExtCT": "kategorija proizvoda",
+    }
+
     def parse_csv(self, content: str, delimiter: str = ",") -> list[Product]:
-        # Some Kaufland stores use "WG" instead of "kategorija proizvoda"
-        # as the column header. Normalize before parsing.
         lines = content.split("\n")
-        if lines and "kategorija proizvoda" not in lines[0] and "\tWG" in lines[0]:
-            lines[0] = lines[0].replace("\tWG", "\tkategorija proizvoda")
+        if lines:
+            headers = [
+                self.HEADER_ALIASES.get(col.strip(), col)
+                for col in lines[0].split(delimiter)
+            ]
+            lines[0] = delimiter.join(headers)
             content = "\n".join(lines)
         return super().parse_csv(content, delimiter)
 
     def parse_csv_row(self, row: dict) -> Product:
+        # SAP truncates 30-day lowest prices >= 100 EUR to "*9,00" / "*4,00"
+        if (row.get("Najniža MPC u 30dana") or "").strip().startswith("*"):
+            row["Najniža MPC u 30dana"] = ""
         # "Sidrena cijena" (anchor price) contains an encoded date + price.
         # Variants seen in the wild:
         #   "MPC 2.5.2025=7,99€"      — standard format
