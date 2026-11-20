@@ -77,6 +77,10 @@ class JadrankaTrgovinaCrawler(BaseCrawler):
 
     Until 2026-11-16 only Market Maxi (607) published, without the file ID:
     MARKET_MAXI_DRAZICA5_MALILOSINJ_607_16112026_0800.csv.
+
+    Since 2026-11-20 Market Maxi, the web shop and a café have the chain's OIB
+    in front of the file name and "ROBA" (goods) after the store ID:
+    02198337590_MARKET_MAXI_DRAZICA5_MALILOSINJ_607_ROBA_221_20112026_0800.csv.
     """
 
     CHAIN = "jadranka_trgovina"
@@ -84,6 +88,7 @@ class JadrankaTrgovinaCrawler(BaseCrawler):
     INDEX_URL = "https://jadranka-trgovina.com/cjenici/"
 
     FILENAME_DATE_PATTERN = re.compile(r"_(\d{2})(\d{2})(\d{4})_\d{4}\.csv$")
+    OIB_PREFIX_PATTERN = re.compile(r"^\d{11}_")
 
     # First day whose file names have a file ID after the store ID.
     FILE_ID_SINCE = datetime.date(2026, 11, 17)
@@ -93,35 +98,50 @@ class JadrankaTrgovinaCrawler(BaseCrawler):
 
     OLD_ANCHOR_PRICE_COLUMN = "SIDRENA CIJENA NA 2.5.2025"
     NEW_ANCHOR_PRICE_COLUMN = "SIDRENA CIJENA"
+    # Since 2026-11-20 (NN 132/2026). Same values as "SIDRENA CIJENA".
+    BASE_PRICE_COLUMN = "BAZNA CIJENA"
 
     # Since 2026-11-17 the only price column is "MPC ZA VRIJEME POSEBNOG
     # OBLIKA PRODAJE". It is filled on every row and holds the shelf price,
     # so it is read as the price, not as a special price.
+    #
+    # Since 2026-11-20 the only price column is "MPC", and "POSEBAN OBLIK
+    # PRODAJE" is "Akcija" on sale rows, else empty. On sale rows MPC is the
+    # sale price: in one store's file, MPC is below the base price on 78% of
+    # sale rows and on 24% of the others.
     PRICE_COLUMN = "MALOPRODAJNA CIJENA"
     SPECIAL_PRICE_COLUMN = "MPC ZA VRIJEME POSEBNOG OBLIKA PRODAJE"
+    SALE_TYPE_COLUMN = "POSEBAN OBLIK PRODAJE"
+
+    # Since 2026-11-20 the barcode is in "EAN KOD" for products with an EAN
+    # and in "BAR KOD" (the chain's own code) for the others. No row fills
+    # both. Until then "BARKOD" held either.
+    EAN_COLUMN = "EAN KOD"
+    BARCODE_COLUMN = "BAR KOD"
 
     PRICE_MAP = {
         # field: (column_name, is_required)
         # Note: Many products have empty retail price but filled special price
         # Some products also have empty unit_price
-        "price": (PRICE_COLUMN, False),
-        "unit_price": ("CIJENA ZA JEDINICU MJERE", False),
+        "price": ((PRICE_COLUMN, "MPC"), False),
+        "unit_price": (("CIJENA ZA JEDINICU MJERE", "CIJENA ZA JM"), False),
         "special_price": (SPECIAL_PRICE_COLUMN, False),
         "best_price_30": ("NAJNIŽA CIJENA U POSLJEDNIH 30 DANA", False),
         "anchor_price": (
-            (OLD_ANCHOR_PRICE_COLUMN, NEW_ANCHOR_PRICE_COLUMN),
+            (OLD_ANCHOR_PRICE_COLUMN, NEW_ANCHOR_PRICE_COLUMN, BASE_PRICE_COLUMN),
             False,
         ),
     }
 
     FIELD_MAP = {
-        "product_id": ("ŠIFRA PROIZVODA", True),
-        "product": ("NAZIV PROIZVODA", True),
-        "brand": ("MARKA PROIZVODA", False),
-        "barcode": ("BARKOD", False),
+        "product_id": (("ŠIFRA PROIZVODA", "SIFRA ROBE"), True),
+        "product": (("NAZIV PROIZVODA", "NAZIV ROBE"), True),
+        "brand": (("MARKA PROIZVODA", "MARKA"), False),
+        "barcode": (("BARKOD", BARCODE_COLUMN), False),
         "category": ("KATEGORIJA PROIZVODA", False),
-        "quantity": ("NETO KOLIČINA", False),
+        "quantity": (("NETO KOLIČINA", "NETO KOLICINA"), False),
         "unit": ("JEDINICA MJERE", False),
+        "special_sale_type": (SALE_TYPE_COLUMN, False),
     }
 
     BOOL_MAP = {
@@ -129,20 +149,20 @@ class JadrankaTrgovinaCrawler(BaseCrawler):
     }
 
     REQUIRED_COLUMNS = [
-        (PRICE_COLUMN, SPECIAL_PRICE_COLUMN),
-        "CIJENA ZA JEDINICU MJERE",
-        (OLD_ANCHOR_PRICE_COLUMN, NEW_ANCHOR_PRICE_COLUMN),
-        "ŠIFRA PROIZVODA",
-        "NAZIV PROIZVODA",
-        "MARKA PROIZVODA",
-        "BARKOD",
+        (PRICE_COLUMN, SPECIAL_PRICE_COLUMN, "MPC"),
+        ("CIJENA ZA JEDINICU MJERE", "CIJENA ZA JM"),
+        (OLD_ANCHOR_PRICE_COLUMN, NEW_ANCHOR_PRICE_COLUMN, BASE_PRICE_COLUMN),
+        ("ŠIFRA PROIZVODA", "SIFRA ROBE"),
+        ("NAZIV PROIZVODA", "NAZIV ROBE"),
+        ("MARKA PROIZVODA", "MARKA"),
+        ("BARKOD", BARCODE_COLUMN),
         "JEDINICA MJERE",
     ]
 
     # The first four aren't required by NN 101/2026, so the chain may drop
     # them. DOSTUPNOST was added on 2026-11-17; older files don't have it.
     OPTIONAL_COLUMNS = [
-        "NETO KOLIČINA",
+        ("NETO KOLIČINA", "NETO KOLICINA"),
         "KATEGORIJA PROIZVODA",
         SPECIAL_PRICE_COLUMN,
         "NAJNIŽA CIJENA U POSLJEDNIH 30 DANA",
@@ -219,9 +239,10 @@ class JadrankaTrgovinaCrawler(BaseCrawler):
             a shop
         """
         filename = csv_url.rsplit("/", 1)[-1]
-        prefix = next((t for t in STORE_TYPES if filename.startswith(f"{t}_")), None)
+        basename = self.OIB_PREFIX_PATTERN.sub("", filename)
+        prefix = next((t for t in STORE_TYPES if basename.startswith(f"{t}_")), None)
         if prefix is None:
-            if not filename.startswith(SKIPPED_TYPES):
+            if not basename.startswith(SKIPPED_TYPES):
                 logger.warning(f"Unknown Jadranka Trgovina point of sale: {filename}")
             return None
 
@@ -229,9 +250,12 @@ class JadrankaTrgovinaCrawler(BaseCrawler):
         # file ID was missing, so the token before the date was the store ID
         # and the one before that the city. Store IDs are numbers, except the
         # web shop's "WEB", so the file date tells the two formats apart.
-        tokens = filename.removesuffix(".csv").split("_")
+        # Since 2026-11-20 some names have "ROBA" between store and file ID.
+        tokens = basename.removesuffix(".csv").split("_")
         file_date = datetime.datetime.strptime(tokens[-2], "%d%m%Y").date()
         idx = len(tokens) - (4 if file_date >= self.FILE_ID_SINCE else 3)
+        if tokens[idx] == "ROBA":
+            idx -= 1
         store_id = tokens[idx]
 
         if store_id in STORES:
@@ -259,10 +283,11 @@ class JadrankaTrgovinaCrawler(BaseCrawler):
     def parse_csv(self, content: str, delimiter: str = ",") -> list[Product]:
         # A few product names contain the delimiter and aren't quoted, e.g.
         # "BUKET GERBER 30 CM; CRVENA;1104409;...". Quote the name so the
-        # other columns don't shift.
+        # other columns don't shift. Since 2026-11-20 the header ends with a
+        # delimiter that the rows don't have.
         lines = content.splitlines()
         if lines:
-            width = lines[0].count(delimiter)
+            width = lines[0].rstrip(delimiter).count(delimiter)
             for i, line in enumerate(lines[1:], start=1):
                 extra = line.count(delimiter) - width
                 if extra > 0:
@@ -274,17 +299,29 @@ class JadrankaTrgovinaCrawler(BaseCrawler):
         return super().parse_csv(content, delimiter)
 
     def parse_csv_row(self, row: dict) -> Product:
-        if self.PRICE_COLUMN not in row:
-            row[self.PRICE_COLUMN] = row.pop(self.SPECIAL_PRICE_COLUMN, "")
+        if self.PRICE_COLUMN not in row and self.SPECIAL_PRICE_COLUMN in row:
+            row[self.PRICE_COLUMN] = row.pop(self.SPECIAL_PRICE_COLUMN)
+
+        if row.get(self.EAN_COLUMN):
+            row[self.BARCODE_COLUMN] = row[self.EAN_COLUMN]
 
         product = super().parse_csv_row(row)
 
-        # The new anchor header states no date, so ANCHOR_PRICE_DATE doesn't
-        # apply to it.
-        if self.NEW_ANCHOR_PRICE_COLUMN in row:
+        # The new anchor headers state no date, so ANCHOR_PRICE_DATE doesn't
+        # apply to them.
+        if self.NEW_ANCHOR_PRICE_COLUMN in row or self.BASE_PRICE_COLUMN in row:
             product.anchor_price_date = None
 
         return product
+
+    def fix_product_data(self, data: dict) -> dict:
+        data = super().fix_product_data(data)
+
+        # On sale rows the only published price is the sale price
+        if data.get("special_sale_type") and data.get("special_price") is None:
+            data["special_price"] = data["price"]
+
+        return data
 
     def get_store_prices(self, csv_url: str) -> list[Product]:
         """
