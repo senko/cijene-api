@@ -92,36 +92,41 @@ class JadrankaTrgovinaCrawler(BaseCrawler):
     ANCHOR_PRICE_DATE = datetime.date(2025, 5, 2)
 
     OLD_ANCHOR_PRICE_COLUMN = "SIDRENA CIJENA NA 2.5.2025"
-    NEW_ANCHOR_PRICE_COLUMN = "SIDRENA CIJENA"
+    NEW_ANCHOR_PRICE_COLUMNS = ("SIDRENA CIJENA", "BAZNA CIJENA")
 
-    # Since 2026-11-17 the only price column is "MPC ZA VRIJEME POSEBNOG
-    # OBLIKA PRODAJE". It is filled on every row and holds the shelf price,
-    # so it is read as the price, not as a special price.
+    # Between 2026-11-17 and 2026-11-19 the only price column was "MPC ZA
+    # VRIJEME POSEBNOG OBLIKA PRODAJE". It was filled on every row and held
+    # the shelf price, so it was read as the price, not as a special price.
+    # Since 2026-11-20 the price column is "MPC" with "POSEBAN OBLIK PRODAJE"
+    # naming the sale ("Akcija").
     PRICE_COLUMN = "MALOPRODAJNA CIJENA"
+    MPC_COLUMN = "MPC"
     SPECIAL_PRICE_COLUMN = "MPC ZA VRIJEME POSEBNOG OBLIKA PRODAJE"
 
     PRICE_MAP = {
         # field: (column_name, is_required)
         # Note: Many products have empty retail price but filled special price
         # Some products also have empty unit_price
-        "price": (PRICE_COLUMN, False),
-        "unit_price": ("CIJENA ZA JEDINICU MJERE", False),
+        "price": ([PRICE_COLUMN, MPC_COLUMN], False),
+        "unit_price": (["CIJENA ZA JEDINICU MJERE", "CIJENA ZA JM"], False),
         "special_price": (SPECIAL_PRICE_COLUMN, False),
         "best_price_30": ("NAJNIŽA CIJENA U POSLJEDNIH 30 DANA", False),
         "anchor_price": (
-            (OLD_ANCHOR_PRICE_COLUMN, NEW_ANCHOR_PRICE_COLUMN),
+            [OLD_ANCHOR_PRICE_COLUMN, *NEW_ANCHOR_PRICE_COLUMNS],
             False,
         ),
     }
 
     FIELD_MAP = {
-        "product_id": ("ŠIFRA PROIZVODA", True),
-        "product": ("NAZIV PROIZVODA", True),
-        "brand": ("MARKA PROIZVODA", False),
-        "barcode": ("BARKOD", False),
+        "product_id": (["ŠIFRA PROIZVODA", "SIFRA ROBE", "ŠIFRA ROBE"], True),
+        "product": (["NAZIV PROIZVODA", "NAZIV ROBE"], True),
+        "brand": (["MARKA PROIZVODA", "MARKA"], False),
+        "barcode": (["BARKOD", "EAN KOD"], False),
+        "alt_barcode": ("BAR KOD", False),
         "category": ("KATEGORIJA PROIZVODA", False),
-        "quantity": ("NETO KOLIČINA", False),
+        "quantity": (["NETO KOLIČINA", "NETO KOLICINA"], False),
         "unit": ("JEDINICA MJERE", False),
+        "special_sale_type": ("POSEBAN OBLIK PRODAJE", False),
     }
 
     BOOL_MAP = {
@@ -129,24 +134,25 @@ class JadrankaTrgovinaCrawler(BaseCrawler):
     }
 
     REQUIRED_COLUMNS = [
-        (PRICE_COLUMN, SPECIAL_PRICE_COLUMN),
-        "CIJENA ZA JEDINICU MJERE",
-        (OLD_ANCHOR_PRICE_COLUMN, NEW_ANCHOR_PRICE_COLUMN),
-        "ŠIFRA PROIZVODA",
-        "NAZIV PROIZVODA",
-        "MARKA PROIZVODA",
-        "BARKOD",
+        [PRICE_COLUMN, MPC_COLUMN, SPECIAL_PRICE_COLUMN],
+        ["CIJENA ZA JEDINICU MJERE", "CIJENA ZA JM"],
+        [OLD_ANCHOR_PRICE_COLUMN, *NEW_ANCHOR_PRICE_COLUMNS],
+        ["ŠIFRA PROIZVODA", "SIFRA ROBE", "ŠIFRA ROBE"],
+        ["NAZIV PROIZVODA", "NAZIV ROBE"],
+        ["MARKA PROIZVODA", "MARKA"],
+        ["BARKOD", "EAN KOD", "BAR KOD"],
         "JEDINICA MJERE",
     ]
 
     # The first four aren't required by NN 101/2026, so the chain may drop
     # them. DOSTUPNOST was added on 2026-11-17; older files don't have it.
     OPTIONAL_COLUMNS = [
-        "NETO KOLIČINA",
+        ["NETO KOLIČINA", "NETO KOLICINA"],
         "KATEGORIJA PROIZVODA",
         SPECIAL_PRICE_COLUMN,
         "NAJNIŽA CIJENA U POSLJEDNIH 30 DANA",
         "DOSTUPNOST",
+        "POSEBAN OBLIK PRODAJE",
     ]
 
     def parse_index(self, content: str) -> list[str]:
@@ -259,9 +265,11 @@ class JadrankaTrgovinaCrawler(BaseCrawler):
     def parse_csv(self, content: str, delimiter: str = ",") -> list[Product]:
         # A few product names contain the delimiter and aren't quoted, e.g.
         # "BUKET GERBER 30 CM; CRVENA;1104409;...". Quote the name so the
-        # other columns don't shift.
+        # other columns don't shift. Since 2026-11-20 the header line has a
+        # trailing delimiter that data rows lack.
         lines = content.splitlines()
         if lines:
+            lines[0] = lines[0].rstrip(delimiter)
             width = lines[0].count(delimiter)
             for i, line in enumerate(lines[1:], start=1):
                 extra = line.count(delimiter) - width
@@ -273,15 +281,27 @@ class JadrankaTrgovinaCrawler(BaseCrawler):
 
         return super().parse_csv(content, delimiter)
 
+    def fix_product_data(self, data: dict) -> dict:
+        alt_barcode = data.pop("alt_barcode", "")
+        if not data.get("barcode") and alt_barcode:
+            data["barcode"] = alt_barcode
+
+        data = super().fix_product_data(data)
+
+        if data.get("special_sale_type") and data.get("special_price") is None:
+            data["special_price"] = data.get("price")
+
+        return data
+
     def parse_csv_row(self, row: dict) -> Product:
-        if self.PRICE_COLUMN not in row:
+        if self.PRICE_COLUMN not in row and self.MPC_COLUMN not in row:
             row[self.PRICE_COLUMN] = row.pop(self.SPECIAL_PRICE_COLUMN, "")
 
         product = super().parse_csv_row(row)
 
-        # The new anchor header states no date, so ANCHOR_PRICE_DATE doesn't
-        # apply to it.
-        if self.NEW_ANCHOR_PRICE_COLUMN in row:
+        # The new anchor headers state no date, so ANCHOR_PRICE_DATE doesn't
+        # apply to them.
+        if any(col in row for col in self.NEW_ANCHOR_PRICE_COLUMNS):
             product.anchor_price_date = None
 
         return product
