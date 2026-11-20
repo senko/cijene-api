@@ -72,6 +72,7 @@ class KauflandCrawler(BaseCrawler):
 
     CITIES = [
         "Zagreb Blato",
+        "Zagreb Sesvete",
         "Zagreb",
         "Karlovac",
         "Velika Gorica",
@@ -109,6 +110,8 @@ class KauflandCrawler(BaseCrawler):
         "Vodice",
         "Varazdin",
         "Samobor",
+        "Krk",
+        "Lucko",
     ]
 
     # Pattern to parse store information from filename
@@ -257,6 +260,12 @@ class KauflandCrawler(BaseCrawler):
         return super().parse_csv(content, delimiter)
 
     def parse_csv_row(self, row: dict) -> Product:
+        # The 30-day lowest price field overflows from 100 EUR up and keeps
+        # only the last digits after a "*", e.g. "*9,00" on a 289,00 EUR item
+        # and "*4,00" on a 104,00 EUR one. The real value can't be recovered.
+        if (row.get("Najniža MPC u 30dana") or "").strip().startswith("*"):
+            row["Najniža MPC u 30dana"] = ""
+
         # "Sidrena cijena" (anchor price) contains an encoded date + price.
         # Variants seen in the wild:
         #   "MPC 2.5.2025=7,99€"      — standard format
