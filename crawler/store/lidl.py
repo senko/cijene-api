@@ -41,22 +41,31 @@ class LidlCrawler(BaseCrawler):
     # varies from row to row ("MPC na 2.5.2025.:1,99€", "MPC na 4.11.2026..
     # 1,89€", "MPC na 10.9.2026: 3,€", "MPC 2.5. 2,29€"), so the date and the
     # price are matched separately.
-    NEW_ANCHOR_PRICE_COLUMN = "SIDRENA_CIJENA"
+    #
+    # Since 2026-11-20 the column is "BAZNA_CIJENA_ROBE" (NN 132/2026), with
+    # values in the same format.
+    NEW_ANCHOR_PRICE_COLUMNS = ("SIDRENA_CIJENA", "BAZNA_CIJENA_ROBE")
     ANCHOR_DATE_PATTERN = re.compile(r"(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4}|\d{2})(?!\d)")
     ANCHOR_VALUE_PATTERN = re.compile(
         r"(\d{1,3}(?:\.\d{3})+|\d+)\s*([.,]\s*\d{0,2})?\s*(?:€|EUR)?\s*$"
     )
 
     # The 2026-11-17 file renamed several columns, one with a typo
-    # ("JEDINICIN"). Both spellings are accepted.
+    # ("JEDINICIN"). The 2026-11-20 file added a "_ROBE" suffix to several
+    # columns ("ŠIFRA" is now "SIFRA_ROBE") and added "EAN_BARKOD_ROBE", which
+    # has the same values as "BARKOD_ROBE". All spellings are accepted.
     PRICE_MAP = {
-        "price": ("MALOPRODAJNA_CIJENA", False),
+        "price": (("MALOPRODAJNA_CIJENA", "MALOPRODAJNA_CIJENA_ROBE"), False),
         "unit_price": (
-            ("CIJENA_ZA_JEDINICU_MJERE", "CIJENA_ZA_JEDINICIN_MJERE"),
+            (
+                "CIJENA_ZA_JEDINICU_MJERE",
+                "CIJENA_ZA_JEDINICIN_MJERE",
+                "CIJENA_ZA_JEDINICIN_MJERE_ROBE",
+            ),
             False,
         ),
         "special_price": ("MPC_ZA_VRIJEME_POSEBNOG_OBLIKA_PRODAJE", False),
-        "anchor_price": ((ANCHOR_PRICE_COLUMN, NEW_ANCHOR_PRICE_COLUMN), False),
+        "anchor_price": ((ANCHOR_PRICE_COLUMN, *NEW_ANCHOR_PRICE_COLUMNS), False),
         "best_price_30": (
             ("NAJNIZA_CIJENA_U_POSLJ._30_DANA", "NAJNIZA_CIJENA_U_POSLJ_30_DANA"),
             False,
@@ -64,24 +73,28 @@ class LidlCrawler(BaseCrawler):
     }
 
     FIELD_MAP = {
-        "product": ("NAZIV", False),
-        "product_id": ("ŠIFRA", True),
-        "brand": ("MARKA", False),
+        "product": (("NAZIV", "NAZIV_ROBE"), False),
+        "product_id": (("ŠIFRA", "SIFRA_ROBE"), True),
+        "brand": (("MARKA", "MARKA_ROBE"), False),
         "quantity": (("NETO_KOLIČINA", "NETO_KOLICINA"), False),
         "unit": ("JEDINICA_MJERE", False),
-        "barcode": ("BARKOD", False),
+        "barcode": (("BARKOD", "BARKOD_ROBE"), False),
         "category": ("KATEGORIJA_PROIZVODA", False),
     }
 
     REQUIRED_COLUMNS = [
-        "MALOPRODAJNA_CIJENA",
-        ("CIJENA_ZA_JEDINICU_MJERE", "CIJENA_ZA_JEDINICIN_MJERE"),
-        (ANCHOR_PRICE_COLUMN, NEW_ANCHOR_PRICE_COLUMN),
-        "NAZIV",
-        "ŠIFRA",
-        "MARKA",
+        ("MALOPRODAJNA_CIJENA", "MALOPRODAJNA_CIJENA_ROBE"),
+        (
+            "CIJENA_ZA_JEDINICU_MJERE",
+            "CIJENA_ZA_JEDINICIN_MJERE",
+            "CIJENA_ZA_JEDINICIN_MJERE_ROBE",
+        ),
+        (ANCHOR_PRICE_COLUMN, *NEW_ANCHOR_PRICE_COLUMNS),
+        ("NAZIV", "NAZIV_ROBE"),
+        ("ŠIFRA", "SIFRA_ROBE"),
+        ("MARKA", "MARKA_ROBE"),
         "JEDINICA_MJERE",
-        "BARKOD",
+        ("BARKOD", "BARKOD_ROBE"),
     ]
 
     # Not required by NN 101/2026, so the chain may drop them when it switches.
@@ -150,13 +163,12 @@ class LidlCrawler(BaseCrawler):
         if "Nije_bilo_u_prodaji" in anchor_price:
             row[self.ANCHOR_PRICE_COLUMN] = None
 
-        if self.NEW_ANCHOR_PRICE_COLUMN not in row:
+        column = next((c for c in self.NEW_ANCHOR_PRICE_COLUMNS if c in row), None)
+        if column is None:
             return super().parse_csv_row(row)
 
-        price, anchor_date = self.parse_anchor_value(
-            row[self.NEW_ANCHOR_PRICE_COLUMN] or ""
-        )
-        row[self.NEW_ANCHOR_PRICE_COLUMN] = price
+        price, anchor_date = self.parse_anchor_value(row[column] or "")
+        row[column] = price
         product = super().parse_csv_row(row)
 
         # The new header states no date, so ANCHOR_PRICE_DATE doesn't apply:
@@ -171,7 +183,7 @@ class LidlCrawler(BaseCrawler):
         Split an anchor value such as "MPC na 10.9.2026: 5,99€".
 
         Args:
-            value: Value of the SIDRENA_CIJENA column
+            value: Value of the SIDRENA_CIJENA or BAZNA_CIJENA_ROBE column
 
         Returns:
             Tuple of (price string for parse_price, or "" if none; ISO date,
