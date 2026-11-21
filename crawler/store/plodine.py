@@ -5,7 +5,7 @@ from typing import Optional
 
 
 from .base import BaseCrawler
-from crawler.store.models import Store
+from crawler.store.models import Product, Store
 
 logger = logging.getLogger(__name__)
 
@@ -217,6 +217,23 @@ class PlodineCrawler(BaseCrawler):
             stores[store.store_id] = (published, store)
 
         return [store for _, store in stores.values()]
+
+    def parse_csv(self, content: str, delimiter: str = ",") -> list[Product]:
+        # Some product names contain unquoted semicolons, e.g.
+        # "MJERNE ZLICICE 6/1  817YA  1;5;15;50;100;125 ML;765805;...".
+        # Quote the product name so the remaining columns don't shift.
+        lines = content.splitlines()
+        if lines:
+            width = lines[0].count(delimiter)
+            for i, line in enumerate(lines[1:], start=1):
+                extra = line.count(delimiter) - width
+                if extra > 0:
+                    parts = line.split(delimiter)
+                    name = delimiter.join(parts[: extra + 1]).replace('"', '""')
+                    lines[i] = delimiter.join([f'"{name}"', *parts[extra + 1 :]])
+            content = "\n".join(lines)
+
+        return super().parse_csv(content, delimiter)
 
     def fix_product_data(self, data: dict) -> dict:
         """Mirror the promotional price for the NN 101/2026 format."""
